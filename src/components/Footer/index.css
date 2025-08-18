@@ -1,0 +1,102 @@
+.footer {
+  background: var(--color-bg-secondary);
+  padding: var(--spacing-10) 0;
+  border-top: 1px solid var(--color-border-primary);
+  width: 100%;
+  padding-left: var(--spacing-5);
+  padding-right: var(--spacing-5);
+  box-sizing: border-box;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-8);
+  flex-wrap: wrap;
+  border-left: 1px solid var(--color-border-primary);
+}
+
+.footer-section {
+  flex: 1;
+  min-width: 180px;
+  border-right: 1px solid var(--color-border-primary);
+  padding: 0 var(--spacing-6);
+}
+
+.footer-section:last-child {
+  border-right: none;
+  min-width: 220px;
+}
+
+.footer-section-title {
+  font-weight: 700;
+  margin-bottom: var(--spacing-4);
+  font-size: 20px;
+  color: var(--color-text-primary);
+}
+
+.footer-brand-name {
+  color: var(--color-primary-500);
+  font-weight: 700;
+  margin-bottom: var(--spacing-1);
+  cursor: pointer;
+}
+
+.footer-link {
+  margin: var(--spacing-2) 0;
+  color: var(--color-text-secondary);
+}
+
+.footer-highlight {
+  font-weight: 700;
+  margin-top: var(--spacing-4);
+  color: var(--color-text-primary);
+}
+
+.footer-highlight-large {
+  font-weight: 700;
+  margin-top: var(--spacing-6);
+  margin-bottom: var(--spacing-2);
+  font-size: 18px;
+  color: var(--color-text-primary);
+}
+
+.footer-social-link {
+  display: inline-block;
+}
+
+.footer-social-icon {
+  width: 40px;
+  height: 40px;
+  background: #4267B2;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .footer {
+    padding-left: var(--spacing-4);
+    padding-right: var(--spacing-4);
+  }
+  
+  .footer-container {
+    flex-direction: column;
+    gap: var(--spacing-6);
+  }
+  
+  .footer-section {
+    border-right: none;
+    border-bottom: 1px solid var(--color-border-primary);
+    padding: 0 0 var(--spacing-6) 0;
+  }
+  
+  .footer-section:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+}

@@ -11,6 +11,9 @@
 # production
 /build
 
+# Cursor
+.cursor/
+
 # misc
 .DS_Store
 .env.local
