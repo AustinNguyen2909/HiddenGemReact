@@ -1,4 +1,4 @@
-# AI Web Application
+# Hidden Gem Web Application
 
 A modern React TypeScript application with a comprehensive design system, consistent spacing, and reusable components.
 
