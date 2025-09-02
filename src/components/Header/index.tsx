@@ -20,8 +20,8 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
   return (
     <header className={`header ${className}`}>
       <TopSettings />
-      <NavBar />
       <MainMenu />
+      <NavBar />
     </header>
   );
 };

@@ -4,6 +4,8 @@
   height: 40px;
   display: flex;
   align-items: center;
+  position: relative;
+  z-index: 10;
 }
 
 .top-settings__container {
@@ -13,19 +15,20 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 var(--spacing-5);
+  padding: 0 80px;
+  height: 100%;
 }
 
 .top-settings__left {
   display: flex;
   align-items: center;
-  gap: var(--spacing-4);
+  gap: 8px;
 }
 
 .top-settings__selector {
   display: flex;
   align-items: center;
-  gap: var(--spacing-1);
+  gap: 4px;
   cursor: pointer;
   transition: opacity var(--transition-colors);
 }
@@ -64,14 +67,13 @@
 .top-settings__right {
   display: flex;
   align-items: center;
+  gap: 16px;
 }
 
 .top-settings__help {
   display: flex;
   align-items: center;
-  gap: var(--spacing-4);
-  border-left: 1px solid var(--color-border-primary);
-  padding-left: var(--spacing-4);
+  gap: 24px;
 }
 
 .top-settings__help-text {
