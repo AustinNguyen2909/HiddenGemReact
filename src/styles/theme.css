@@ -7,17 +7,17 @@
      LIGHT THEME (DEFAULT)
      ======================================== */
   
-  /* Primary Colors */
-  --color-primary-50: #f0f9ff;
-  --color-primary-100: #e0f2fe;
-  --color-primary-200: #bae6fd;
-  --color-primary-300: #7dd3fc;
-  --color-primary-400: #38bdf8;
-  --color-primary-500: #156082;
-  --color-primary-600: #0f4c63;
-  --color-primary-700: #0c3d4f;
-  --color-primary-800: #0a2e3b;
-  --color-primary-900: #081f27;
+  /* Primary Colors - Coffee Theme */
+  --color-primary-50: #fdf8f3;
+  --color-primary-100: #f9f0e6;
+  --color-primary-200: #f2e0cc;
+  --color-primary-300: #e8c8a3;
+  --color-primary-400: #d4a875;
+  --color-primary-500: #603809;
+  --color-primary-600: #6F3D28;
+  --color-primary-700: #442808;
+  --color-primary-800: #2d1a05;
+  --color-primary-900: #1a0f03;
   
   /* Neutral Colors */
   --color-neutral-50: #f9fafb;
@@ -115,9 +115,23 @@
   --color-shadow-light: rgba(0, 0, 0, 0.05);
   --color-shadow-medium: rgba(0, 0, 0, 0.1);
   --color-shadow-heavy: rgba(0, 0, 0, 0.15);
-  --color-shadow-focus: rgba(21, 96, 130, 0.1);
+  --color-shadow-focus: rgba(96, 56, 9, 0.1);
   --color-shadow-error: rgba(220, 38, 38, 0.1);
   --color-shadow-success: rgba(5, 150, 105, 0.1);
+  
+  /* Coffee Theme Specific Colors */
+  --color-coffee-light: #FFF9F1;
+  --color-coffee-medium: #F9C06A;
+  --color-coffee-dark: #442808;
+  --color-coffee-accent: #EB8F10;
+  
+  /* Social Media Brand Colors */
+  --color-social-facebook: #4267B2;
+  --color-social-zalo: #0068FF;
+  --color-social-instagram: linear-gradient(45deg, #405DE6, #5851DB, #833AB4, #C13584, #E1306C, #FD1D1D);
+  --color-social-whatsapp: #25D366;
+  --color-social-twitter: #1DA1F2;
+  --color-social-linkedin: #0077B5;
 }
 
 /* ========================================
@@ -125,17 +139,17 @@
    ======================================== */
 
 [data-theme="dark"] {
-  /* Primary Colors - Same as light theme */
-  --color-primary-50: #f0f9ff;
-  --color-primary-100: #e0f2fe;
-  --color-primary-200: #bae6fd;
-  --color-primary-300: #7dd3fc;
-  --color-primary-400: #38bdf8;
-  --color-primary-500: #156082;
-  --color-primary-600: #0f4c63;
-  --color-primary-700: #0c3d4f;
-  --color-primary-800: #0a2e3b;
-  --color-primary-900: #081f27;
+  /* Primary Colors - Coffee Theme (Same as light theme) */
+  --color-primary-50: #fdf8f3;
+  --color-primary-100: #f9f0e6;
+  --color-primary-200: #f2e0cc;
+  --color-primary-300: #e8c8a3;
+  --color-primary-400: #d4a875;
+  --color-primary-500: #603809;
+  --color-primary-600: #6F3D28;
+  --color-primary-700: #442808;
+  --color-primary-800: #2d1a05;
+  --color-primary-900: #1a0f03;
   
   /* Neutral Colors - Inverted for dark theme */
   --color-neutral-50: #111827;
@@ -233,9 +247,23 @@
   --color-shadow-light: rgba(156, 163, 175, 0.1);
   --color-shadow-medium: rgba(156, 163, 175, 0.2);
   --color-shadow-heavy: rgba(156, 163, 175, 0.3);
-  --color-shadow-focus: rgba(21, 96, 130, 0.3);
+  --color-shadow-focus: rgba(96, 56, 9, 0.3);
   --color-shadow-error: rgba(220, 38, 38, 0.3);
   --color-shadow-success: rgba(5, 150, 105, 0.3);
+  
+  /* Coffee Theme Specific Colors - Dark theme */
+  --color-coffee-light: #FFF9F1;
+  --color-coffee-medium: #F9C06A;
+  --color-coffee-dark: #442808;
+  --color-coffee-accent: #EB8F10;
+  
+  /* Social Media Brand Colors - Same as light theme */
+  --color-social-facebook: #4267B2;
+  --color-social-zalo: #0068FF;
+  --color-social-instagram: linear-gradient(45deg, #405DE6, #5851DB, #833AB4, #C13584, #E1306C, #FD1D1D);
+  --color-social-whatsapp: #25D366;
+  --color-social-twitter: #1DA1F2;
+  --color-social-linkedin: #0077B5;
 }
 
 /* ========================================
