@@ -7,12 +7,16 @@
 
 # testing
 /coverage
+.env.mcp
 
 # production
 /build
 
 # Cursor
 .cursor/
+/documents
+/document-2/
+
 
 # misc
 .DS_Store
