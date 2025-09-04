@@ -1,6 +1,7 @@
 import React from 'react';
 import { Footer, Title, Text, Card } from '../../components';
 import './HomeScreen.css';
+import CarouselExamples from '../../components/CarouselExamples';
 
 const products = [
   { id: 1, name: 'Sản phẩm A', price: 100000, description: 'Mô tả sản phẩm A' },
@@ -37,6 +38,7 @@ const HomeScreen: React.FC = () => {
           ))}
         </ul>
       </div>
+      <CarouselExamples />
       <div className="home-footer">
         <Footer />
       </div>
