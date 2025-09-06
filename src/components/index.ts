@@ -11,6 +11,11 @@ export { ThemeProvider, useTheme } from './ThemeProvider';
 export { ThemeToggle } from './ThemeToggle';
 export { AuthProvider, useAuth } from './AuthProvider';
 
+// Shared UI Components
+export { default as ProductCard } from './ProductCard';
+export { default as InfoCard } from './InfoCard';
+export { default as LocationItem } from './LocationItem';
+
 // Carousel Components
 export { default as HeroCarousel } from './HeroCarousel';
 export { default as CoffeeListCarousel } from './CoffeeListCarousel';

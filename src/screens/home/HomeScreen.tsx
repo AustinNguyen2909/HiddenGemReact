@@ -1,6 +1,16 @@
 import React from 'react';
-import { Footer, Title, Text, Card, Button, Input } from '../../components';
+import { Footer, Title, Text, Button, Input, ProductCard, InfoCard, LocationItem } from '../../components';
+import { 
+  heroContent, 
+  featuredProducts, 
+  aboutContent, 
+  services, 
+  testimonials, 
+  locationInfo, 
+  newsletterContent 
+} from '../../dummyData';
 import './HomeScreen.css';
+
 
 const HomeScreen: React.FC = () => {
   return (
@@ -9,17 +19,17 @@ const HomeScreen: React.FC = () => {
       <section className="hero-section">
         <div className="hero-content">
           <Title level="h1" size="xl" color="white" align="center">
-            Welcome to Our Coffee Shop
+            {heroContent.title}
           </Title>
           <Text variant="p" size="lg" color="white" align="center" className="hero-subtitle">
-            Experience the finest coffee and cozy atmosphere
+            {heroContent.subtitle}
           </Text>
           <div className="hero-actions">
             <Button variant="primary" size="lg">
-              Order Now
+              {heroContent.primaryButton}
             </Button>
             <Button variant="secondary" size="lg">
-              View Menu
+              {heroContent.secondaryButton}
             </Button>
           </div>
         </div>
@@ -35,24 +45,14 @@ const HomeScreen: React.FC = () => {
             Discover our most popular coffee blends and treats
           </Text>
           <div className="products-grid">
-            {[1, 2, 3, 4].map((item) => (
-              <Card key={item} variant="elevated" padding="lg" shadow="md" hover className="product-card">
-                <div className="product-image-placeholder">
-                  <Text variant="p" size="sm" color="secondary">Product Image</Text>
-                </div>
-                <Title level="h3" size="lg" color="primary">
-                  Coffee Blend {item}
-                </Title>
-                <Text variant="p" size="md" color="secondary">
-                  Rich and aromatic coffee blend
-                </Text>
-                <Text variant="p" size="lg" weight="semibold" color="accent">
-                  $12.99
-                </Text>
-                <Button variant="primary" size="sm" className="product-button">
-                  Add to Cart
-                </Button>
-              </Card>
+            {featuredProducts.map((product) => (
+              <ProductCard 
+                key={product.id} 
+                product={product} 
+                variant="featured"
+                showRating={false}
+                showQuickView={false}
+              />
             ))}
           </div>
         </div>
@@ -64,24 +64,21 @@ const HomeScreen: React.FC = () => {
           <div className="about-content">
             <div className="about-text">
               <Title level="h2" size="xl" color="primary">
-                About Our Coffee Shop
+                {aboutContent.title}
               </Title>
               <Text variant="p" size="md" color="secondary">
-                We are passionate about bringing you the finest coffee experience. 
-                Our beans are carefully selected from the best coffee regions around the world, 
-                and our skilled baristas craft each cup with love and attention to detail.
+                {aboutContent.description1}
               </Text>
               <Text variant="p" size="md" color="secondary">
-                Since 2010, we have been serving our community with exceptional coffee, 
-                delicious pastries, and a warm, welcoming atmosphere that makes you feel at home.
+                {aboutContent.description2}
               </Text>
               <Button variant="primary" size="md">
-                Learn More
+                {aboutContent.buttonText}
               </Button>
             </div>
             <div className="about-image-placeholder">
               <Text variant="p" size="md" color="secondary" align="center">
-                About Us Image
+                {aboutContent.imagePlaceholder}
               </Text>
             </div>
           </div>
@@ -98,23 +95,14 @@ const HomeScreen: React.FC = () => {
             Everything you need for the perfect coffee experience
           </Text>
           <div className="services-grid">
-            {[
-              { title: 'Fresh Coffee', description: 'Daily roasted beans' },
-              { title: 'Pastries', description: 'Homemade baked goods' },
-              { title: 'WiFi', description: 'Free internet access' },
-              { title: 'Events', description: 'Private party hosting' }
-            ].map((service, index) => (
-              <Card key={index} variant="elevated" padding="lg" shadow="sm" className="service-card">
-                <div className="service-icon-placeholder">
-                  <Text variant="p" size="sm" color="secondary">Icon</Text>
-                </div>
-                <Title level="h3" size="md" color="primary" align="center">
-                  {service.title}
-                </Title>
-                <Text variant="p" size="sm" color="secondary" align="center">
-                  {service.description}
-                </Text>
-              </Card>
+            {services.map((service) => (
+              <InfoCard 
+                key={service.id} 
+                title={service.title}
+                description={service.description}
+                icon="Icon"
+                variant="service"
+              />
             ))}
           </div>
         </div>
@@ -127,19 +115,14 @@ const HomeScreen: React.FC = () => {
             What Our Customers Say
           </Title>
           <div className="testimonials-grid">
-            {[
-              { name: 'Sarah Johnson', text: 'Best coffee in town! The atmosphere is perfect for working.' },
-              { name: 'Mike Chen', text: 'Amazing pastries and friendly staff. Highly recommended!' },
-              { name: 'Emily Davis', text: 'Love the cozy vibe and the coffee is always perfect.' }
-            ].map((testimonial, index) => (
-              <Card key={index} variant="elevated" padding="lg" shadow="sm" className="testimonial-card">
-                <Text variant="p" size="md" color="secondary" className="testimonial-text">
-                  "{testimonial.text}"
-                </Text>
-                <Text variant="p" size="sm" weight="semibold" color="primary" className="testimonial-author">
-                  - {testimonial.name}
-                </Text>
-              </Card>
+            {testimonials.map((testimonial) => (
+              <InfoCard 
+                key={testimonial.id} 
+                title={testimonial.name}
+                description={testimonial.text}
+                variant="testimonial"
+                author={testimonial.name}
+              />
             ))}
           </div>
         </div>
@@ -154,28 +137,9 @@ const HomeScreen: React.FC = () => {
                 Visit Us
               </Title>
               <div className="location-details">
-                <div className="location-item">
-                  <Title level="h3" size="md" color="primary">Address</Title>
-                  <Text variant="p" size="md" color="secondary">
-                    123 Coffee Street<br />
-                    Downtown District<br />
-                    City, State 12345
-                  </Text>
-                </div>
-                <div className="location-item">
-                  <Title level="h3" size="md" color="primary">Hours</Title>
-                  <Text variant="p" size="md" color="secondary">
-                    Monday - Friday: 6:00 AM - 8:00 PM<br />
-                    Saturday - Sunday: 7:00 AM - 9:00 PM
-                  </Text>
-                </div>
-                <div className="location-item">
-                  <Title level="h3" size="md" color="primary">Contact</Title>
-                  <Text variant="p" size="md" color="secondary">
-                    Phone: (555) 123-4567<br />
-                    Email: info@coffeeshop.com
-                  </Text>
-                </div>
+                <LocationItem title="Address" content={locationInfo.address} />
+                <LocationItem title="Hours" content={locationInfo.hours} />
+                <LocationItem title="Contact" content={locationInfo.contact} />
               </div>
             </div>
             <div className="location-map-placeholder">
@@ -191,19 +155,19 @@ const HomeScreen: React.FC = () => {
       <section className="newsletter-section">
         <div className="section-container">
           <Title level="h2" size="xl" align="center" color="white">
-            Stay Updated
+            {newsletterContent.title}
           </Title>
           <Text variant="p" size="md" align="center" color="white" className="newsletter-subtitle">
-            Subscribe to our newsletter for special offers and updates
+            {newsletterContent.subtitle}
           </Text>
           <div className="newsletter-form">
             <Input 
               type="email" 
-              placeholder="Enter your email address"
+              placeholder={newsletterContent.placeholder}
               className="newsletter-input"
             />
             <Button variant="primary" size="lg">
-              Subscribe
+              {newsletterContent.buttonText}
             </Button>
           </div>
         </div>
