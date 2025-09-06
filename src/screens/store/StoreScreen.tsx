@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Footer, Title, Text, Card, Button, Input, ProductCard } from '../../components';
 import { 
   storeHeroContent, 
@@ -78,8 +79,21 @@ const PaginationButton: React.FC<{
 );
 
 const StoreScreen: React.FC<StoreScreenProps> = ({ className = '' }) => {
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [cartItems] = useState<number>(0);
+  const [cartItems, setCartItems] = useState<number>(0);
+
+  // Temporary navigation function to store detail
+  const handleViewStoreDetail = (product: any) => {
+    navigate(`/store/${product.id}`);
+  };
+
+  // Temporary add to cart function
+  const handleAddToCart = (product: any) => {
+    console.log('Added to cart:', product.name);
+    setCartItems(prev => prev + 1);
+    // TODO: Implement actual cart functionality
+  };
 
   const filteredProducts = selectedCategory === 'all' 
     ? allProducts 
@@ -183,6 +197,8 @@ const StoreScreen: React.FC<StoreScreenProps> = ({ className = '' }) => {
                     variant="store"
                     showRating={true}
                     showQuickView={true}
+                    onQuickView={handleViewStoreDetail}
+                    onAddToCart={handleAddToCart}
                   />
                 ))}
               </div>

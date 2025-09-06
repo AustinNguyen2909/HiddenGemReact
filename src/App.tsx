@@ -7,6 +7,7 @@ import {
   Register,
   HomeScreen,
   StoreScreen,
+  StoreDetailScreen,
   LocationScreen,
   AboutScreen,
   BlogScreen,
@@ -28,6 +29,7 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/" element={<HomeScreen />} />
               <Route path="/store" element={<StoreScreen />} />
+              <Route path="/store/:id" element={<StoreDetailScreen />} />
               <Route path="/location" element={<LocationScreen />} />
               <Route path="/about" element={<AboutScreen />} />
               <Route path="/blog" element={<BlogScreen />} />
