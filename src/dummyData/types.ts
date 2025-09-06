@@ -61,3 +61,29 @@ export interface HeroContent {
   secondaryButton: string;
   backgroundImage?: string;
 }
+
+export interface BlogPost {
+  id: number;
+  title: string;
+  excerpt: string;
+  author: string;
+  publishDate: string;
+  category: string;
+  image: string;
+  readTime: string;
+  featured: boolean;
+}
+
+export interface BlogCategory {
+  id: string;
+  name: string;
+  count: number;
+}
+
+export interface BlogFilter {
+  searchPlaceholder: string;
+  topicsLabel: string;
+  dateFromLabel: string;
+  dateToLabel: string;
+  loadMoreText: string;
+}

@@ -3,6 +3,7 @@ export * from './home';
 export * from './store';
 export * from './storeDetail';
 export * from './location';
+export * from './userProfile';
 export * from './about';
 export * from './blog';
 export * from './contact';

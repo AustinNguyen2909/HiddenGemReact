@@ -9,6 +9,7 @@ import {
   StoreScreen,
   StoreDetailScreen,
   LocationScreen,
+  UserProfileScreen,
   AboutScreen,
   BlogScreen,
   ContactScreen,
@@ -31,6 +32,7 @@ function App() {
               <Route path="/store" element={<StoreScreen />} />
               <Route path="/store/:id" element={<StoreDetailScreen />} />
               <Route path="/location" element={<LocationScreen />} />
+              <Route path="/profile" element={<UserProfileScreen />} />
               <Route path="/about" element={<AboutScreen />} />
               <Route path="/blog" element={<BlogScreen />} />
               <Route path="/contact" element={<ContactScreen />} />

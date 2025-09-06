@@ -90,6 +90,17 @@
   color: var(--color-text-primary);
 }
 
+.top-settings__account,
+.top-settings__logout {
+  cursor: pointer;
+  transition: color var(--transition-colors);
+}
+
+.top-settings__account:hover,
+.top-settings__logout:hover {
+  color: var(--color-primary);
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .top-settings {

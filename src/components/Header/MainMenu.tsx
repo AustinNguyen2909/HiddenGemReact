@@ -1,6 +1,7 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../../components";
+import { useAuth } from "../AuthProvider";
 import "./MainMenu.css";
 
 interface MainMenuProps {
@@ -8,6 +9,17 @@ interface MainMenuProps {
 }
 
 const MainMenu: React.FC<MainMenuProps> = ({ className = "" }) => {
+  const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
+
+  const handleUserIconClick = () => {
+    if (isAuthenticated) {
+      navigate('/profile');
+    } else {
+      navigate('/login');
+    }
+  };
+
   return (
     <div className={`main-menu ${className}`}>
       <div className="main-menu__container">
@@ -77,11 +89,19 @@ const MainMenu: React.FC<MainMenuProps> = ({ className = "" }) => {
           </div>
 
           <div className="main-menu__action-item">
-            <div className="main-menu__action-icon">
+            <div 
+              className="main-menu__action-icon main-menu__action-icon--user"
+              onClick={handleUserIconClick}
+            >
               {/* TODO: Replace with user icon */}
               <div className="main-menu__icon-placeholder main-menu__icon-placeholder--user">
                 <span>👤</span>
               </div>
+              {isAuthenticated && user?.name && (
+                <div className="main-menu__user-name">
+                  {user.name}
+                </div>
+              )}
             </div>
           </div>
         </div>
