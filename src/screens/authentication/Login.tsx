@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import './Login.css';
+import { useAuth } from '../../components';
+import { useNavigate } from 'react-router-dom';
 
 const Login: React.FC = () => {
+  let navigate = useNavigate();
+  const {loading, login} = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -10,6 +14,12 @@ const Login: React.FC = () => {
     e.preventDefault();
     // Handle login logic here
     console.log('Login attempt with:', { email, password });
+    login({email, password}). then(res => {
+      console.log('Login successful:', res);
+      if (res.user) {
+        navigate('/')
+      }
+    });
   };
 
   return (
@@ -66,8 +76,9 @@ const Login: React.FC = () => {
           <button
             type="submit"
             className="login-button"
+            disabled={loading}
           >
-            Continue
+            Login
           </button>
         </form>
 

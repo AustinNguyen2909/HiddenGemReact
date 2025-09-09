@@ -1,4 +1,5 @@
 import apiClient from './api';
+import { BaseId } from './type';
 
 export interface LoginRequest {
   email: string;
@@ -12,24 +13,32 @@ export interface RegisterRequest {
 }
 
 export interface AuthResponse {
-  token: string;
-  user?: any;
-  [key: string]: any;
+  access_token: string;
+  refresh_token: string;
+  user: BaseUser;
 }
+
+export interface BaseUser extends BaseId {
+  "username": string
+  "email": string
+  "role": RoleType
+}
+
+export type RoleType = "customer" | "admin" | "shop"
 
 class AuthService {
   async login(payload: LoginRequest): Promise<AuthResponse> {
     const res = await apiClient.post<AuthResponse>('/auth/login', payload);
-    if (res && res.token) {
-      apiClient.setAuthToken(res.token);
+    if (res && res.access_token) {
+      apiClient.setAuthToken(res.access_token);
     }
     return res;
   }
 
   async register(payload: RegisterRequest): Promise<AuthResponse> {
     const res = await apiClient.post<AuthResponse>('/auth/register', payload);
-    if (res && res.token) {
-      apiClient.setAuthToken(res.token);
+    if (res && res.access_token) {
+      apiClient.setAuthToken(res.access_token);
     }
     return res;
   }

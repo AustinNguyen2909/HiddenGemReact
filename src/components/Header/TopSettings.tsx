@@ -33,7 +33,7 @@ const TopSettings: React.FC<TopSettingsProps> = ({ className = "" }) => {
               className="top-settings__help-text top-settings__account"
               onClick={handleAccountClick}
             >
-              {isAuthenticated ? (user?.name || 'Account') : 'Account'}
+              {isAuthenticated ? (user?.username || 'Account') : 'Account'}
             </span>
             <span className="top-settings__help-text">Track Order</span>
             <span className="top-settings__help-text">Support</span>

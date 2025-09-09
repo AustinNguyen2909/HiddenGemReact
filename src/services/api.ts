@@ -11,7 +11,7 @@ export interface RequestOptions {
 
 // CRA only exposes REACT_APP_* at build time. Support BASE_URL via window fallback too.
 const runtimeBaseUrl = (typeof window !== 'undefined' && (window as any).__BASE_URL__) as string | undefined;
-const BASE_URL = (process.env.BASE_URL || runtimeBaseUrl || '/api');
+const BASE_URL = (process.env.REACT_APP_BASE_BE_URL || runtimeBaseUrl || '/api');
 
 function buildQueryString(params?: Record<string, any>): string {
   if (!params) return '';
@@ -87,6 +87,8 @@ class ApiClient {
     if (body !== undefined && body !== null) {
       init.body = typeof body === 'string' ? body : JSON.stringify(body);
     }
+    console.log('url',url)
+    console.log('init',init)
 
     const res = await fetch(url, init);
     return handleResponse<T>(res);

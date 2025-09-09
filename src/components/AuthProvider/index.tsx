@@ -1,18 +1,10 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import apiClient from '../../services/api';
 import { TokenStorage } from '../../services/storage';
-import authService, { LoginRequest, RegisterRequest, AuthResponse } from '../../services/auth';
-
-export interface AuthUser {
-  id?: string | number;
-  email?: string;
-  name?: string;
-  // extend as needed
-  [key: string]: any;
-}
+import authService, { LoginRequest, RegisterRequest, AuthResponse, BaseUser } from '../../services/auth';
 
 interface AuthContextValue {
-  user: AuthUser | null;
+  user: BaseUser | null;
   token: string | null;
   isAuthenticated: boolean;
   loading: boolean;
@@ -20,7 +12,7 @@ interface AuthContextValue {
   login: (payload: LoginRequest) => Promise<AuthResponse>;
   register: (payload: RegisterRequest) => Promise<AuthResponse>;
   logout: () => void;
-  setUser: (user: AuthUser | null) => void;
+  setUser: (user: BaseUser | null) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -30,7 +22,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<BaseUser | null>(null);
   const [token, setToken] = useState<string | null>(() => TokenStorage.getToken());
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -49,8 +41,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setError(null);
     try {
       const res = await authService.login(payload);
-      if (res?.token) {
-        setToken(res.token);
+      if (res?.access_token) {
+        setToken(res.access_token);
       }
       if (res?.user) {
         setUser(res.user);
@@ -70,8 +62,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setError(null);
     try {
       const res = await authService.register(payload);
-      if (res?.token) {
-        setToken(res.token);
+      if (res?.access_token) {
+        setToken(res.access_token);
       }
       if (res?.user) {
         setUser(res.user);

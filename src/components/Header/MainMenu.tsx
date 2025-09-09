@@ -97,9 +97,9 @@ const MainMenu: React.FC<MainMenuProps> = ({ className = "" }) => {
               <div className="main-menu__icon-placeholder main-menu__icon-placeholder--user">
                 <span>👤</span>
               </div>
-              {isAuthenticated && user?.name && (
+              {isAuthenticated && user?.username && (
                 <div className="main-menu__user-name">
-                  {user.name}
+                  {user.username}
                 </div>
               )}
             </div>
