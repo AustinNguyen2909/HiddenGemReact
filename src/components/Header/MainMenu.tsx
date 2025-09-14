@@ -74,7 +74,6 @@ const MainMenu: React.FC<MainMenuProps> = ({ className = "" }) => {
               <div className="main-menu__icon-placeholder main-menu__icon-placeholder--location">
                 <span>📍</span>
               </div>
-              <div className="main-menu__notification-badge">2</div>
             </div>
           </div>
 
@@ -84,7 +83,6 @@ const MainMenu: React.FC<MainMenuProps> = ({ className = "" }) => {
               <div className="main-menu__icon-placeholder main-menu__icon-placeholder--notification">
                 <span>🔔</span>
               </div>
-              <div className="main-menu__notification-badge">1</div>
             </div>
           </div>
 

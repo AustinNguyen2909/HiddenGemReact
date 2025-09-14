@@ -7,3 +7,5 @@ export * from './locationData';
 export * from './userProfileData';
 export * from './aboutData';
 export * from './blogData';
+export * from './contactData';
+export * from './promotionData';

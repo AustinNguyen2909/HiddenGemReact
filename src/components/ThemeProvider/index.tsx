@@ -23,9 +23,10 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     }
     
     // Check system preference
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return 'dark';
-    }
+    // Use default Light theme
+    // if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    //   return 'dark';
+    // }
     
     // Default to light theme
     return 'light';
