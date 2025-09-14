@@ -10,6 +10,13 @@ export { default as Container } from './Container';
 export { ThemeProvider, useTheme } from './ThemeProvider';
 export { ThemeToggle } from './ThemeToggle';
 export { AuthProvider, useAuth } from './AuthProvider';
+export { default as AdminRouteGuard } from './AdminRouteGuard';
+
+// Admin Components
+export { default as AdminSidebar } from './AdminSidebar';
+export { default as AdminHeader } from './AdminHeader';
+export { default as AdminStatsCard } from './AdminStatsCard';
+export { default as AdminTable } from './AdminTable';
 
 // Shared UI Components
 export { default as ProductCard } from './ProductCard';
