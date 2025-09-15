@@ -15,7 +15,7 @@ import {
   ContactScreen,
   PromotionScreen,
 } from "./screens";
-import { AdminLayout, AdminLogin, AdminDashboard, StoresManage, StoreDetailManage, UserManage, UserDetailManage, BlogsManage, BlogDetailManage, BlogCreate, SubService, BannerManage, ServiceManage, ClientManage, PayManage, ParkingManage, AmenitiesManage, ServiceAdd, MenuManage, MenuAdd } from "./screens/admin";
+import { AdminLayout, AdminLogin, AdminDashboard, StoresManage, StoreDetailManage, UserManage, UserDetailManage, BlogsManage, BlogDetailManage, BlogCreate, SubService, BannerManage, ServiceManage, ClientManage, PayManage, ParkingManage, AmenitiesManage, ServiceAdd, MenuManage, MenuAdd, CategoryManage, CategoryAdd, ReviewManage, ReviewView, PromotionManage, PromotionAdd } from "./screens/admin";
 import { ThemeProvider, Header, AuthProvider, AdminRouteGuard } from "./components";
 import "./App.css";
 
@@ -133,6 +133,36 @@ function App() {
                 <Route path="store/menu/new" element={
                   <AdminRouteGuard>
                     <MenuAdd />
+                  </AdminRouteGuard>
+                } />
+                <Route path="store/category/manage" element={
+                  <AdminRouteGuard>
+                    <CategoryManage />
+                  </AdminRouteGuard>
+                } />
+                <Route path="store/category/new" element={
+                  <AdminRouteGuard>
+                    <CategoryAdd />
+                  </AdminRouteGuard>
+                } />
+                <Route path="store/review/manage" element={
+                  <AdminRouteGuard>
+                    <ReviewManage />
+                  </AdminRouteGuard>
+                } />
+                <Route path="store/review/:id" element={
+                  <AdminRouteGuard>
+                    <ReviewView />
+                  </AdminRouteGuard>
+                } />
+                <Route path="store/promotion/manage" element={
+                  <AdminRouteGuard>
+                    <PromotionManage />
+                  </AdminRouteGuard>
+                } />
+                <Route path="store/promotion/new" element={
+                  <AdminRouteGuard>
+                    <PromotionAdd />
                   </AdminRouteGuard>
                 } />
                 <Route path="banners" element={
