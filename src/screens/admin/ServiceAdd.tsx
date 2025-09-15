@@ -105,7 +105,7 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({ className = '' }) => {
         <form ref={formRef} className="service-add__form" onSubmit={handleSubmit}>
           <div className="service-add__form-group">
             <label htmlFor="title" className="service-add__label">
-              <Text variant="label" size="sm" color="primary" className="service-add__label-text">
+              <Text variant="p" size="sm" color="primary" className="service-add__label-text">
                 Title *
               </Text>
             </label>
@@ -123,7 +123,7 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({ className = '' }) => {
 
           <div className="service-add__form-group">
             <label htmlFor="description" className="service-add__label">
-              <Text variant="label" size="sm" color="primary" className="service-add__label-text">
+              <Text variant="p" size="sm" color="primary" className="service-add__label-text">
                 Description *
               </Text>
             </label>
@@ -141,7 +141,7 @@ const ServiceAdd: React.FC<ServiceAddProps> = ({ className = '' }) => {
 
           {error && (
             <div className="service-add__error">
-              <Text variant="p" size="sm" color="error">
+              <Text variant="p" size="sm" color="accent">
                 {error}
               </Text>
             </div>

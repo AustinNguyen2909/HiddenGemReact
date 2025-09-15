@@ -132,7 +132,7 @@ const MenuAdd: React.FC<MenuAddProps> = ({ className = '' }) => {
           <div className="menu-add__form-row">
             <div className="menu-add__form-group">
               <label htmlFor="name" className="menu-add__label">
-                <Text variant="label" size="sm" color="primary" className="menu-add__label-text">
+                <Text variant="p" size="sm" color="primary" className="menu-add__label-text">
                   Menu Name *
                 </Text>
               </label>
@@ -150,7 +150,7 @@ const MenuAdd: React.FC<MenuAddProps> = ({ className = '' }) => {
 
             <div className="menu-add__form-group">
               <label htmlFor="price" className="menu-add__label">
-                <Text variant="label" size="sm" color="primary" className="menu-add__label-text">
+                <Text variant="p" size="sm" color="primary" className="menu-add__label-text">
                   Price *
                 </Text>
               </label>
@@ -169,7 +169,7 @@ const MenuAdd: React.FC<MenuAddProps> = ({ className = '' }) => {
 
           <div className="menu-add__form-group">
             <label htmlFor="description" className="menu-add__label">
-              <Text variant="label" size="sm" color="primary" className="menu-add__label-text">
+              <Text variant="p" size="sm" color="primary" className="menu-add__label-text">
                 Description *
               </Text>
             </label>
@@ -188,7 +188,7 @@ const MenuAdd: React.FC<MenuAddProps> = ({ className = '' }) => {
           <div className="menu-add__form-row">
             <div className="menu-add__form-group">
               <label className="menu-add__label">
-                <Text variant="label" size="sm" color="primary" className="menu-add__label-text">
+                <Text variant="p" size="sm" color="primary" className="menu-add__label-text">
                   Available Sizes *
                 </Text>
               </label>
@@ -209,7 +209,7 @@ const MenuAdd: React.FC<MenuAddProps> = ({ className = '' }) => {
 
             <div className="menu-add__form-group">
               <label htmlFor="status" className="menu-add__label">
-                <Text variant="label" size="sm" color="primary" className="menu-add__label-text">
+                <Text variant="p" size="sm" color="primary" className="menu-add__label-text">
                   Status *
                 </Text>
               </label>
@@ -232,7 +232,7 @@ const MenuAdd: React.FC<MenuAddProps> = ({ className = '' }) => {
 
           <div className="menu-add__form-group">
             <label htmlFor="images" className="menu-add__label">
-              <Text variant="label" size="sm" color="primary" className="menu-add__label-text">
+              <Text variant="p" size="sm" color="primary" className="menu-add__label-text">
                 Images *
               </Text>
             </label>
@@ -284,7 +284,7 @@ const MenuAdd: React.FC<MenuAddProps> = ({ className = '' }) => {
 
           {error && (
             <div className="menu-add__error">
-              <Text variant="p" size="sm" color="error">
+              <Text variant="p" size="sm" color="accent">
                 {error}
               </Text>
             </div>
