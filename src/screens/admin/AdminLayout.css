@@ -33,6 +33,14 @@
   transition: margin-left 0.3s ease;
 }
 
+.admin-layout__main__not-logged-in {
+  flex: 1;
+  min-height: calc(100vh - 70px);
+  background-color: var(--color-bg-primary);
+  transition: margin-left 0.3s ease;
+}
+
+
 .admin-layout__content {
   padding: var(--spacing-xl);
   max-width: 100%;
