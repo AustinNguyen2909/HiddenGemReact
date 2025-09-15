@@ -16,3 +16,5 @@ export { default as PayManage } from './PayManage';
 export { default as ParkingManage } from './ParkingManage';
 export { default as AmenitiesManage } from './AmenitiesManage';
 export { default as ServiceAdd } from './ServiceAdd';
+export { default as MenuManage } from './MenuManage';
+export { default as MenuAdd } from './MenuAdd';

@@ -15,7 +15,7 @@ import {
   ContactScreen,
   PromotionScreen,
 } from "./screens";
-import { AdminLayout, AdminLogin, AdminDashboard, StoresManage, StoreDetailManage, UserManage, UserDetailManage, BlogsManage, BlogDetailManage, BlogCreate, SubService, BannerManage, ServiceManage, ClientManage, PayManage, ParkingManage, AmenitiesManage, ServiceAdd } from "./screens/admin";
+import { AdminLayout, AdminLogin, AdminDashboard, StoresManage, StoreDetailManage, UserManage, UserDetailManage, BlogsManage, BlogDetailManage, BlogCreate, SubService, BannerManage, ServiceManage, ClientManage, PayManage, ParkingManage, AmenitiesManage, ServiceAdd, MenuManage, MenuAdd } from "./screens/admin";
 import { ThemeProvider, Header, AuthProvider, AdminRouteGuard } from "./components";
 import "./App.css";
 
@@ -123,6 +123,16 @@ function App() {
                 <Route path="introductions/:serviceType/new" element={
                   <AdminRouteGuard>
                     <ServiceAdd />
+                  </AdminRouteGuard>
+                } />
+                <Route path="store/menu/manage" element={
+                  <AdminRouteGuard>
+                    <MenuManage />
+                  </AdminRouteGuard>
+                } />
+                <Route path="store/menu/new" element={
+                  <AdminRouteGuard>
+                    <MenuAdd />
                   </AdminRouteGuard>
                 } />
                 <Route path="banners" element={

@@ -39,11 +39,10 @@ const menuItems: MenuItem[] = [
     label: 'Store',
     icon: '🏪',
     children: [
-      { id: 'store-overview', label: 'Store Overview', path: '/admin/store/overview' },
-      { id: 'store-products', label: 'Products', path: '/admin/store/products' },
-      { id: 'store-orders', label: 'Orders', path: '/admin/store/orders' },
-      { id: 'store-inventory', label: 'Inventory', path: '/admin/store/inventory' },
-      { id: 'store-settings', label: 'Store Settings', path: '/admin/store/settings' }
+      { id: 'store-menu', label: 'Menu', path: '/admin/store/menu/manage' },
+      { id: 'store-category', label: 'Category', path: '/admin/store/category/manage' },
+      { id: 'store-review', label: 'Review', path: '/admin/store/review/manage' },
+      { id: 'store-promotion', label: 'Promotion Program', path: '/admin/store/promotion/manage' }
     ]
   }
 ];
