@@ -1,13 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Title, Text, Button, Input, AdminStatsCard, AdminTable } from '../../components';
-import './ServiceManage.css';
+import './PayManage.css';
 
-interface ServiceManageProps {
+interface PayManageProps {
   className?: string;
 }
 
-interface ServiceItem {
+interface PayItem {
   id: number;
   title: string;
   description: string;
@@ -16,67 +16,51 @@ interface ServiceItem {
   updatedAt: string;
 }
 
-const serviceItems: ServiceItem[] = [
+const payItems: PayItem[] = [
   {
     id: 1,
-    title: 'Espresso',
-    description: 'Single or double shot espresso',
+    title: 'Cash Payment',
+    description: 'Traditional cash transactions at the counter',
     isAvailable: true,
     createdAt: '2024-01-15T10:00:00Z',
     updatedAt: '2024-01-15T10:00:00Z'
   },
   {
     id: 2,
-    title: 'Latte',
-    description: 'Espresso with steamed milk',
+    title: 'Card Payment',
+    description: 'Credit and debit card processing',
     isAvailable: true,
     createdAt: '2024-01-15T10:00:00Z',
     updatedAt: '2024-01-15T10:00:00Z'
   },
   {
     id: 3,
-    title: 'Cappuccino',
-    description: 'Espresso with equal parts steamed milk and foam',
+    title: 'Mobile Payment',
+    description: 'Apple Pay, Google Pay, and other mobile wallets',
     isAvailable: true,
     createdAt: '2024-01-15T10:00:00Z',
     updatedAt: '2024-01-15T10:00:00Z'
   },
   {
     id: 4,
-    title: 'Americano',
-    description: 'Espresso with hot water',
-    isAvailable: true,
-    createdAt: '2024-01-15T10:00:00Z',
-    updatedAt: '2024-01-15T10:00:00Z'
-  },
-  {
-    id: 5,
-    title: 'Cold Brew',
-    description: 'Slow-steeped cold coffee',
+    title: 'Cryptocurrency',
+    description: 'Bitcoin and other cryptocurrency payments',
     isAvailable: false,
     createdAt: '2024-01-15T10:00:00Z',
     updatedAt: '2024-01-15T10:00:00Z'
   },
   {
+    id: 5,
+    title: 'Contactless Payment',
+    description: 'Tap-to-pay with NFC-enabled cards and devices',
+    isAvailable: true,
+    createdAt: '2024-01-15T10:00:00Z',
+    updatedAt: '2024-01-15T10:00:00Z'
+  },
+  {
     id: 6,
-    title: 'Croissant',
-    description: 'Fresh baked buttery croissant',
-    isAvailable: true,
-    createdAt: '2024-01-15T10:00:00Z',
-    updatedAt: '2024-01-15T10:00:00Z'
-  },
-  {
-    id: 7,
-    title: 'Muffin',
-    description: 'Blueberry or chocolate chip muffin',
-    isAvailable: true,
-    createdAt: '2024-01-15T10:00:00Z',
-    updatedAt: '2024-01-15T10:00:00Z'
-  },
-  {
-    id: 8,
-    title: 'Sandwich',
-    description: 'Grilled chicken or turkey sandwich',
+    title: 'Online Prepayment',
+    description: 'Pay in advance through our website or app',
     isAvailable: false,
     createdAt: '2024-01-15T10:00:00Z',
     updatedAt: '2024-01-15T10:00:00Z'
@@ -85,7 +69,7 @@ const serviceItems: ServiceItem[] = [
 
 const statusOptions = ['All', 'Available', 'Unavailable'];
 
-const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
+const PayManage: React.FC<PayManageProps> = ({ className = '' }) => {
   const navigate = useNavigate();
   
   // Filter states
@@ -93,9 +77,9 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
   const [statusFilter, setStatusFilter] = useState('All');
   const [sortBy, setSortBy] = useState('title-asc');
   
-  // Filter and sort services
-  const filteredAndSortedServices = useMemo(() => {
-    let filtered = serviceItems.filter(item => {
+  // Filter and sort payment methods
+  const filteredAndSortedPayments = useMemo(() => {
+    let filtered = payItems.filter(item => {
       const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            item.description.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = statusFilter === 'All' || 
@@ -105,13 +89,13 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
       return matchesSearch && matchesStatus;
     });
 
-    // Sort services
+    // Sort payment methods
     filtered.sort((a, b) => {
       const [sortKey, direction] = sortBy.split('-');
       const isAsc = direction === 'asc';
       
-      let aValue: any = a[sortKey as keyof ServiceItem];
-      let bValue: any = b[sortKey as keyof ServiceItem];
+      let aValue: any = a[sortKey as keyof PayItem];
+      let bValue: any = b[sortKey as keyof PayItem];
       
       if (sortKey === 'createdAt' || sortKey === 'updatedAt') {
         aValue = new Date(aValue).getTime();
@@ -136,26 +120,26 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
   // Statistics
   const statsData = [
     {
-      title: 'Total Services',
-      value: serviceItems.length.toString(),
-      icon: '☕',
-      trend: { value: 2, isPositive: true }
+      title: 'Total Methods',
+      value: payItems.length.toString(),
+      icon: '💳',
+      trend: { value: 1, isPositive: true }
     },
     {
       title: 'Available',
-      value: serviceItems.filter(item => item.isAvailable).length.toString(),
+      value: payItems.filter(item => item.isAvailable).length.toString(),
       icon: '✅',
       trend: { value: 1, isPositive: true }
     },
     {
       title: 'Unavailable',
-      value: serviceItems.filter(item => !item.isAvailable).length.toString(),
+      value: payItems.filter(item => !item.isAvailable).length.toString(),
       icon: '❌',
       trend: { value: 0, isPositive: false }
     },
     {
       title: 'Recently Added',
-      value: serviceItems.filter(item => {
+      value: payItems.filter(item => {
         const daysDiff = (new Date().getTime() - new Date(item.createdAt).getTime()) / (1000 * 60 * 60 * 24);
         return daysDiff <= 7;
       }).length.toString(),
@@ -164,28 +148,28 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
     }
   ];
 
-  const handleViewService = (service: ServiceItem) => {
-    navigate(`/admin/introductions/service/${service.id}`);
+  const handleViewPay = (pay: PayItem) => {
+    navigate(`/admin/introductions/pay/${pay.id}`);
   };
 
-  const handleEditService = (service: ServiceItem) => {
-    navigate(`/admin/introductions/service/${service.id}/edit`);
+  const handleEditPay = (pay: PayItem) => {
+    navigate(`/admin/introductions/pay/${pay.id}/edit`);
   };
 
-  const handleDeleteService = (service: ServiceItem) => {
-    if (window.confirm(`Are you sure you want to delete "${service.title}"?`)) {
-      console.log('Delete service:', service.id);
+  const handleDeletePay = (pay: PayItem) => {
+    if (window.confirm(`Are you sure you want to delete "${pay.title}"?`)) {
+      console.log('Delete payment method:', pay.id);
       // In a real app, this would make an API call
     }
   };
 
-  const handleAddService = () => {
-    navigate('/admin/introductions/service/new');
+  const handleAddPay = () => {
+    navigate('/admin/introductions/pay/new');
   };
 
   const getStatusBadge = (isAvailable: boolean) => {
     return (
-      <span className={`service-manage__status-badge ${isAvailable ? 'service-manage__status-badge--available' : 'service-manage__status-badge--unavailable'}`}>
+      <span className={`pay-manage__status-badge ${isAvailable ? 'pay-manage__status-badge--available' : 'pay-manage__status-badge--unavailable'}`}>
         {isAvailable ? 'Available' : 'Unavailable'}
       </span>
     );
@@ -202,15 +186,15 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
   const tableColumns = [
     {
       key: 'title',
-      label: 'Service Title',
+      label: 'Payment Method',
       sortable: true,
       width: '300px',
-      render: (value: string, item: ServiceItem) => (
-        <div className="service-manage__service-info">
-          <Text variant="p" size="sm" color="primary" className="service-manage__service-title">
+      render: (value: string, item: PayItem) => (
+        <div className="pay-manage__pay-info">
+          <Text variant="p" size="sm" color="primary" className="pay-manage__pay-title">
             {value}
           </Text>
-          <Text variant="p" size="xs" color="muted" className="service-manage__service-description">
+          <Text variant="p" size="xs" color="muted" className="pay-manage__pay-description">
             {item.description}
           </Text>
         </div>
@@ -236,32 +220,32 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
   ];
 
   return (
-    <div className={`service-manage ${className}`}>
-      <div className="service-manage__header">
-        <div className="service-manage__header-left">
-          <Title level="h1" size="xl" color="primary" className="service-manage__title">
-            Service Management
+    <div className={`pay-manage ${className}`}>
+      <div className="pay-manage__header">
+        <div className="pay-manage__header-left">
+          <Title level="h1" size="xl" color="primary" className="pay-manage__title">
+            Payment Management
           </Title>
-          <Text variant="p" size="md" color="secondary" className="service-manage__subtitle">
-            Manage your coffee shop services and offerings
+          <Text variant="p" size="md" color="secondary" className="pay-manage__subtitle">
+            Manage payment processing and billing options
           </Text>
         </div>
-        <div className="service-manage__header-right">
+        <div className="pay-manage__header-right">
           <Button variant="secondary" size="md" onClick={() => navigate('/admin/introductions')}>
             Back
           </Button>
           <Button
             variant="primary"
             size="md"
-            onClick={handleAddService}
-            className="service-manage__add-btn"
+            onClick={handleAddPay}
+            className="pay-manage__add-btn"
           >
-            + Add Service
+            + Add Method
           </Button>
         </div>
       </div>
 
-      <div className="service-manage__stats">
+      <div className="pay-manage__stats">
         {statsData.map((stat, index) => (
           <AdminStatsCard
             key={index}
@@ -269,27 +253,27 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
             value={stat.value}
             icon={stat.icon}
             trend={stat.trend}
-            className="service-manage__stat-card"
+            className="pay-manage__stat-card"
           />
         ))}
       </div>
 
-      <div className="service-manage__filters">
-        <div className="service-manage__filter-group">
+      <div className="pay-manage__filters">
+        <div className="pay-manage__filter-group">
           <Input
             type="text"
-            placeholder="Search services..."
+            placeholder="Search payment methods..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="service-manage__search-input"
+            className="pay-manage__search-input"
           />
         </div>
         
-        <div className="service-manage__filter-group">
+        <div className="pay-manage__filter-group">
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="service-manage__filter-select"
+            className="pay-manage__filter-select"
           >
             {statusOptions.map(status => (
               <option key={status} value={status}>
@@ -299,11 +283,11 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
           </select>
         </div>
 
-        <div className="service-manage__filter-group">
+        <div className="pay-manage__filter-group">
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="service-manage__filter-select"
+            className="pay-manage__filter-select"
           >
             <option value="title-asc">Title A-Z</option>
             <option value="title-desc">Title Z-A</option>
@@ -313,18 +297,18 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
         </div>
       </div>
 
-      <div className="service-manage__table-section">
+      <div className="pay-manage__table-section">
         <AdminTable
-          data={filteredAndSortedServices}
+          data={filteredAndSortedPayments}
           columns={tableColumns}
-          onView={handleViewService}
-          onEdit={handleEditService}
-          onDelete={handleDeleteService}
-          emptyMessage="No services found matching your criteria"
+          onView={handleViewPay}
+          onEdit={handleEditPay}
+          onDelete={handleDeletePay}
+          emptyMessage="No payment methods found matching your criteria"
         />
       </div>
     </div>
   );
 };
 
-export default ServiceManage;
+export default PayManage;

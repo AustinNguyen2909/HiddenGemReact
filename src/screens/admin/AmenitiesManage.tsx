@@ -1,13 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Title, Text, Button, Input, AdminStatsCard, AdminTable } from '../../components';
-import './ServiceManage.css';
+import './AmenitiesManage.css';
 
-interface ServiceManageProps {
+interface AmenitiesManageProps {
   className?: string;
 }
 
-interface ServiceItem {
+interface AmenityItem {
   id: number;
   title: string;
   description: string;
@@ -16,67 +16,67 @@ interface ServiceItem {
   updatedAt: string;
 }
 
-const serviceItems: ServiceItem[] = [
+const amenityItems: AmenityItem[] = [
   {
     id: 1,
-    title: 'Espresso',
-    description: 'Single or double shot espresso',
+    title: 'Free WiFi',
+    description: 'Complimentary high-speed internet access for customers',
     isAvailable: true,
     createdAt: '2024-01-15T10:00:00Z',
     updatedAt: '2024-01-15T10:00:00Z'
   },
   {
     id: 2,
-    title: 'Latte',
-    description: 'Espresso with steamed milk',
+    title: 'Outdoor Seating',
+    description: 'Patio and outdoor tables for al fresco dining',
     isAvailable: true,
     createdAt: '2024-01-15T10:00:00Z',
     updatedAt: '2024-01-15T10:00:00Z'
   },
   {
     id: 3,
-    title: 'Cappuccino',
-    description: 'Espresso with equal parts steamed milk and foam',
+    title: 'Meeting Room',
+    description: 'Private space for meetings and small events',
     isAvailable: true,
     createdAt: '2024-01-15T10:00:00Z',
     updatedAt: '2024-01-15T10:00:00Z'
   },
   {
     id: 4,
-    title: 'Americano',
-    description: 'Espresso with hot water',
-    isAvailable: true,
-    createdAt: '2024-01-15T10:00:00Z',
-    updatedAt: '2024-01-15T10:00:00Z'
-  },
-  {
-    id: 5,
-    title: 'Cold Brew',
-    description: 'Slow-steeped cold coffee',
+    title: 'Pet Friendly',
+    description: 'Welcome to bring well-behaved pets',
     isAvailable: false,
     createdAt: '2024-01-15T10:00:00Z',
     updatedAt: '2024-01-15T10:00:00Z'
   },
   {
+    id: 5,
+    title: 'Power Outlets',
+    description: 'Convenient charging stations for laptops and devices',
+    isAvailable: true,
+    createdAt: '2024-01-15T10:00:00Z',
+    updatedAt: '2024-01-15T10:00:00Z'
+  },
+  {
     id: 6,
-    title: 'Croissant',
-    description: 'Fresh baked buttery croissant',
+    title: 'Air Conditioning',
+    description: 'Climate-controlled environment for comfort',
     isAvailable: true,
     createdAt: '2024-01-15T10:00:00Z',
     updatedAt: '2024-01-15T10:00:00Z'
   },
   {
     id: 7,
-    title: 'Muffin',
-    description: 'Blueberry or chocolate chip muffin',
-    isAvailable: true,
+    title: 'Live Music',
+    description: 'Occasional live performances and acoustic sessions',
+    isAvailable: false,
     createdAt: '2024-01-15T10:00:00Z',
     updatedAt: '2024-01-15T10:00:00Z'
   },
   {
     id: 8,
-    title: 'Sandwich',
-    description: 'Grilled chicken or turkey sandwich',
+    title: 'Kids Play Area',
+    description: 'Designated space for children to play safely',
     isAvailable: false,
     createdAt: '2024-01-15T10:00:00Z',
     updatedAt: '2024-01-15T10:00:00Z'
@@ -85,7 +85,7 @@ const serviceItems: ServiceItem[] = [
 
 const statusOptions = ['All', 'Available', 'Unavailable'];
 
-const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
+const AmenitiesManage: React.FC<AmenitiesManageProps> = ({ className = '' }) => {
   const navigate = useNavigate();
   
   // Filter states
@@ -93,9 +93,9 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
   const [statusFilter, setStatusFilter] = useState('All');
   const [sortBy, setSortBy] = useState('title-asc');
   
-  // Filter and sort services
-  const filteredAndSortedServices = useMemo(() => {
-    let filtered = serviceItems.filter(item => {
+  // Filter and sort amenities
+  const filteredAndSortedAmenities = useMemo(() => {
+    let filtered = amenityItems.filter(item => {
       const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            item.description.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = statusFilter === 'All' || 
@@ -105,13 +105,13 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
       return matchesSearch && matchesStatus;
     });
 
-    // Sort services
+    // Sort amenities
     filtered.sort((a, b) => {
       const [sortKey, direction] = sortBy.split('-');
       const isAsc = direction === 'asc';
       
-      let aValue: any = a[sortKey as keyof ServiceItem];
-      let bValue: any = b[sortKey as keyof ServiceItem];
+      let aValue: any = a[sortKey as keyof AmenityItem];
+      let bValue: any = b[sortKey as keyof AmenityItem];
       
       if (sortKey === 'createdAt' || sortKey === 'updatedAt') {
         aValue = new Date(aValue).getTime();
@@ -136,26 +136,26 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
   // Statistics
   const statsData = [
     {
-      title: 'Total Services',
-      value: serviceItems.length.toString(),
-      icon: '☕',
+      title: 'Total Amenities',
+      value: amenityItems.length.toString(),
+      icon: '🏪',
       trend: { value: 2, isPositive: true }
     },
     {
       title: 'Available',
-      value: serviceItems.filter(item => item.isAvailable).length.toString(),
+      value: amenityItems.filter(item => item.isAvailable).length.toString(),
       icon: '✅',
       trend: { value: 1, isPositive: true }
     },
     {
       title: 'Unavailable',
-      value: serviceItems.filter(item => !item.isAvailable).length.toString(),
+      value: amenityItems.filter(item => !item.isAvailable).length.toString(),
       icon: '❌',
-      trend: { value: 0, isPositive: false }
+      trend: { value: 1, isPositive: false }
     },
     {
       title: 'Recently Added',
-      value: serviceItems.filter(item => {
+      value: amenityItems.filter(item => {
         const daysDiff = (new Date().getTime() - new Date(item.createdAt).getTime()) / (1000 * 60 * 60 * 24);
         return daysDiff <= 7;
       }).length.toString(),
@@ -164,28 +164,28 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
     }
   ];
 
-  const handleViewService = (service: ServiceItem) => {
-    navigate(`/admin/introductions/service/${service.id}`);
+  const handleViewAmenity = (amenity: AmenityItem) => {
+    navigate(`/admin/introductions/amenities/${amenity.id}`);
   };
 
-  const handleEditService = (service: ServiceItem) => {
-    navigate(`/admin/introductions/service/${service.id}/edit`);
+  const handleEditAmenity = (amenity: AmenityItem) => {
+    navigate(`/admin/introductions/amenities/${amenity.id}/edit`);
   };
 
-  const handleDeleteService = (service: ServiceItem) => {
-    if (window.confirm(`Are you sure you want to delete "${service.title}"?`)) {
-      console.log('Delete service:', service.id);
+  const handleDeleteAmenity = (amenity: AmenityItem) => {
+    if (window.confirm(`Are you sure you want to delete "${amenity.title}"?`)) {
+      console.log('Delete amenity:', amenity.id);
       // In a real app, this would make an API call
     }
   };
 
-  const handleAddService = () => {
-    navigate('/admin/introductions/service/new');
+  const handleAddAmenity = () => {
+    navigate('/admin/introductions/amenities/new');
   };
 
   const getStatusBadge = (isAvailable: boolean) => {
     return (
-      <span className={`service-manage__status-badge ${isAvailable ? 'service-manage__status-badge--available' : 'service-manage__status-badge--unavailable'}`}>
+      <span className={`amenities-manage__status-badge ${isAvailable ? 'amenities-manage__status-badge--available' : 'amenities-manage__status-badge--unavailable'}`}>
         {isAvailable ? 'Available' : 'Unavailable'}
       </span>
     );
@@ -202,15 +202,15 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
   const tableColumns = [
     {
       key: 'title',
-      label: 'Service Title',
+      label: 'Amenity',
       sortable: true,
       width: '300px',
-      render: (value: string, item: ServiceItem) => (
-        <div className="service-manage__service-info">
-          <Text variant="p" size="sm" color="primary" className="service-manage__service-title">
+      render: (value: string, item: AmenityItem) => (
+        <div className="amenities-manage__amenity-info">
+          <Text variant="p" size="sm" color="primary" className="amenities-manage__amenity-title">
             {value}
           </Text>
-          <Text variant="p" size="xs" color="muted" className="service-manage__service-description">
+          <Text variant="p" size="xs" color="muted" className="amenities-manage__amenity-description">
             {item.description}
           </Text>
         </div>
@@ -236,32 +236,32 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
   ];
 
   return (
-    <div className={`service-manage ${className}`}>
-      <div className="service-manage__header">
-        <div className="service-manage__header-left">
-          <Title level="h1" size="xl" color="primary" className="service-manage__title">
-            Service Management
+    <div className={`amenities-manage ${className}`}>
+      <div className="amenities-manage__header">
+        <div className="amenities-manage__header-left">
+          <Title level="h1" size="xl" color="primary" className="amenities-manage__title">
+            Amenities Management
           </Title>
-          <Text variant="p" size="md" color="secondary" className="service-manage__subtitle">
-            Manage your coffee shop services and offerings
+          <Text variant="p" size="md" color="secondary" className="amenities-manage__subtitle">
+            Manage additional facilities and services for customers
           </Text>
         </div>
-        <div className="service-manage__header-right">
+        <div className="amenities-manage__header-right">
           <Button variant="secondary" size="md" onClick={() => navigate('/admin/introductions')}>
             Back
           </Button>
           <Button
             variant="primary"
             size="md"
-            onClick={handleAddService}
-            className="service-manage__add-btn"
+            onClick={handleAddAmenity}
+            className="amenities-manage__add-btn"
           >
-            + Add Service
+            + Add Amenity
           </Button>
         </div>
       </div>
 
-      <div className="service-manage__stats">
+      <div className="amenities-manage__stats">
         {statsData.map((stat, index) => (
           <AdminStatsCard
             key={index}
@@ -269,27 +269,27 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
             value={stat.value}
             icon={stat.icon}
             trend={stat.trend}
-            className="service-manage__stat-card"
+            className="amenities-manage__stat-card"
           />
         ))}
       </div>
 
-      <div className="service-manage__filters">
-        <div className="service-manage__filter-group">
+      <div className="amenities-manage__filters">
+        <div className="amenities-manage__filter-group">
           <Input
             type="text"
-            placeholder="Search services..."
+            placeholder="Search amenities..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="service-manage__search-input"
+            className="amenities-manage__search-input"
           />
         </div>
         
-        <div className="service-manage__filter-group">
+        <div className="amenities-manage__filter-group">
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="service-manage__filter-select"
+            className="amenities-manage__filter-select"
           >
             {statusOptions.map(status => (
               <option key={status} value={status}>
@@ -299,11 +299,11 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
           </select>
         </div>
 
-        <div className="service-manage__filter-group">
+        <div className="amenities-manage__filter-group">
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="service-manage__filter-select"
+            className="amenities-manage__filter-select"
           >
             <option value="title-asc">Title A-Z</option>
             <option value="title-desc">Title Z-A</option>
@@ -313,18 +313,18 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
         </div>
       </div>
 
-      <div className="service-manage__table-section">
+      <div className="amenities-manage__table-section">
         <AdminTable
-          data={filteredAndSortedServices}
+          data={filteredAndSortedAmenities}
           columns={tableColumns}
-          onView={handleViewService}
-          onEdit={handleEditService}
-          onDelete={handleDeleteService}
-          emptyMessage="No services found matching your criteria"
+          onView={handleViewAmenity}
+          onEdit={handleEditAmenity}
+          onDelete={handleDeleteAmenity}
+          emptyMessage="No amenities found matching your criteria"
         />
       </div>
     </div>
   );
 };
 
-export default ServiceManage;
+export default AmenitiesManage;

@@ -15,7 +15,7 @@ import {
   ContactScreen,
   PromotionScreen,
 } from "./screens";
-import { AdminLayout, AdminLogin, AdminDashboard, StoresManage, StoreDetailManage, UserManage, UserDetailManage, BlogsManage, BlogDetailManage, BlogCreate, SubService, BannerManage, ServiceManage } from "./screens/admin";
+import { AdminLayout, AdminLogin, AdminDashboard, StoresManage, StoreDetailManage, UserManage, UserDetailManage, BlogsManage, BlogDetailManage, BlogCreate, SubService, BannerManage, ServiceManage, ClientManage, PayManage, ParkingManage, AmenitiesManage, ServiceAdd } from "./screens/admin";
 import { ThemeProvider, Header, AuthProvider, AdminRouteGuard } from "./components";
 import "./App.css";
 
@@ -98,6 +98,31 @@ function App() {
                 <Route path="introductions/service/manage" element={
                   <AdminRouteGuard>
                     <ServiceManage />
+                  </AdminRouteGuard>
+                } />
+                <Route path="introductions/client/manage" element={
+                  <AdminRouteGuard>
+                    <ClientManage />
+                  </AdminRouteGuard>
+                } />
+                <Route path="introductions/pay/manage" element={
+                  <AdminRouteGuard>
+                    <PayManage />
+                  </AdminRouteGuard>
+                } />
+                <Route path="introductions/parking/manage" element={
+                  <AdminRouteGuard>
+                    <ParkingManage />
+                  </AdminRouteGuard>
+                } />
+                <Route path="introductions/amenities/manage" element={
+                  <AdminRouteGuard>
+                    <AmenitiesManage />
+                  </AdminRouteGuard>
+                } />
+                <Route path="introductions/:serviceType/new" element={
+                  <AdminRouteGuard>
+                    <ServiceAdd />
                   </AdminRouteGuard>
                 } />
                 <Route path="banners" element={

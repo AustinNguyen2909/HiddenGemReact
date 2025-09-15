@@ -1,13 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Title, Text, Button, Input, AdminStatsCard, AdminTable } from '../../components';
-import './ServiceManage.css';
+import './ParkingManage.css';
 
-interface ServiceManageProps {
+interface ParkingManageProps {
   className?: string;
 }
 
-interface ServiceItem {
+interface ParkingItem {
   id: number;
   title: string;
   description: string;
@@ -16,68 +16,52 @@ interface ServiceItem {
   updatedAt: string;
 }
 
-const serviceItems: ServiceItem[] = [
+const parkingItems: ParkingItem[] = [
   {
     id: 1,
-    title: 'Espresso',
-    description: 'Single or double shot espresso',
-    isAvailable: true,
+    title: 'Valet Parking',
+    description: 'Full-service valet parking for customers',
+    isAvailable: false,
     createdAt: '2024-01-15T10:00:00Z',
     updatedAt: '2024-01-15T10:00:00Z'
   },
   {
     id: 2,
-    title: 'Latte',
-    description: 'Espresso with steamed milk',
-    isAvailable: true,
+    title: 'Self Parking',
+    description: 'Customer self-parking area with designated spots',
+    isAvailable: false,
     createdAt: '2024-01-15T10:00:00Z',
     updatedAt: '2024-01-15T10:00:00Z'
   },
   {
     id: 3,
-    title: 'Cappuccino',
-    description: 'Espresso with equal parts steamed milk and foam',
-    isAvailable: true,
+    title: 'Reserved Spots',
+    description: 'Pre-booked parking spaces for regular customers',
+    isAvailable: false,
     createdAt: '2024-01-15T10:00:00Z',
     updatedAt: '2024-01-15T10:00:00Z'
   },
   {
     id: 4,
-    title: 'Americano',
-    description: 'Espresso with hot water',
+    title: 'Street Parking',
+    description: 'Metered street parking available nearby',
     isAvailable: true,
     createdAt: '2024-01-15T10:00:00Z',
     updatedAt: '2024-01-15T10:00:00Z'
   },
   {
     id: 5,
-    title: 'Cold Brew',
-    description: 'Slow-steeped cold coffee',
-    isAvailable: false,
+    title: 'Bike Racks',
+    description: 'Secure bicycle parking for eco-friendly customers',
+    isAvailable: true,
     createdAt: '2024-01-15T10:00:00Z',
     updatedAt: '2024-01-15T10:00:00Z'
   },
   {
     id: 6,
-    title: 'Croissant',
-    description: 'Fresh baked buttery croissant',
+    title: 'Handicap Accessible',
+    description: 'Accessible parking spaces for customers with disabilities',
     isAvailable: true,
-    createdAt: '2024-01-15T10:00:00Z',
-    updatedAt: '2024-01-15T10:00:00Z'
-  },
-  {
-    id: 7,
-    title: 'Muffin',
-    description: 'Blueberry or chocolate chip muffin',
-    isAvailable: true,
-    createdAt: '2024-01-15T10:00:00Z',
-    updatedAt: '2024-01-15T10:00:00Z'
-  },
-  {
-    id: 8,
-    title: 'Sandwich',
-    description: 'Grilled chicken or turkey sandwich',
-    isAvailable: false,
     createdAt: '2024-01-15T10:00:00Z',
     updatedAt: '2024-01-15T10:00:00Z'
   }
@@ -85,7 +69,7 @@ const serviceItems: ServiceItem[] = [
 
 const statusOptions = ['All', 'Available', 'Unavailable'];
 
-const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
+const ParkingManage: React.FC<ParkingManageProps> = ({ className = '' }) => {
   const navigate = useNavigate();
   
   // Filter states
@@ -93,9 +77,9 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
   const [statusFilter, setStatusFilter] = useState('All');
   const [sortBy, setSortBy] = useState('title-asc');
   
-  // Filter and sort services
-  const filteredAndSortedServices = useMemo(() => {
-    let filtered = serviceItems.filter(item => {
+  // Filter and sort parking options
+  const filteredAndSortedParking = useMemo(() => {
+    let filtered = parkingItems.filter(item => {
       const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            item.description.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = statusFilter === 'All' || 
@@ -105,13 +89,13 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
       return matchesSearch && matchesStatus;
     });
 
-    // Sort services
+    // Sort parking options
     filtered.sort((a, b) => {
       const [sortKey, direction] = sortBy.split('-');
       const isAsc = direction === 'asc';
       
-      let aValue: any = a[sortKey as keyof ServiceItem];
-      let bValue: any = b[sortKey as keyof ServiceItem];
+      let aValue: any = a[sortKey as keyof ParkingItem];
+      let bValue: any = b[sortKey as keyof ParkingItem];
       
       if (sortKey === 'createdAt' || sortKey === 'updatedAt') {
         aValue = new Date(aValue).getTime();
@@ -136,56 +120,56 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
   // Statistics
   const statsData = [
     {
-      title: 'Total Services',
-      value: serviceItems.length.toString(),
-      icon: '☕',
-      trend: { value: 2, isPositive: true }
+      title: 'Total Options',
+      value: parkingItems.length.toString(),
+      icon: '🅿️',
+      trend: { value: 0, isPositive: true }
     },
     {
       title: 'Available',
-      value: serviceItems.filter(item => item.isAvailable).length.toString(),
+      value: parkingItems.filter(item => item.isAvailable).length.toString(),
       icon: '✅',
-      trend: { value: 1, isPositive: true }
+      trend: { value: 0, isPositive: true }
     },
     {
       title: 'Unavailable',
-      value: serviceItems.filter(item => !item.isAvailable).length.toString(),
+      value: parkingItems.filter(item => !item.isAvailable).length.toString(),
       icon: '❌',
       trend: { value: 0, isPositive: false }
     },
     {
       title: 'Recently Added',
-      value: serviceItems.filter(item => {
+      value: parkingItems.filter(item => {
         const daysDiff = (new Date().getTime() - new Date(item.createdAt).getTime()) / (1000 * 60 * 60 * 24);
         return daysDiff <= 7;
       }).length.toString(),
       icon: '🆕',
-      trend: { value: 1, isPositive: true }
+      trend: { value: 0, isPositive: true }
     }
   ];
 
-  const handleViewService = (service: ServiceItem) => {
-    navigate(`/admin/introductions/service/${service.id}`);
+  const handleViewParking = (parking: ParkingItem) => {
+    navigate(`/admin/introductions/parking/${parking.id}`);
   };
 
-  const handleEditService = (service: ServiceItem) => {
-    navigate(`/admin/introductions/service/${service.id}/edit`);
+  const handleEditParking = (parking: ParkingItem) => {
+    navigate(`/admin/introductions/parking/${parking.id}/edit`);
   };
 
-  const handleDeleteService = (service: ServiceItem) => {
-    if (window.confirm(`Are you sure you want to delete "${service.title}"?`)) {
-      console.log('Delete service:', service.id);
+  const handleDeleteParking = (parking: ParkingItem) => {
+    if (window.confirm(`Are you sure you want to delete "${parking.title}"?`)) {
+      console.log('Delete parking option:', parking.id);
       // In a real app, this would make an API call
     }
   };
 
-  const handleAddService = () => {
-    navigate('/admin/introductions/service/new');
+  const handleAddParking = () => {
+    navigate('/admin/introductions/parking/new');
   };
 
   const getStatusBadge = (isAvailable: boolean) => {
     return (
-      <span className={`service-manage__status-badge ${isAvailable ? 'service-manage__status-badge--available' : 'service-manage__status-badge--unavailable'}`}>
+      <span className={`parking-manage__status-badge ${isAvailable ? 'parking-manage__status-badge--available' : 'parking-manage__status-badge--unavailable'}`}>
         {isAvailable ? 'Available' : 'Unavailable'}
       </span>
     );
@@ -202,15 +186,15 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
   const tableColumns = [
     {
       key: 'title',
-      label: 'Service Title',
+      label: 'Parking Option',
       sortable: true,
       width: '300px',
-      render: (value: string, item: ServiceItem) => (
-        <div className="service-manage__service-info">
-          <Text variant="p" size="sm" color="primary" className="service-manage__service-title">
+      render: (value: string, item: ParkingItem) => (
+        <div className="parking-manage__parking-info">
+          <Text variant="p" size="sm" color="primary" className="parking-manage__parking-title">
             {value}
           </Text>
-          <Text variant="p" size="xs" color="muted" className="service-manage__service-description">
+          <Text variant="p" size="xs" color="muted" className="parking-manage__parking-description">
             {item.description}
           </Text>
         </div>
@@ -236,32 +220,32 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
   ];
 
   return (
-    <div className={`service-manage ${className}`}>
-      <div className="service-manage__header">
-        <div className="service-manage__header-left">
-          <Title level="h1" size="xl" color="primary" className="service-manage__title">
-            Service Management
+    <div className={`parking-manage ${className}`}>
+      <div className="parking-manage__header">
+        <div className="parking-manage__header-left">
+          <Title level="h1" size="xl" color="primary" className="parking-manage__title">
+            Parking Management
           </Title>
-          <Text variant="p" size="md" color="secondary" className="service-manage__subtitle">
-            Manage your coffee shop services and offerings
+          <Text variant="p" size="md" color="secondary" className="parking-manage__subtitle">
+            Manage parking facilities and options for customers
           </Text>
         </div>
-        <div className="service-manage__header-right">
+        <div className="parking-manage__header-right">
           <Button variant="secondary" size="md" onClick={() => navigate('/admin/introductions')}>
             Back
           </Button>
           <Button
             variant="primary"
             size="md"
-            onClick={handleAddService}
-            className="service-manage__add-btn"
+            onClick={handleAddParking}
+            className="parking-manage__add-btn"
           >
-            + Add Service
+            + Add Option
           </Button>
         </div>
       </div>
 
-      <div className="service-manage__stats">
+      <div className="parking-manage__stats">
         {statsData.map((stat, index) => (
           <AdminStatsCard
             key={index}
@@ -269,27 +253,27 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
             value={stat.value}
             icon={stat.icon}
             trend={stat.trend}
-            className="service-manage__stat-card"
+            className="parking-manage__stat-card"
           />
         ))}
       </div>
 
-      <div className="service-manage__filters">
-        <div className="service-manage__filter-group">
+      <div className="parking-manage__filters">
+        <div className="parking-manage__filter-group">
           <Input
             type="text"
-            placeholder="Search services..."
+            placeholder="Search parking options..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="service-manage__search-input"
+            className="parking-manage__search-input"
           />
         </div>
         
-        <div className="service-manage__filter-group">
+        <div className="parking-manage__filter-group">
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="service-manage__filter-select"
+            className="parking-manage__filter-select"
           >
             {statusOptions.map(status => (
               <option key={status} value={status}>
@@ -299,11 +283,11 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
           </select>
         </div>
 
-        <div className="service-manage__filter-group">
+        <div className="parking-manage__filter-group">
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="service-manage__filter-select"
+            className="parking-manage__filter-select"
           >
             <option value="title-asc">Title A-Z</option>
             <option value="title-desc">Title Z-A</option>
@@ -313,18 +297,18 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
         </div>
       </div>
 
-      <div className="service-manage__table-section">
+      <div className="parking-manage__table-section">
         <AdminTable
-          data={filteredAndSortedServices}
+          data={filteredAndSortedParking}
           columns={tableColumns}
-          onView={handleViewService}
-          onEdit={handleEditService}
-          onDelete={handleDeleteService}
-          emptyMessage="No services found matching your criteria"
+          onView={handleViewParking}
+          onEdit={handleEditParking}
+          onDelete={handleDeleteParking}
+          emptyMessage="No parking options found matching your criteria"
         />
       </div>
     </div>
   );
 };
 
-export default ServiceManage;
+export default ParkingManage;

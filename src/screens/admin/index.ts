@@ -11,3 +11,8 @@ export { default as BlogCreate } from './BlogCreate';
 export { default as SubService } from './SubService';
 export { default as BannerManage } from './BannerManage';
 export { default as ServiceManage } from './ServiceManage';
+export { default as ClientManage } from './ClientManage';
+export { default as PayManage } from './PayManage';
+export { default as ParkingManage } from './ParkingManage';
+export { default as AmenitiesManage } from './AmenitiesManage';
+export { default as ServiceAdd } from './ServiceAdd';

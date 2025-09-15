@@ -1,13 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Title, Text, Button, Input, AdminStatsCard, AdminTable } from '../../components';
-import './ServiceManage.css';
+import './ClientManage.css';
 
-interface ServiceManageProps {
+interface ClientManageProps {
   className?: string;
 }
 
-interface ServiceItem {
+interface ClientItem {
   id: number;
   title: string;
   description: string;
@@ -16,67 +16,51 @@ interface ServiceItem {
   updatedAt: string;
 }
 
-const serviceItems: ServiceItem[] = [
+const clientItems: ClientItem[] = [
   {
     id: 1,
-    title: 'Espresso',
-    description: 'Single or double shot espresso',
+    title: 'Loyalty Program',
+    description: 'Points-based rewards system for regular customers',
     isAvailable: true,
     createdAt: '2024-01-15T10:00:00Z',
     updatedAt: '2024-01-15T10:00:00Z'
   },
   {
     id: 2,
-    title: 'Latte',
-    description: 'Espresso with steamed milk',
+    title: 'Reservations',
+    description: 'Table booking system for customers',
     isAvailable: true,
     createdAt: '2024-01-15T10:00:00Z',
     updatedAt: '2024-01-15T10:00:00Z'
   },
   {
     id: 3,
-    title: 'Cappuccino',
-    description: 'Espresso with equal parts steamed milk and foam',
+    title: 'Feedback System',
+    description: 'Customer review and feedback collection',
     isAvailable: true,
     createdAt: '2024-01-15T10:00:00Z',
     updatedAt: '2024-01-15T10:00:00Z'
   },
   {
     id: 4,
-    title: 'Americano',
-    description: 'Espresso with hot water',
-    isAvailable: true,
-    createdAt: '2024-01-15T10:00:00Z',
-    updatedAt: '2024-01-15T10:00:00Z'
-  },
-  {
-    id: 5,
-    title: 'Cold Brew',
-    description: 'Slow-steeped cold coffee',
+    title: 'Notifications',
+    description: 'SMS and email alerts for customers',
     isAvailable: false,
     createdAt: '2024-01-15T10:00:00Z',
     updatedAt: '2024-01-15T10:00:00Z'
   },
   {
+    id: 5,
+    title: 'Customer Support',
+    description: 'Live chat and phone support for customers',
+    isAvailable: true,
+    createdAt: '2024-01-15T10:00:00Z',
+    updatedAt: '2024-01-15T10:00:00Z'
+  },
+  {
     id: 6,
-    title: 'Croissant',
-    description: 'Fresh baked buttery croissant',
-    isAvailable: true,
-    createdAt: '2024-01-15T10:00:00Z',
-    updatedAt: '2024-01-15T10:00:00Z'
-  },
-  {
-    id: 7,
-    title: 'Muffin',
-    description: 'Blueberry or chocolate chip muffin',
-    isAvailable: true,
-    createdAt: '2024-01-15T10:00:00Z',
-    updatedAt: '2024-01-15T10:00:00Z'
-  },
-  {
-    id: 8,
-    title: 'Sandwich',
-    description: 'Grilled chicken or turkey sandwich',
+    title: 'Membership Benefits',
+    description: 'Exclusive perks and discounts for members',
     isAvailable: false,
     createdAt: '2024-01-15T10:00:00Z',
     updatedAt: '2024-01-15T10:00:00Z'
@@ -85,7 +69,7 @@ const serviceItems: ServiceItem[] = [
 
 const statusOptions = ['All', 'Available', 'Unavailable'];
 
-const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
+const ClientManage: React.FC<ClientManageProps> = ({ className = '' }) => {
   const navigate = useNavigate();
   
   // Filter states
@@ -93,9 +77,9 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
   const [statusFilter, setStatusFilter] = useState('All');
   const [sortBy, setSortBy] = useState('title-asc');
   
-  // Filter and sort services
-  const filteredAndSortedServices = useMemo(() => {
-    let filtered = serviceItems.filter(item => {
+  // Filter and sort clients
+  const filteredAndSortedClients = useMemo(() => {
+    let filtered = clientItems.filter(item => {
       const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            item.description.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = statusFilter === 'All' || 
@@ -105,13 +89,13 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
       return matchesSearch && matchesStatus;
     });
 
-    // Sort services
+    // Sort clients
     filtered.sort((a, b) => {
       const [sortKey, direction] = sortBy.split('-');
       const isAsc = direction === 'asc';
       
-      let aValue: any = a[sortKey as keyof ServiceItem];
-      let bValue: any = b[sortKey as keyof ServiceItem];
+      let aValue: any = a[sortKey as keyof ClientItem];
+      let bValue: any = b[sortKey as keyof ClientItem];
       
       if (sortKey === 'createdAt' || sortKey === 'updatedAt') {
         aValue = new Date(aValue).getTime();
@@ -136,56 +120,56 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
   // Statistics
   const statsData = [
     {
-      title: 'Total Services',
-      value: serviceItems.length.toString(),
-      icon: '☕',
-      trend: { value: 2, isPositive: true }
+      title: 'Total Features',
+      value: clientItems.length.toString(),
+      icon: '👥',
+      trend: { value: 1, isPositive: true }
     },
     {
       title: 'Available',
-      value: serviceItems.filter(item => item.isAvailable).length.toString(),
+      value: clientItems.filter(item => item.isAvailable).length.toString(),
       icon: '✅',
       trend: { value: 1, isPositive: true }
     },
     {
       title: 'Unavailable',
-      value: serviceItems.filter(item => !item.isAvailable).length.toString(),
+      value: clientItems.filter(item => !item.isAvailable).length.toString(),
       icon: '❌',
       trend: { value: 0, isPositive: false }
     },
     {
       title: 'Recently Added',
-      value: serviceItems.filter(item => {
+      value: clientItems.filter(item => {
         const daysDiff = (new Date().getTime() - new Date(item.createdAt).getTime()) / (1000 * 60 * 60 * 24);
         return daysDiff <= 7;
       }).length.toString(),
       icon: '🆕',
-      trend: { value: 1, isPositive: true }
+      trend: { value: 2, isPositive: true }
     }
   ];
 
-  const handleViewService = (service: ServiceItem) => {
-    navigate(`/admin/introductions/service/${service.id}`);
+  const handleViewClient = (client: ClientItem) => {
+    navigate(`/admin/introductions/client/${client.id}`);
   };
 
-  const handleEditService = (service: ServiceItem) => {
-    navigate(`/admin/introductions/service/${service.id}/edit`);
+  const handleEditClient = (client: ClientItem) => {
+    navigate(`/admin/introductions/client/${client.id}/edit`);
   };
 
-  const handleDeleteService = (service: ServiceItem) => {
-    if (window.confirm(`Are you sure you want to delete "${service.title}"?`)) {
-      console.log('Delete service:', service.id);
+  const handleDeleteClient = (client: ClientItem) => {
+    if (window.confirm(`Are you sure you want to delete "${client.title}"?`)) {
+      console.log('Delete client:', client.id);
       // In a real app, this would make an API call
     }
   };
 
-  const handleAddService = () => {
-    navigate('/admin/introductions/service/new');
+  const handleAddClient = () => {
+    navigate('/admin/introductions/client/new');
   };
 
   const getStatusBadge = (isAvailable: boolean) => {
     return (
-      <span className={`service-manage__status-badge ${isAvailable ? 'service-manage__status-badge--available' : 'service-manage__status-badge--unavailable'}`}>
+      <span className={`client-manage__status-badge ${isAvailable ? 'client-manage__status-badge--available' : 'client-manage__status-badge--unavailable'}`}>
         {isAvailable ? 'Available' : 'Unavailable'}
       </span>
     );
@@ -202,15 +186,15 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
   const tableColumns = [
     {
       key: 'title',
-      label: 'Service Title',
+      label: 'Feature Title',
       sortable: true,
       width: '300px',
-      render: (value: string, item: ServiceItem) => (
-        <div className="service-manage__service-info">
-          <Text variant="p" size="sm" color="primary" className="service-manage__service-title">
+      render: (value: string, item: ClientItem) => (
+        <div className="client-manage__client-info">
+          <Text variant="p" size="sm" color="primary" className="client-manage__client-title">
             {value}
           </Text>
-          <Text variant="p" size="xs" color="muted" className="service-manage__service-description">
+          <Text variant="p" size="xs" color="muted" className="client-manage__client-description">
             {item.description}
           </Text>
         </div>
@@ -236,32 +220,32 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
   ];
 
   return (
-    <div className={`service-manage ${className}`}>
-      <div className="service-manage__header">
-        <div className="service-manage__header-left">
-          <Title level="h1" size="xl" color="primary" className="service-manage__title">
-            Service Management
+    <div className={`client-manage ${className}`}>
+      <div className="client-manage__header">
+        <div className="client-manage__header-left">
+          <Title level="h1" size="xl" color="primary" className="client-manage__title">
+            Client Management
           </Title>
-          <Text variant="p" size="md" color="secondary" className="service-manage__subtitle">
-            Manage your coffee shop services and offerings
+          <Text variant="p" size="md" color="secondary" className="client-manage__subtitle">
+            Manage customer service and client management features
           </Text>
         </div>
-        <div className="service-manage__header-right">
+        <div className="client-manage__header-right">
           <Button variant="secondary" size="md" onClick={() => navigate('/admin/introductions')}>
             Back
           </Button>
           <Button
             variant="primary"
             size="md"
-            onClick={handleAddService}
-            className="service-manage__add-btn"
+            onClick={handleAddClient}
+            className="client-manage__add-btn"
           >
-            + Add Service
+            + Add Feature
           </Button>
         </div>
       </div>
 
-      <div className="service-manage__stats">
+      <div className="client-manage__stats">
         {statsData.map((stat, index) => (
           <AdminStatsCard
             key={index}
@@ -269,27 +253,27 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
             value={stat.value}
             icon={stat.icon}
             trend={stat.trend}
-            className="service-manage__stat-card"
+            className="client-manage__stat-card"
           />
         ))}
       </div>
 
-      <div className="service-manage__filters">
-        <div className="service-manage__filter-group">
+      <div className="client-manage__filters">
+        <div className="client-manage__filter-group">
           <Input
             type="text"
-            placeholder="Search services..."
+            placeholder="Search features..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="service-manage__search-input"
+            className="client-manage__search-input"
           />
         </div>
         
-        <div className="service-manage__filter-group">
+        <div className="client-manage__filter-group">
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="service-manage__filter-select"
+            className="client-manage__filter-select"
           >
             {statusOptions.map(status => (
               <option key={status} value={status}>
@@ -299,11 +283,11 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
           </select>
         </div>
 
-        <div className="service-manage__filter-group">
+        <div className="client-manage__filter-group">
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="service-manage__filter-select"
+            className="client-manage__filter-select"
           >
             <option value="title-asc">Title A-Z</option>
             <option value="title-desc">Title Z-A</option>
@@ -313,18 +297,18 @@ const ServiceManage: React.FC<ServiceManageProps> = ({ className = '' }) => {
         </div>
       </div>
 
-      <div className="service-manage__table-section">
+      <div className="client-manage__table-section">
         <AdminTable
-          data={filteredAndSortedServices}
+          data={filteredAndSortedClients}
           columns={tableColumns}
-          onView={handleViewService}
-          onEdit={handleEditService}
-          onDelete={handleDeleteService}
-          emptyMessage="No services found matching your criteria"
+          onView={handleViewClient}
+          onEdit={handleEditClient}
+          onDelete={handleDeleteClient}
+          emptyMessage="No client features found matching your criteria"
         />
       </div>
     </div>
   );
 };
 
-export default ServiceManage;
+export default ClientManage;
