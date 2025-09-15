@@ -27,7 +27,7 @@ const menuItems: MenuItem[] = [
     label: 'Introductions',
     icon: '📝',
     children: [
-      { id: 'introductions-overview', label: 'Overview', path: '/admin/introductions' },
+      { id: 'introductions-overview', label: 'Overview', path: '/admin/introductions/overview' },
       { id: 'introductions-about', label: 'About Us', path: '/admin/introductions/about' },
       { id: 'introductions-team', label: 'Our Team', path: '/admin/introductions/team' },
       { id: 'introductions-story', label: 'Our Story', path: '/admin/introductions/story' }
@@ -38,7 +38,7 @@ const menuItems: MenuItem[] = [
     label: 'Store',
     icon: '🏪',
     children: [
-      { id: 'store-overview', label: 'Store Overview', path: '/admin/store' },
+      { id: 'store-overview', label: 'Store Overview', path: '/admin/store/overview' },
       { id: 'store-products', label: 'Products', path: '/admin/store/products' },
       { id: 'store-orders', label: 'Orders', path: '/admin/store/orders' },
       { id: 'store-inventory', label: 'Inventory', path: '/admin/store/inventory' },

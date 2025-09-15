@@ -15,7 +15,7 @@ import {
   ContactScreen,
   PromotionScreen,
 } from "./screens";
-import { AdminLayout, AdminLogin, AdminDashboard, StoresManage, StoreDetailManage, UserManage, UserDetailManage, BlogsManage, BlogDetailManage, BlogCreate } from "./screens/admin";
+import { AdminLayout, AdminLogin, AdminDashboard, StoresManage, StoreDetailManage, UserManage, UserDetailManage, BlogsManage, BlogDetailManage, BlogCreate, SubService } from "./screens/admin";
 import { ThemeProvider, Header, AuthProvider, AdminRouteGuard } from "./components";
 import "./App.css";
 
@@ -88,6 +88,11 @@ function App() {
                 <Route path="blogs/:id" element={
                   <AdminRouteGuard>
                     <BlogDetailManage />
+                  </AdminRouteGuard>
+                } />
+                <Route path="introductions/:serviceId" element={
+                  <AdminRouteGuard>
+                    <SubService />
                   </AdminRouteGuard>
                 } />
                 <Route path="" element={<AdminLogin />} />
