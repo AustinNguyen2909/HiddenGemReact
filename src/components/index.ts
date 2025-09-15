@@ -18,6 +18,9 @@ export { default as AdminHeader } from './AdminHeader';
 export { default as AdminStatsCard } from './AdminStatsCard';
 export { default as AdminTable } from './AdminTable';
 
+// Shop Components
+export { default as ShopSidebar } from './ShopSidebar';
+
 // Shared UI Components
 export { default as ProductCard } from './ProductCard';
 export { default as InfoCard } from './InfoCard';
