@@ -8,7 +8,7 @@ interface AdminRouteGuardProps {
 
 const AdminRouteGuard: React.FC<AdminRouteGuardProps> = ({ children }) => {
   const { isAuthenticated, user } = useAuth();
-  const isAdmin = isAuthenticated && user?.role === 'admin';
+  const isAdmin = isAuthenticated && (user?.role === 'admin' || user?.role === 'shop');
 
   if (!isAdmin) {
     return <Navigate to="/admin/login" replace />;

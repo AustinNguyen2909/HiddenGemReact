@@ -43,7 +43,8 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ className = '' }) => {
 
     try {
       const res = await login({ email: formData.email, password: formData.password });
-      if (!res?.user || res.user.role !== 'admin') {
+      console.log(res)
+      if (!res?.user || res.user.role === 'customer') {
         setUser(null);
         setLocalError('You do not have admin permissions.');
         return;
@@ -135,18 +136,6 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ className = '' }) => {
               >
                 {loading ? 'Signing In...' : 'Sign In'}
               </Button>
-            </div>
-
-            <div className="admin-login__demo-credentials">
-              <Text variant="p" size="xs" color="secondary" className="admin-login__demo-title">
-                Demo Credentials:
-              </Text>
-              <Text variant="p" size="xs" color="secondary" className="admin-login__demo-text">
-                Email: admin@hiddengems.com
-              </Text>
-              <Text variant="p" size="xs" color="secondary" className="admin-login__demo-text">
-                Password: admin123
-              </Text>
             </div>
           </form>
 

@@ -27,10 +27,11 @@ const menuItems: MenuItem[] = [
     label: 'Introductions',
     icon: '📝',
     children: [
-      { id: 'introductions-overview', label: 'Overview', path: '/admin/introductions/overview' },
-      { id: 'introductions-about', label: 'About Us', path: '/admin/introductions/about' },
-      { id: 'introductions-team', label: 'Our Team', path: '/admin/introductions/team' },
-      { id: 'introductions-story', label: 'Our Story', path: '/admin/introductions/story' }
+      { id: 'introductions-service', label: 'Service', path: '/admin/introductions/service' },
+      { id: 'introductions-client', label: 'Client', path: '/admin/introductions/client' },
+      { id: 'introductions-pay', label: 'Pay', path: '/admin/introductions/pay' },
+      { id: 'introductions-parking', label: 'Parking', path: '/admin/introductions/parking' },
+      { id: 'introductions-amenities', label: 'Amenities', path: '/admin/introductions/amenities' }
     ]
   },
   {
