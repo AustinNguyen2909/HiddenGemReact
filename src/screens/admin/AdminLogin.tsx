@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Title, Text, Button, Input } from '../../components';
 import './AdminLogin.css';
+import { useAuth } from '../../components/AuthProvider';
 
 interface AdminLoginProps {
   className?: string;
@@ -14,12 +15,18 @@ interface LoginFormData {
 
 const AdminLogin: React.FC<AdminLoginProps> = ({ className = '' }) => {
   const navigate = useNavigate();
+  const { login, loading, error, setUser, isAuthenticated, user } = useAuth();
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: ''
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [localError, setLocalError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isAuthenticated && user?.role === 'admin') {
+      navigate('/admin/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -27,38 +34,23 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ className = '' }) => {
       ...prev,
       [name]: value
     }));
-    // Clear error when user starts typing
-    if (error) setError(null);
+    if (localError) setLocalError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError(null);
+    setLocalError(null);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Simple validation for demo purposes
-      if (formData.email === 'admin@hiddengems.com' && formData.password === 'admin123') {
-        // Store admin session
-        localStorage.setItem('adminSession', 'true');
-        localStorage.setItem('adminUser', JSON.stringify({
-          email: formData.email,
-          name: 'Admin User',
-          role: 'admin'
-        }));
-        
-        // Navigate to admin dashboard
-        navigate('/admin/dashboard');
-      } else {
-        setError('Invalid email or password. Please try again.');
+      const res = await login({ email: formData.email, password: formData.password });
+      if (!res?.user || res.user.role !== 'admin') {
+        setUser(null);
+        setLocalError('You do not have admin permissions.');
+        return;
       }
-    } catch (err) {
-      setError('An error occurred. Please try again.');
-    } finally {
-      setIsLoading(false);
+      navigate('/admin/dashboard', { replace: true });
+    } catch (err: any) {
+      setLocalError(err?.data?.message || err?.message || 'Login failed');
     }
   };
 
@@ -124,10 +116,10 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ className = '' }) => {
               </div>
             </div>
 
-            {error && (
+            {(localError || error) && (
               <div className="admin-login__error">
                 <Text variant="p" size="sm" color="primary">
-                  {error}
+                  {localError || error}
                 </Text>
               </div>
             )}
@@ -137,11 +129,11 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ className = '' }) => {
                 type="submit"
                 variant="primary"
                 size="lg"
-                disabled={isLoading}
+                disabled={loading}
                 fullWidth
                 className="admin-login__submit"
               >
-                {isLoading ? 'Signing In...' : 'Sign In'}
+                {loading ? 'Signing In...' : 'Sign In'}
               </Button>
             </div>
 

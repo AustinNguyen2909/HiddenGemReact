@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Text } from '../';
 import './index.css';
+import { useAuth } from '../AuthProvider';
 
 interface AdminHeaderProps {
   className?: string;
@@ -15,10 +16,10 @@ interface BreadcrumbItem {
 const AdminHeader: React.FC<AdminHeaderProps> = ({ className = '' }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
-  // Get admin user from localStorage
-  const adminUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
+  const adminName = user?.username || user?.email || 'Admin User';
 
   // Generate breadcrumbs based on current path
   const generateBreadcrumbs = (): BreadcrumbItem[] => {
@@ -50,8 +51,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ className = '' }) => {
   const breadcrumbs = generateBreadcrumbs();
 
   const handleLogout = () => {
-    localStorage.removeItem('adminSession');
-    localStorage.removeItem('adminUser');
+    logout();
     navigate('/admin/login');
   };
 
@@ -97,12 +97,12 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ className = '' }) => {
         <div className="admin-header__user-info">
           <div className="admin-header__user-avatar">
             <Text variant="span" size="md" color="primary" className="admin-header__user-avatar-text">
-              {adminUser.name ? adminUser.name.charAt(0).toUpperCase() : 'A'}
+              {adminName ? adminName.charAt(0).toUpperCase() : 'A'}
             </Text>
           </div>
           <div className="admin-header__user-details">
             <Text variant="p" size="sm" color="primary" className="admin-header__user-name">
-              {adminUser.name || 'Admin User'}
+              {adminName}
             </Text>
             <Text variant="p" size="xs" color="secondary" className="admin-header__user-role">
               Administrator

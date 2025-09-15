@@ -1,14 +1,16 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
+import { useAuth } from '../AuthProvider';
 
 interface AdminRouteGuardProps {
   children: React.ReactNode;
 }
 
 const AdminRouteGuard: React.FC<AdminRouteGuardProps> = ({ children }) => {
-  const isAdminLoggedIn = localStorage.getItem('adminSession') === 'true';
+  const { isAuthenticated, user } = useAuth();
+  const isAdmin = isAuthenticated && user?.role === 'admin';
 
-  if (!isAdminLoggedIn) {
+  if (!isAdmin) {
     return <Navigate to="/admin/login" replace />;
   }
 
