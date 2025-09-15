@@ -1,6 +1,6 @@
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Title, Text, Button } from '../../components';
+import { useNavigate } from 'react-router-dom';
+import { Title, Text, Button, AdminStatsCard } from '../../components';
 import './SubService.css';
 
 interface SubServiceProps {
@@ -13,17 +13,10 @@ interface ServiceType {
   description: string;
   icon: string;
   color: string;
-  items: ServiceItem[];
+  itemCount: number;
+  activeCount: number;
   isEnabled: boolean;
-}
-
-interface ServiceItem {
-  id: string;
-  name: string;
-  description: string;
-  price?: string;
-  duration?: string;
-  isAvailable: boolean;
+  lastUpdated: string;
 }
 
 const serviceTypes: ServiceType[] = [
@@ -33,14 +26,10 @@ const serviceTypes: ServiceType[] = [
     description: 'Manage your coffee shop services and offerings',
     icon: '☕',
     color: '#8B4513',
+    itemCount: 12,
+    activeCount: 8,
     isEnabled: true,
-    items: [
-      { id: 'espresso', name: 'Espresso', description: 'Single or double shot espresso', price: '$2.50', duration: '2 min', isAvailable: true },
-      { id: 'latte', name: 'Latte', description: 'Espresso with steamed milk', price: '$4.00', duration: '3 min', isAvailable: true },
-      { id: 'cappuccino', name: 'Cappuccino', description: 'Espresso with equal parts steamed milk and foam', price: '$3.50', duration: '3 min', isAvailable: true },
-      { id: 'americano', name: 'Americano', description: 'Espresso with hot water', price: '$2.75', duration: '2 min', isAvailable: true },
-      { id: 'cold-brew', name: 'Cold Brew', description: 'Slow-steeped cold coffee', price: '$3.25', duration: '1 min', isAvailable: false }
-    ]
+    lastUpdated: '2024-01-15T10:00:00Z'
   },
   {
     id: 'client',
@@ -48,13 +37,10 @@ const serviceTypes: ServiceType[] = [
     description: 'Customer service and client management features',
     icon: '👥',
     color: '#4A90E2',
+    itemCount: 6,
+    activeCount: 4,
     isEnabled: true,
-    items: [
-      { id: 'loyalty-program', name: 'Loyalty Program', description: 'Points-based rewards system', isAvailable: true },
-      { id: 'reservations', name: 'Reservations', description: 'Table booking system', isAvailable: true },
-      { id: 'feedback', name: 'Feedback System', description: 'Customer review collection', isAvailable: true },
-      { id: 'notifications', name: 'Notifications', description: 'SMS and email alerts', isAvailable: false }
-    ]
+    lastUpdated: '2024-01-12T14:30:00Z'
   },
   {
     id: 'pay',
@@ -62,13 +48,10 @@ const serviceTypes: ServiceType[] = [
     description: 'Payment processing and billing options',
     icon: '💳',
     color: '#50C878',
+    itemCount: 8,
+    activeCount: 6,
     isEnabled: true,
-    items: [
-      { id: 'cash', name: 'Cash Payment', description: 'Traditional cash transactions', isAvailable: true },
-      { id: 'card', name: 'Card Payment', description: 'Credit/debit card processing', isAvailable: true },
-      { id: 'mobile', name: 'Mobile Payment', description: 'Apple Pay, Google Pay', isAvailable: true },
-      { id: 'crypto', name: 'Cryptocurrency', description: 'Bitcoin and other crypto payments', isAvailable: false }
-    ]
+    lastUpdated: '2024-01-10T09:15:00Z'
   },
   {
     id: 'parking',
@@ -76,12 +59,10 @@ const serviceTypes: ServiceType[] = [
     description: 'Parking facilities and management',
     icon: '🅿️',
     color: '#FF6B35',
+    itemCount: 4,
+    activeCount: 0,
     isEnabled: false,
-    items: [
-      { id: 'valet', name: 'Valet Parking', description: 'Full-service valet parking', price: '$5.00', isAvailable: false },
-      { id: 'self-park', name: 'Self Parking', description: 'Customer self-parking area', isAvailable: false },
-      { id: 'reserved', name: 'Reserved Spots', description: 'Pre-booked parking spaces', isAvailable: false }
-    ]
+    lastUpdated: '2024-01-08T16:45:00Z'
   },
   {
     id: 'amenities',
@@ -89,32 +70,72 @@ const serviceTypes: ServiceType[] = [
     description: 'Additional facilities and services',
     icon: '🏪',
     color: '#9B59B6',
+    itemCount: 10,
+    activeCount: 7,
     isEnabled: true,
-    items: [
-      { id: 'wifi', name: 'Free WiFi', description: 'Complimentary internet access', isAvailable: true },
-      { id: 'outdoor', name: 'Outdoor Seating', description: 'Patio and outdoor tables', isAvailable: true },
-      { id: 'meeting', name: 'Meeting Room', description: 'Private space for meetings', price: '$20/hour', isAvailable: true },
-      { id: 'pet-friendly', name: 'Pet Friendly', description: 'Welcome to bring pets', isAvailable: false }
-    ]
+    lastUpdated: '2024-01-05T11:20:00Z'
   }
 ];
 
 const SubService: React.FC<SubServiceProps> = ({ className = '' }) => {
   const navigate = useNavigate();
 
-  const handleServiceToggle = (serviceId: string) => {
-    // Toggle service enabled/disabled state
-    console.log('Toggle service:', serviceId);
-  };
-
-  const handleItemToggle = (serviceId: string, itemId: string) => {
-    // Toggle individual service item availability
-    console.log('Toggle item:', serviceId, itemId);
+  const handleManageService = (serviceId: string) => {
+    navigate(`/admin/introductions/${serviceId}/manage`);
   };
 
   const handleEditService = (serviceId: string) => {
     navigate(`/admin/introductions/${serviceId}/edit`);
   };
+
+  const handleToggleService = (serviceId: string) => {
+    console.log('Toggle service:', serviceId);
+    // In a real app, this would make an API call
+  };
+
+  const getStatusBadge = (isEnabled: boolean) => {
+    return (
+      <span className={`sub-service__status-badge ${isEnabled ? 'sub-service__status-badge--active' : 'sub-service__status-badge--inactive'}`}>
+        {isEnabled ? 'Active' : 'Inactive'}
+      </span>
+    );
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  // Statistics
+  const statsData = [
+    {
+      title: 'Total Services',
+      value: serviceTypes.length.toString(),
+      icon: '📋',
+      trend: { value: 2, isPositive: true }
+    },
+    {
+      title: 'Active Services',
+      value: serviceTypes.filter(s => s.isEnabled).length.toString(),
+      icon: '✅',
+      trend: { value: 1, isPositive: true }
+    },
+    {
+      title: 'Total Items',
+      value: serviceTypes.reduce((sum, s) => sum + s.itemCount, 0).toString(),
+      icon: '📝',
+      trend: { value: 5, isPositive: true }
+    },
+    {
+      title: 'Active Items',
+      value: serviceTypes.reduce((sum, s) => sum + s.activeCount, 0).toString(),
+      icon: '🎯',
+      trend: { value: 3, isPositive: true }
+    }
+  ];
 
   return (
     <div className={`sub-service ${className}`}>
@@ -137,6 +158,19 @@ const SubService: React.FC<SubServiceProps> = ({ className = '' }) => {
         </div>
       </div>
 
+      <div className="sub-service__stats">
+        {statsData.map((stat, index) => (
+          <AdminStatsCard
+            key={index}
+            title={stat.title}
+            value={stat.value}
+            icon={stat.icon}
+            trend={stat.trend}
+            className="sub-service__stat-card"
+          />
+        ))}
+      </div>
+
       <div className="sub-service__content">
         <div className="sub-service__grid">
           {serviceTypes.map((serviceType) => (
@@ -146,72 +180,57 @@ const SubService: React.FC<SubServiceProps> = ({ className = '' }) => {
                   {serviceType.icon}
                 </div>
                 <div className="sub-service__card-info">
-                  <Title level="h3" size="md" color="primary" className="sub-service__card-title">
-                    {serviceType.title}
-                  </Title>
+                  <div className="sub-service__card-title-row">
+                    <Title level="h3" size="md" color="primary" className="sub-service__card-title">
+                      {serviceType.title}
+                    </Title>
+                    {getStatusBadge(serviceType.isEnabled)}
+                  </div>
                   <Text variant="p" size="sm" color="secondary" className="sub-service__card-description">
                     {serviceType.description}
                   </Text>
+                  <div className="sub-service__card-meta">
+                    <Text variant="span" size="xs" color="muted">
+                      {serviceType.activeCount}/{serviceType.itemCount} items active
+                    </Text>
+                    <Text variant="span" size="xs" color="muted">
+                      • Updated {formatDate(serviceType.lastUpdated)}
+                    </Text>
+                  </div>
                 </div>
-                <div className="sub-service__card-actions">
+              </div>
+
+              <div className="sub-service__card-actions">
+                <div className="sub-service__card-toggle">
                   <label className="sub-service__toggle">
                     <input
                       type="checkbox"
                       checked={serviceType.isEnabled}
-                      onChange={() => handleServiceToggle(serviceType.id)}
+                      onChange={() => handleToggleService(serviceType.id)}
                     />
                     <span className="sub-service__toggle-slider"></span>
                   </label>
+                  <Text variant="span" size="xs" color="secondary">
+                    {serviceType.isEnabled ? 'Enabled' : 'Disabled'}
+                  </Text>
+                </div>
+                <div className="sub-service__card-buttons">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleManageService(serviceType.id)}
+                    className="sub-service__manage-btn"
+                  >
+                    Manage
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleEditService(serviceType.id)}
-                    disabled={!serviceType.isEnabled}
+                    className="sub-service__edit-btn"
                   >
                     Edit
                   </Button>
-                </div>
-              </div>
-
-              <div className="sub-service__card-content">
-                <div className="sub-service__items">
-                  {serviceType.items.map((item) => (
-                    <div key={item.id} className={`sub-service__item ${!item.isAvailable ? 'sub-service__item--unavailable' : ''}`}>
-                      <div className="sub-service__item-main">
-                        <div className="sub-service__item-info">
-                          <Text variant="p" size="sm" color="primary" className="sub-service__item-name">
-                            {item.name}
-                          </Text>
-                          <Text variant="p" size="xs" color="secondary" className="sub-service__item-description">
-                            {item.description}
-                          </Text>
-                          {(item.price || item.duration) && (
-                            <div className="sub-service__item-meta">
-                              {item.price && (
-                                <Text variant="span" size="xs" color="primary" className="sub-service__item-price">
-                                  {item.price}
-                                </Text>
-                              )}
-                              {item.duration && (
-                                <Text variant="span" size="xs" color="muted" className="sub-service__item-duration">
-                                  {item.duration}
-                                </Text>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                        <label className="sub-service__item-toggle">
-                          <input
-                            type="checkbox"
-                            checked={item.isAvailable}
-                            onChange={() => handleItemToggle(serviceType.id, item.id)}
-                            disabled={!serviceType.isEnabled}
-                          />
-                          <span className="sub-service__item-toggle-slider"></span>
-                        </label>
-                      </div>
-                    </div>
-                  ))}
                 </div>
               </div>
             </div>
