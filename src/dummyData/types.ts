@@ -211,3 +211,32 @@ export interface AdminBlogFilter {
   sortBy: string;
   sortDirection: 'asc' | 'desc';
 }
+
+export interface Banner {
+  id: number;
+  title: string;
+  description: string;
+  image: string;
+  link: string;
+  position: 'hero' | 'banner' | 'sidebar' | 'popup' | 'footer';
+  status: 'active' | 'inactive' | 'draft' | 'archived';
+  priority: number;
+  startDate: string;
+  endDate: string;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
+  clicks: number;
+  impressions: number;
+}
+
+export type BannerStatus = 'active' | 'inactive' | 'draft' | 'archived';
+export type BannerPosition = 'hero' | 'banner' | 'sidebar' | 'popup' | 'footer';
+
+export interface AdminBannerFilter {
+  search: string;
+  status: BannerStatus | 'all';
+  position: BannerPosition | 'all';
+  sortBy: string;
+  sortDirection: 'asc' | 'desc';
+}

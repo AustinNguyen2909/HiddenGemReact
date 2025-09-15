@@ -12,3 +12,4 @@ export * from './aboutData';
 export * from './blogData';
 export * from './contactData';
 export * from './promotionData';
+export * from './bannerData';

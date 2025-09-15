@@ -9,3 +9,4 @@ export { default as BlogsManage } from './BlogsManage';
 export { default as BlogDetailManage } from './BlogDetailManage';
 export { default as BlogCreate } from './BlogCreate';
 export { default as SubService } from './SubService';
+export { default as BannerManage } from './BannerManage';
