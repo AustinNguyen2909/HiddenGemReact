@@ -24,3 +24,6 @@ export { default as ReviewManage } from './ReviewManage';
 export { default as ReviewView } from './ReviewView';
 export { default as PromotionManage } from './PromotionManage';
 export { default as PromotionAdd } from './PromotionAdd';
+export { default as AdminProfile } from './AdminProfile';
+export { default as ShopProfile } from './ShopProfile';
+export { default as StoreProfileEdit } from './StoreProfileEdit';

@@ -126,7 +126,14 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ className = '' }) => {
                 className="admin-header__user-menu-item"
                 onClick={() => {
                   setShowUserMenu(false);
-                  navigate('/admin/profile');
+                  if (user?.role === 'admin') {
+                    navigate('/admin/profile');
+                    return;
+                  }
+                  if (user?.role === 'shop') {
+                    navigate('/admin/profile-shop');
+                    return;
+                  }
                 }}
               >
                 <Text variant="span" size="sm" color="primary">

@@ -15,7 +15,9 @@ import {
   ContactScreen,
   PromotionScreen,
 } from "./screens";
-import { AdminLayout, AdminLogin, AdminDashboard, StoresManage, StoreDetailManage, UserManage, UserDetailManage, BlogsManage, BlogDetailManage, BlogCreate, SubService, BannerManage, ServiceManage, ClientManage, PayManage, ParkingManage, AmenitiesManage, ServiceAdd, MenuManage, MenuAdd, CategoryManage, CategoryAdd, ReviewManage, ReviewView, PromotionManage, PromotionAdd } from "./screens/admin";
+import {
+  AdminLayout, AdminLogin, AdminDashboard, StoresManage, StoreDetailManage, UserManage, UserDetailManage, BlogsManage, BlogDetailManage, BlogCreate, SubService, BannerManage, ServiceManage, ClientManage, PayManage, ParkingManage, AmenitiesManage, ServiceAdd, MenuManage, MenuAdd, CategoryManage, CategoryAdd, ReviewManage, ReviewView, PromotionManage, PromotionAdd, AdminProfile, ShopProfile, StoreProfileEdit
+} from "./screens/admin";
 import { ThemeProvider, Header, AuthProvider, AdminRouteGuard } from "./components";
 import "./App.css";
 
@@ -46,7 +48,7 @@ function App() {
                   </Routes>
                 </>
               } />
-              
+
               {/* Admin Routes */}
               <Route path="/admin" element={<AdminLayout />}>
                 <Route path="login" element={<AdminLogin />} />
@@ -163,6 +165,21 @@ function App() {
                 <Route path="store/promotion/new" element={
                   <AdminRouteGuard>
                     <PromotionAdd />
+                  </AdminRouteGuard>
+                } />
+                <Route path="profile-shop" element={
+                  <AdminRouteGuard>
+                    <ShopProfile />
+                  </AdminRouteGuard>
+                } />
+                <Route path="store/profile/edit" element={
+                  <AdminRouteGuard>
+                    <StoreProfileEdit />
+                  </AdminRouteGuard>
+                } />
+                <Route path="profile" element={
+                  <AdminRouteGuard>
+                    <AdminProfile />
                   </AdminRouteGuard>
                 } />
                 <Route path="banners" element={
