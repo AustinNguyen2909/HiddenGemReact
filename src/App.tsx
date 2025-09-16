@@ -20,6 +20,7 @@ import {
 } from "./screens/admin";
 import { ThemeProvider, Header, AuthProvider, AdminRouteGuard } from "./components";
 import "./App.css";
+import { Bounce, ToastContainer } from "react-toastify";
 
 function App() {
   return (
@@ -193,6 +194,19 @@ function App() {
           </Router>
         </ThemeProvider>
       </AuthProvider>
+      <ToastContainer
+        position="bottom-center"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+      />
     </MantineProvider>
   );
 }

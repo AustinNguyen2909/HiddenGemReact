@@ -1,7 +1,8 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import apiClient from '../../services/api';
 import { TokenStorage } from '../../services/storage';
-import authService, { LoginRequest, RegisterRequest, AuthResponse, BaseUser } from '../../services/auth';
+import authService, { LoginRequest, RegisterRequest, AuthResponse, BaseUser, RegisterResponse } from '../../services/auth';
+import { toast } from 'react-toastify';
 
 interface AuthContextValue {
   user: BaseUser | null;
@@ -10,7 +11,7 @@ interface AuthContextValue {
   loading: boolean;
   error: string | null;
   login: (payload: LoginRequest) => Promise<AuthResponse>;
-  register: (payload: RegisterRequest) => Promise<AuthResponse>;
+  register: (payload: RegisterRequest) => Promise<RegisterResponse>;
   logout: () => void;
   setUser: (user: BaseUser | null) => void;
 }
@@ -49,6 +50,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       return res;
     } catch (e: any) {
+      toast.error(e?.data?.message || e?.message || 'Login failed');
       const message = (e?.data?.message || e?.message || 'Login failed');
       setError(message);
       throw e;
@@ -62,15 +64,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setError(null);
     try {
       const res = await authService.register(payload);
-      if (res?.access_token) {
-        setToken(res.access_token);
-      }
-      if (res?.user) {
-        setUser(res.user);
-      }
+      toast.success('Register successful');
+      // if (res?.access_token) {
+      //   setToken(res.access_token);
+      // }
+      // if (res?.user) {
+      //   setUser(res.user);
+      // }
       return res;
     } catch (e: any) {
       const message = (e?.data?.message || e?.message || 'Register failed');
+      toast.error(message);
       setError(message);
       throw e;
     } finally {

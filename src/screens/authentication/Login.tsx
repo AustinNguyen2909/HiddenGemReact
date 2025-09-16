@@ -22,6 +22,10 @@ const Login: React.FC = () => {
     });
   };
 
+  const goToRegister = () => {
+    navigate('/register');
+  };
+
   return (
     <div className="login-container">
       <div className="login-card">
@@ -99,6 +103,7 @@ const Login: React.FC = () => {
         <button
           type="button"
           className="login-create-account"
+          onClick={goToRegister}
         >
           Create account
         </button>

@@ -1,17 +1,28 @@
 import React, { useState } from 'react';
 import './Register.css';
+import { useAuth } from '../../components';
+import { useNavigate } from 'react-router-dom';
 
 const Register: React.FC = () => {
+  const {loading, register} = useAuth();
+
   const [name, setName] = useState('');
   const [mobile, setMobile] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle registration logic here
     console.log('Registration attempt with:', { name, mobile, email, password });
+    register({email, password, username: email, full_name: name, phone_number: mobile}). then(res => {
+      console.log('Login successful:', res);
+      if (res.user_id) {
+        navigate('/login')
+      }
+    });
   };
 
   return (
@@ -85,7 +96,8 @@ const Register: React.FC = () => {
           <button
             type="submit"
             className="register-button"
-          >
+            disabled={loading}
+            >
             Continue
           </button>
         </form>

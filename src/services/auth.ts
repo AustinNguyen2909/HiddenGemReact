@@ -7,15 +7,22 @@ export interface LoginRequest {
 }
 
 export interface RegisterRequest {
+  username: string;
   email: string;
   password: string;
-  name?: string;
+  full_name: string;
+  phone_number: string;
 }
 
 export interface AuthResponse {
   access_token: string;
   refresh_token: string;
   user: BaseUser;
+}
+
+export interface RegisterResponse {
+  user_id: number;
+  verify_email_token: string;
 }
 
 export interface BaseUser extends BaseId {
@@ -35,11 +42,8 @@ class AuthService {
     return res;
   }
 
-  async register(payload: RegisterRequest): Promise<AuthResponse> {
-    const res = await apiClient.post<AuthResponse>('/auth/register', payload);
-    if (res && res.access_token) {
-      apiClient.setAuthToken(res.access_token);
-    }
+  async register(payload: RegisterRequest): Promise<RegisterResponse> {
+    const res = await apiClient.post<RegisterResponse>('/auth/register', payload);
     return res;
   }
 
