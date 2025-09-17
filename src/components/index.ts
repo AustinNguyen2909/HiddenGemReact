@@ -25,6 +25,8 @@ export { default as ShopSidebar } from './ShopSidebar';
 export { default as ProductCard } from './ProductCard';
 export { default as InfoCard } from './InfoCard';
 export { default as LocationItem } from './LocationItem';
+export { default as StoreCard } from './StoreCard';
+export { default as MapComponent } from './MapComponent';
 
 // Carousel Components
 export { default as HeroCarousel } from './HeroCarousel';

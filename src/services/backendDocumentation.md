@@ -144,7 +144,7 @@ List stores with pagination.
         "id_cua_hang": 1,
         "ten_cua_hang": "Hidden Gem",
         "mo_ta": "Quan ca phe thu vi",
-        "diem_danh_gia_trung_binh": 4.8,
+        "diem_danh_gia_trung_binh": "4.8",
         "luot_xem": 1234,
         "id_trang_thai": 2,
         "id_vi_tri": 1,
@@ -669,7 +669,7 @@ export type Cafe = {
   id_chu_so_huu: number;
   ten_cua_hang: string;
   mo_ta?: string | null;
-  diem_danh_gia_trung_binh: number; // float
+  diem_danh_gia_trung_binh: string;
   luot_xem: number;
   id_trang_thai?: number | null;
   id_vi_tri?: number | null;

@@ -1,7 +1,7 @@
 import apiClient from './api';
-import { CafeListResponse, CreateReviewRequest, Cafe } from './types';
+import { CafeListResponse, CreateReviewRequest, Cafe, BaseData } from './types';
 
-export interface CafeDetail extends Cafe {}
+export interface CafeDetail extends BaseData<Cafe> {}
 
 export interface ReviewsListResponse {
   data: {

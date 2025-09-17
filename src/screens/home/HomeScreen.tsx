@@ -1,72 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Footer, Title, Text, Button, Input } from '../../components';
+import { Footer, Title, Text, Button, Input, StoreCard } from '../../components';
 import { bannersService } from '../../services/banners';
-import { Banner } from '../../services/types';
+import { cafesService } from '../../services/cafes';
+import { Banner, Cafe } from '../../services/types';
+import { users } from '../../dummyData/usersData';
 import './HomeScreen.css';
 import HomeStory from "../../assets/images/home-story.png";
 import HomeReview from "../../assets/images/home-review.png";
 import HomeNewsletter from "../../assets/images/home-newsletter.png";
+import { useNavigate } from 'react-router-dom';
 
-// Reusable Components
-const StoreCard: React.FC<{ 
-  store: any; 
-  onViewDetails: (storeId: number) => void;
-}> = ({ store, onViewDetails }) => {
-  const renderStars = (rating: number) => {
-    const stars = [];
-    for (let i = 1; i <= 5; i++) {
-      stars.push(
-        <span key={i} className={`star ${i <= rating ? 'filled' : ''}`}>
-          ★
-        </span>
-      );
-    }
-    return stars;
-  };
-
-  return (
-    <div className="store-card" onClick={() => onViewDetails(store.id)}>
-      <div className="store-image-container">
-        <img src={store.image} alt={store.name} className="store-image" />
-        <div className="store-overlay">
-          <button className="wishlist-btn">
-            <span className="wishlist-icon">♡</span>
-          </button>
-        </div>
-      </div>
-      
-      <div className="store-info">
-        <div className="store-details">
-          <div className="store-hours-price">
-            <Text variant="p" size="sm" color="secondary">
-              Uptime: {store.hours}
-            </Text>
-            <Text variant="p" size="sm" color="secondary">
-              Price: {store.priceRange}
-            </Text>
-          </div>
-          
-          <Title level="h3" size="md" color="primary" className="store-name">
-            {store.name}
-          </Title>
-          
-          <div className="store-location-rating">
-            <div className="location-info">
-              <img src="/api/placeholder/17/22" alt="Location" className="location-icon" />
-              <Text variant="p" size="sm" color="secondary">
-                {store.distance}
-              </Text>
-            </div>
-            
-            <div className="rating-stars">
-              {renderStars(store.rating)}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const TestimonialCard: React.FC<{ testimonial: any }> = ({ testimonial }) => {
   const renderStars = (rating: number) => {
@@ -114,10 +57,16 @@ const TestimonialCard: React.FC<{ testimonial: any }> = ({ testimonial }) => {
 };
 
 const HomeScreen: React.FC = () => {
+  const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [banners, setBanners] = useState<Banner[]>([]);
   const [isLoadingBanners, setIsLoadingBanners] = useState(true);
   const [bannerError, setBannerError] = useState<string | null>(null);
+  
+  // Cafe data states
+  const [cafes, setCafes] = useState<Cafe[]>([]);
+  const [isLoadingCafes, setIsLoadingCafes] = useState(true);
+  const [cafeError, setCafeError] = useState<string | null>(null);
 
   // Fetch banners on component mount
   useEffect(() => {
@@ -141,6 +90,26 @@ const HomeScreen: React.FC = () => {
     fetchBanners();
   }, []);
 
+  // Fetch cafes on component mount
+  useEffect(() => {
+    const fetchCafes = async () => {
+      try {
+        setIsLoadingCafes(true);
+        setCafeError(null);
+        const response = await cafesService.list(1, 12); // First page, 12 items
+        setCafes(response.data.items);
+      } catch (error) {
+        console.error('Error fetching cafes:', error);
+        setCafeError('Failed to load cafes');
+        setCafes([]);
+      } finally {
+        setIsLoadingCafes(false);
+      }
+    };
+
+    fetchCafes();
+  }, []);
+
   // Get hero images from banners, sorted by thu_tu (order)
   const heroImages = banners
     .sort((a, b) => a.thu_tu - b.thu_tu)
@@ -148,85 +117,49 @@ const HomeScreen: React.FC = () => {
 
   const hiddenGemsStory = {
     id: 1,
-    name: "Jonny Thomas",
-    role: "Project Manager",
-    text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset.....",
-    timeAgo: "Old story",
-    avatar: "/api/placeholder/80/80"
+    name: `${users[2].firstName} ${users[2].lastName}`,
+    role: "Coffee Enthusiast & Food Blogger",
+    text: "Hidden Gems has completely transformed my coffee experience! As someone who travels frequently for work, I've visited countless coffee shops, but none compare to the authentic flavors and warm atmosphere I've found here. The baristas truly understand their craft, and every cup tells a story. From their signature single-origin blends to the cozy corner nooks perfect for remote work, this place has become my second home. The community here is incredible - I've made lifelong friends over shared tables and morning conversations. It's not just about the coffee; it's about the connection, the culture, and the passion that goes into every single brew.",
+    timeAgo: "2 weeks ago",
+    avatar: users[2].avatar
   };
 
   const testimonials = [
     {
       id: 1,
-      name: "Mrs Catherine White",
-      text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit,",
-      timeAgo: "44 Hours Ago",
-      title: "As good as advertised",
-      rating: 4,
-      avatar: "/api/placeholder/80/80"
+      name: `${users[4].firstName} ${users[4].lastName}`,
+      text: "The best coffee I've had in the city! The baristas are incredibly knowledgeable and the atmosphere is perfect for both work and relaxation.",
+      timeAgo: "3 days ago",
+      title: "Exceptional coffee experience",
+      rating: 5,
+      avatar: users[4].avatar
     },
     {
       id: 2,
-      name: "Mrs Catherine White",
-      text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit,",
-      timeAgo: "44 Hours Ago",
-      title: "As good as advertised",
+      name: `${users[3].firstName} ${users[3].lastName}`,
+      text: "As a busy professional, I appreciate the quality coffee and quiet environment. The staff remembers my order and always greets me with a smile.",
+      timeAgo: "1 week ago",
+      title: "Perfect for remote work",
       rating: 4,
-      avatar: "/api/placeholder/80/80"
+      avatar: users[3].avatar
     },
     {
       id: 3,
-      name: "Mrs Catherine White",
-      text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit,",
-      timeAgo: "44 Hours Ago",
-      title: "As good as advertised",
-      rating: 4,
-      avatar: "/api/placeholder/80/80"
+      name: `${users[7].firstName} ${users[7].lastName}`,
+      text: "Hidden Gems truly lives up to its name. The single-origin beans and expert brewing techniques make every visit a delightful experience.",
+      timeAgo: "5 days ago",
+      title: "A true hidden gem",
+      rating: 5,
+      avatar: users[7].avatar
     }
   ];
 
-  const allCoffees = [
-    {
-      id: 1,
-      name: "Sumatra mandheling",
-      image: "/api/placeholder/305/288",
-      hours: "9:00AM - 10:00PM",
-      priceRange: "$18.50 – $87.50",
-      distance: "3.5 Km",
-      rating: 4
-    },
-    {
-      id: 2,
-      name: "Sumatra mandheling",
-      image: "/api/placeholder/305/288",
-      hours: "9:00AM - 10:00PM",
-      priceRange: "$18.50 – $87.50",
-      distance: "3.5 Km",
-      rating: 4
-    },
-    {
-      id: 3,
-      name: "Sumatra mandheling",
-      image: "/api/placeholder/305/288",
-      hours: "9:00AM - 10:00PM",
-      priceRange: "$18.50 – $87.50",
-      distance: "3.5 Km",
-      rating: 4
-    },
-    {
-      id: 4,
-      name: "Sumatra mandheling",
-      image: "/api/placeholder/305/288",
-      hours: "9:00AM - 10:00PM",
-      priceRange: "$18.50 – $87.50",
-      distance: "3.5 Km",
-      rating: 4
-    }
-  ];
+  // Use cafes from API instead of dummy data
+  const allCoffees = cafes;
 
   const handleViewStoreDetail = (storeId: number) => {
     console.log('View store details:', storeId);
-    // Navigate to store detail page
+    navigate(`/store/${storeId}`);
   };
 
   return (
@@ -322,16 +255,37 @@ const HomeScreen: React.FC = () => {
           <Title level="h2" size="xl" color="primary" className="section-title">
             All Coffees
           </Title>
-          <div className="coffees-grid">
-            {allCoffees.map((coffee) => (
-              <StoreCard key={coffee.id} store={coffee} onViewDetails={handleViewStoreDetail} />
-            ))}
-          </div>
-          <div className="pagination-dots">
-            {Array.from({ length: 7 }, (_, i) => (
-              <button key={i} className={`pagination-dot ${i === 0 ? 'active' : ''}`} />
-            ))}
-          </div>
+          
+          {isLoadingCafes ? (
+            <div className="coffees-loading">
+              <Text variant="p" size="lg" color="primary">Loading cafes...</Text>
+            </div>
+          ) : cafeError ? (
+            <div className="coffees-error">
+              <Text variant="p" size="lg" color="primary">{cafeError}</Text>
+            </div>
+          ) : allCoffees.length > 0 ? (
+            <>
+              <div className="coffees-grid">
+                {allCoffees.map((coffee) => (
+                  <StoreCard 
+                    key={coffee.id_cua_hang} 
+                    store={coffee} 
+                    onViewDetails={handleViewStoreDetail}
+                  />
+                ))}
+              </div>
+              <div className="pagination-dots">
+                {Array.from({ length: Math.ceil(allCoffees.length / 4) }, (_, i) => (
+                  <button key={i} className={`pagination-dot ${i === 0 ? 'active' : ''}`} />
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="coffees-empty">
+              <Text variant="p" size="lg" color="secondary">No cafes available</Text>
+            </div>
+          )}
         </div>
       </section>
 

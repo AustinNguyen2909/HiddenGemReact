@@ -1,151 +1,58 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Footer, Title, Text } from '../../components';
+import { Footer, Text, StoreCard, MapComponent } from '../../components';
+import { cafesService } from '../../services/cafes';
+import { Cafe } from '../../services/types';
 import './LocationScreen.css';
+import StoreDetail from "../../assets/images/store-detail.png";
 
 interface LocationScreenProps {
   className?: string;
 }
 
-// Reusable Components
-const StoreCard: React.FC<{ 
-  store: any; 
-  onViewDetails: (storeId: number) => void;
-  onGetDirections: (store: any) => void;
-}> = ({ store, onViewDetails, onGetDirections }) => {
-  const renderStars = (rating: number) => {
-    const stars = [];
-    for (let i = 1; i <= 5; i++) {
-      stars.push(
-        <span key={i} className={`star ${i <= rating ? 'filled' : ''}`}>
-          ★
-        </span>
-      );
-    }
-    return stars;
-  };
-
-  return (
-    <div className="store-card" onClick={() => onViewDetails(store.id)}>
-      <div className="store-image-container">
-        <img src={store.image} alt={store.name} className="store-image" />
-        <div className="store-overlay">
-          <button 
-            className="wishlist-btn"
-            onClick={(e) => {
-              e.stopPropagation();
-              // Handle wishlist functionality
-            }}
-          >
-            <span className="wishlist-icon">♡</span>
-          </button>
-        </div>
-      </div>
-      
-      <div className="store-info">
-        <div className="store-details">
-          <div className="store-hours-price">
-            <Text variant="p" size="sm" color="secondary">
-              Uptime: {store.hours}
-            </Text>
-            <Text variant="p" size="sm" color="secondary">
-              Price: {store.priceRange}
-            </Text>
-          </div>
-          
-          <Title level="h3" size="md" color="primary" className="store-name">
-            {store.name}
-          </Title>
-          
-          <div className="store-location-rating">
-            <div className="location-info">
-              <img src="/api/placeholder/17/22" alt="Location" className="location-icon" />
-              <Text variant="p" size="sm" color="secondary">
-                {store.distance}
-              </Text>
-            </div>
-            
-            <div className="rating-stars">
-              {renderStars(store.rating)}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const LocationScreen: React.FC<LocationScreenProps> = ({ className = '' }) => {
   const navigate = useNavigate();
+  const [stores, setStores] = useState<Cafe[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Sample store data matching Figma design
-  const stores = [
-    {
-      id: 1,
-      name: "Sumatra mandheling",
-      image: "/api/placeholder/305/288",
-      hours: "9:00AM - 10:00PM",
-      priceRange: "$18.50 – $87.50",
-      distance: "3.5 Km",
-      rating: 3.5
-    },
-    {
-      id: 2,
-      name: "Sumatra mandheling",
-      image: "/api/placeholder/305/288",
-      hours: "9:00AM - 10:00PM",
-      priceRange: "$18.50 – $87.50",
-      distance: "3.5 Km",
-      rating: 3.5
-    },
-    {
-      id: 3,
-      name: "Sumatra mandheling",
-      image: "/api/placeholder/305/288",
-      hours: "9:00AM - 10:00PM",
-      priceRange: "$18.50 – $87.50",
-      distance: "3.5 Km",
-      rating: 3.5
-    },
-    {
-      id: 4,
-      name: "Sumatra mandheling",
-      image: "/api/placeholder/305/288",
-      hours: "9:00AM - 10:00PM",
-      priceRange: "$18.50 – $87.50",
-      distance: "3.5 Km",
-      rating: 3.5
-    }
-  ];
+  // Fetch stores from API
+  useEffect(() => {
+    const fetchStores = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await cafesService.list(1, 12);
+        setStores(response.data.items);
+      } catch (err) {
+        setError('Failed to load stores');
+        console.error('Error fetching stores:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStores();
+  }, []);
 
   const handleViewDetails = (storeId: number) => {
     navigate(`/store/${storeId}`);
   };
 
-  const handleGetDirections = (store: any) => {
-    console.log('Get directions to:', store.name);
+  const handleStoreClick = (store: Cafe) => {
+    navigate(`/store/${store.id_cua_hang}`);
   };
+
 
   return (
     <div className={`location-screen ${className}`}>
-      {/* Map Section */}
-      <section className="map-section">
-        <div className="map-container">
-          <div className="map-image">
-            <img src="/api/placeholder/1280/600" alt="Map" />
-          </div>
-          <div className="map-overlay">
-            <div className="location-search">
-              <h2 className="location-title">coffee shop near you</h2>
-              <button className="look-around-btn">Look around here</button>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Hero Banner */}
       <section className="hero-banner">
         <div className="banner-overlay">
+          <div className="hero-overlay-background">
+            <img src={StoreDetail} alt="Store background" />
+          </div>
           <div className="banner-content">
             <div className="banner-text">
               <p className="banner-highlight">Hightlight news, ads, discount, HOT HOT</p>
@@ -165,15 +72,24 @@ const LocationScreen: React.FC<LocationScreenProps> = ({ className = '' }) => {
         </div>
       </section>
 
-      {/* Sort Section */}
-      <section className="sort-section">
-        <div className="sort-container">
-          <p className="sort-text">Showing 1 – 27 stores of 23250 store</p>
-          <div className="sort-controls">
-            <button className="sort-btn">
-              <span className="sort-icon">⚙</span>
-            </button>
+      {/* Map Section */}
+      <section className="map-section">
+        <div className="location-search">
+          <h2 className="location-title">coffee shop near you</h2>
+          <button className="look-around-btn">Look around here</button>
+        </div>
+        <div className="map-container">
+          <div className="map-overlay">
+
           </div>
+          <MapComponent
+            stores={stores}
+            center={[10.8231, 106.6297]} // Ho Chi Minh City coordinates
+            zoom={13}
+            searchRadius={2000} // 2km radius
+            onStoreClick={handleStoreClick}
+            className="location-map"
+          />
         </div>
       </section>
 
@@ -191,14 +107,23 @@ const LocationScreen: React.FC<LocationScreenProps> = ({ className = '' }) => {
           </div>
 
           <div className="stores-grid">
-            {stores.map((store) => (
-              <StoreCard
-                key={store.id}
-                store={store}
-                onViewDetails={handleViewDetails}
-                onGetDirections={handleGetDirections}
-              />
-            ))}
+            {loading ? (
+              <div className="loading-container">
+                <Text variant="p" size="lg" color="primary">Loading stores...</Text>
+              </div>
+            ) : error ? (
+              <div className="error-container">
+                <Text variant="p" size="lg" color="primary">{error}</Text>
+              </div>
+            ) : (
+              stores.map((store) => (
+                <StoreCard
+                  key={store.id_cua_hang}
+                  store={store}
+                  onViewDetails={handleViewDetails}
+                />
+              ))
+            )}
           </div>
 
           <div className="load-more-section">

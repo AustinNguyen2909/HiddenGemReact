@@ -1,6 +1,10 @@
 export type ISODateTimeString = string;
 export type ISODateString = string;
 
+export interface BaseData<T> {
+  data: T;
+}
+
 // Auth
 export type LoginRequest = { email?: string; username?: string; password: string };
 export type TokenResponse = { access_token: string; refresh_token: string };
@@ -23,7 +27,7 @@ export type Cafe = {
   id_chu_so_huu: number;
   ten_cua_hang: string;
   mo_ta?: string | null;
-  diem_danh_gia_trung_binh: number;
+  diem_danh_gia_trung_binh: string;
   luot_xem: number;
   id_trang_thai?: number | null;
   id_vi_tri?: number | null;

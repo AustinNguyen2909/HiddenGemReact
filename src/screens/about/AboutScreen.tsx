@@ -7,6 +7,13 @@ interface AboutScreenProps {
 }
 
 const AboutScreen: React.FC<AboutScreenProps> = ({ className = '' }) => {
+  const scrollToTeam = () => {
+    const teamSection = document.getElementById('team-section');
+    if (teamSection) {
+      teamSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className={`about-screen ${className}`}>
       
@@ -67,7 +74,7 @@ const AboutScreen: React.FC<AboutScreenProps> = ({ className = '' }) => {
             <Text variant="p" size="md" color="secondary" className="about-gallery__description">
               We believe that every coffee shop has a story, and every visit is a memorable experience. This website is a community diary where people continue to write their own coffee journeys.
             </Text>
-            <Button variant="primary" size="lg" className="about-gallery__button">
+            <Button variant="primary" size="lg" className="about-gallery__button" onClick={scrollToTeam}>
               View All Team
             </Button>
           </div>
@@ -130,6 +137,41 @@ const AboutScreen: React.FC<AboutScreenProps> = ({ className = '' }) => {
               <div className="about-content-section__image">
                 <img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" alt="Why choose us" />
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Team Members Section */}
+      <section className="about-team" id="team-section">
+        <div className="about-team__container">
+          <div className="about-team__content">
+            <Title level="h2" size="xl" color="primary" className="about-team__title">
+              We Help To Achieve<br />Awesome Experience
+            </Title>
+            <Text variant="p" size="md" color="secondary" className="about-team__description">
+              We believe that every coffee shop has a story, and every visit is a memorable experience. This website is a community diary where people continue to write their own coffee journeys.
+            </Text>
+            <Button variant="primary" size="lg" className="about-team__button">
+              View All Team
+            </Button>
+          </div>
+          
+          <div className="about-team__grid">
+            <div className="about-team__member">
+              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80" alt="Team member 1" />
+            </div>
+            <div className="about-team__member">
+              <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80" alt="Team member 3" />
+            </div>
+            <div className="about-team__member">
+              <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80" alt="Team member 4" />
+            </div>
+            <div className="about-team__member">
+              <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80" alt="Team member 5" />
+            </div>
+            <div className="about-team__member">
+              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80" alt="Team member 6" />
             </div>
           </div>
         </div>

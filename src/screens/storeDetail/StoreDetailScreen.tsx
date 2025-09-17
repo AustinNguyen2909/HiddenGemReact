@@ -1,62 +1,112 @@
-import React, { useState } from 'react';
-import { Footer, Title, Text, Button, Input } from '../../components';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Footer, Title, Text, Button, Input, StoreCard } from '../../components';
+import { cafesService } from '../../services/cafes';
+import { Cafe } from '../../services/types';
 import './StoreDetailScreen.css';
+import StoreDetail from "../../assets/images/store-detail.png";
+
 
 interface StoreDetailScreenProps {
   className?: string;
 }
 
-// Reusable Components
-const StoreCard: React.FC<{ store: any }> = ({ store }) => (
-  <div className="store-card">
-    <div className="store-image-container">
-      <img src={store.image} alt={store.name} className="store-image" />
-      <div className="store-overlay">
-        <button className="wishlist-btn">
-          <span className="wishlist-icon">♡</span>
-        </button>
-      </div>
-    </div>
-    <div className="store-info">
-      <div className="store-details">
-        <Text variant="p" size="sm" color="secondary" className="store-hours">
-          Uptime: 9:00AM - 10:00PM
-        </Text>
-        <Text variant="p" size="sm" color="secondary" className="store-price">
-          Price: $18.50 – $87.50
-        </Text>
-      </div>
-      <Title level="h3" size="md" color="primary" className="store-name">
-        {store.name}
-      </Title>
-      <div className="store-meta">
-        <div className="store-distance">
-          <div className="location-icon"></div>
-          <Text variant="p" size="sm" color="secondary">3.5 Km</Text>
-        </div>
-        <div className="store-rating">
-          <span className="stars">★★★★☆</span>
-        </div>
-      </div>
-    </div>
-  </div>
-);
+// Helper function to safely convert rating to number
+const getRating = (rating: string | number): number => {
+  if (typeof rating === 'string') {
+    return parseFloat(rating) || 0;
+  }
+  return rating || 0;
+};
+
 
 const StoreDetailScreen: React.FC<StoreDetailScreenProps> = ({ className = '' }) => {
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState<'details' | 'menu' | 'reviews' | 'photos'>('details');
+  const [store, setStore] = useState<Cafe | null>(null);
+  const [relatedStores, setRelatedStores] = useState<Cafe[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const relatedStores = [
-    { id: 1, name: "Sumatra mandheling", image: "/api/placeholder/305/288" },
-    { id: 2, name: "Sumatra mandheling", image: "/api/placeholder/305/288" },
-    { id: 3, name: "Sumatra mandheling", image: "/api/placeholder/305/288" },
-    { id: 4, name: "Sumatra mandheling", image: "/api/placeholder/305/288" }
-  ];
+  // Fetch store details on component mount
+  useEffect(() => {
+    const fetchStoreDetails = async () => {
+      if (!id) {
+        setError('Store ID not found');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+        const storeData = await cafesService.detail(parseInt(id));
+        setStore(storeData.data);
+
+        // Fetch related stores (first page of cafes)
+        const relatedData = await cafesService.list(1, 4);
+        setRelatedStores(relatedData.data.items);
+      } catch (err) {
+        setError('Failed to load store details');
+        console.error('Error fetching store details:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStoreDetails();
+  }, [id]);
+
+  const handleViewDetails = (storeId: number) => {
+    navigate(`/store/${storeId}`);
+  };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className={`store-detail-screen ${className}`}>
+        <div className="loading-container">
+          <Text variant="p" size="lg" color="primary">Loading store details...</Text>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className={`store-detail-screen ${className}`}>
+        <div className="error-container">
+          <Text variant="p" size="lg" color="primary">{error}</Text>
+          <Button variant="primary" onClick={() => window.location.reload()}>
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // No store data
+  if (!store) {
+    return (
+      <div className={`store-detail-screen ${className}`}>
+        <div className="error-container">
+          <Text variant="p" size="lg" color="primary">Store not found</Text>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`store-detail-screen ${className}`}>
       {/* Hero Banner */}
       <section className="hero-banner">
-        <div className="hero-overlay"></div>
+        <div className="hero-overlay">
+          <div className="hero-overlay-background">
+            <img src={StoreDetail} alt="Store background" />
+          </div>
+        </div>
         <div className="hero-content">
           <div className="hero-search">
             <div className="search-slogan">
@@ -66,8 +116,8 @@ const StoreDetailScreen: React.FC<StoreDetailScreenProps> = ({ className = '' })
             </div>
             <div className="search-form">
               <div className="search-input-container">
-                <Input 
-                  type="text" 
+                <Input
+                  type="text"
                   placeholder="Search for coffee shops, cafes, or locations..."
                   className="search-input"
                 />
@@ -88,29 +138,31 @@ const StoreDetailScreen: React.FC<StoreDetailScreenProps> = ({ className = '' })
             <div className="store-header">
               <div className="store-title">
                 <Title level="h1" size="xl" color="primary">
-                  Coffee Corner
+                  {store.ten_cua_hang}
                 </Title>
                 <div className="store-rating">
-                  <span className="stars">★★★★★</span>
+                  <span className="stars">
+                    {'★'.repeat(Math.floor(getRating(store.diem_danh_gia_trung_binh)))}
+                    {'☆'.repeat(5 - Math.floor(getRating(store.diem_danh_gia_trung_binh)))}
+                  </span>
                   <Text variant="p" size="md" color="secondary">
-                    4.8 (124 reviews)
+                    {getRating(store.diem_danh_gia_trung_binh).toFixed(1)} ({store.luot_xem} views)
                   </Text>
                 </div>
               </div>
               <div className="store-price">
                 <Text variant="p" size="lg" color="primary" className="price">
-                  $$$
+                  {getRating(store.diem_danh_gia_trung_binh) >= 4 ? '$$$' : getRating(store.diem_danh_gia_trung_binh) >= 3 ? '$$' : '$'}
                 </Text>
                 <Text variant="p" size="sm" color="secondary">
-                  Moderate
+                  {getRating(store.diem_danh_gia_trung_binh) >= 4 ? 'High-end' : getRating(store.diem_danh_gia_trung_binh) >= 3 ? 'Moderate' : 'Budget'}
                 </Text>
               </div>
             </div>
-            
+
             <div className="store-description">
               <Text variant="p" size="md" color="secondary">
-                A cozy coffee shop with a warm atmosphere, serving freshly brewed coffee and delicious pastries. 
-                Perfect for work, study, or just relaxing with friends.
+                {store.mo_ta || 'A wonderful coffee shop with great atmosphere and quality beverages.'}
               </Text>
             </div>
           </div>
@@ -148,25 +200,25 @@ const StoreDetailScreen: React.FC<StoreDetailScreenProps> = ({ className = '' })
         <section className="store-tabs">
           <div className="tab-container">
             <div className="tab-navigation">
-              <button 
+              <button
                 className={`tab-button ${activeTab === 'details' ? 'active' : ''}`}
                 onClick={() => setActiveTab('details')}
               >
                 Shop Details
               </button>
-              <button 
+              <button
                 className={`tab-button ${activeTab === 'menu' ? 'active' : ''}`}
                 onClick={() => setActiveTab('menu')}
               >
                 Show Menu
               </button>
-              <button 
+              <button
                 className={`tab-button ${activeTab === 'reviews' ? 'active' : ''}`}
                 onClick={() => setActiveTab('reviews')}
               >
                 Customer Reviews
               </button>
-              <button 
+              <button
                 className={`tab-button ${activeTab === 'photos' ? 'active' : ''}`}
                 onClick={() => setActiveTab('photos')}
               >
@@ -182,22 +234,7 @@ const StoreDetailScreen: React.FC<StoreDetailScreenProps> = ({ className = '' })
           {activeTab === 'details' && (
             <div className="details-content">
               <div className="content-card">
-                <Text variant="p" size="sm" color="secondary" className="content-text">
-                  As is known to all, coffee shops are places where modern people gather for leisure and business communication. The reason why coffee shops have their unique attraction is that what they sell is not only coffee, but also a kind of quality, culture and ideas. It is believed that many literary young people have a dream to open their own coffee shop. No matter in the morning when insects and birds are chirping or in the evening when the sky is full of clouds, they will watch their own coffee shop, or play ukulele gently, or read San Mao or Shakespeare, and have a few words with regular guests from time to time.
-                </Text>
-                <Text variant="p" size="sm" color="secondary" className="content-text">
-                  3 D design Details
 
-                  Please contact us to talk with your ideas about the design, such as style and layout or some special requirements.
-
-                  Please send us your floor plan and the size of your shop, then we can see your shop shape first.
-
-                  The design fee is $500-$800, which depend on the size of your shop.
-
-                  The design time is about 3-5 working days for a shop, and the design can be modified.
-
-                  After you confirm the design, we will offer you the floor plan and technology drawing, which including all details for you.
-                </Text>
               </div>
             </div>
           )}
@@ -216,7 +253,11 @@ const StoreDetailScreen: React.FC<StoreDetailScreenProps> = ({ className = '' })
           </div>
           <div className="related-stores-grid">
             {relatedStores.map((store) => (
-              <StoreCard key={store.id} store={store} />
+              <StoreCard 
+                key={store.id_cua_hang} 
+                store={store} 
+                onViewDetails={handleViewDetails}
+              />
             ))}
           </div>
         </section>

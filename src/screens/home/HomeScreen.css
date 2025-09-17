@@ -854,3 +854,27 @@
     font-size: 1rem;
   }
 }
+
+/* Loading and Error States for Cafes */
+.coffees-loading,
+.coffees-error,
+.coffees-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  text-align: center;
+  padding: 2rem;
+}
+
+.coffees-loading {
+  color: var(--color-text-primary);
+}
+
+.coffees-error {
+  color: var(--color-text-danger);
+}
+
+.coffees-empty {
+  color: var(--color-text-secondary);
+}
