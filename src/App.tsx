@@ -16,7 +16,7 @@ import {
   PromotionScreen,
 } from "./screens";
 import {
-  AdminLayout, AdminLogin, AdminDashboard, StoresManage, StoreDetailManage, UserManage, UserDetailManage, BlogsManage, BlogDetailManage, BlogCreate, SubService, BannerManage, ServiceManage, ClientManage, PayManage, ParkingManage, AmenitiesManage, ServiceAdd, MenuManage, MenuAdd, CategoryManage, CategoryAdd, ReviewManage, ReviewView, PromotionManage, PromotionAdd, AdminProfile, ShopProfile, StoreProfileEdit
+  AdminLayout, AdminLogin, AdminDashboard, StoresManage, StoreDetailManage, UserManage, UserDetailManage, BlogsManage, BlogDetailManage, BlogCreate, SubService, BannerManage, BannerAdd, ServiceManage, ClientManage, PayManage, ParkingManage, AmenitiesManage, ServiceAdd, MenuManage, MenuAdd, CategoryManage, CategoryAdd, ReviewManage, ReviewView, PromotionManage, PromotionAdd, AdminProfile, ShopProfile, StoreProfileEdit
 } from "./screens/admin";
 import { ThemeProvider, Header, AuthProvider, AdminRouteGuard } from "./components";
 import "./App.css";
@@ -186,6 +186,11 @@ function App() {
                 <Route path="banners" element={
                   <AdminRouteGuard>
                     <BannerManage />
+                  </AdminRouteGuard>
+                } />
+                <Route path="banners/new" element={
+                  <AdminRouteGuard>
+                    <BannerAdd />
                   </AdminRouteGuard>
                 } />
                 <Route path="" element={<AdminLogin />} />

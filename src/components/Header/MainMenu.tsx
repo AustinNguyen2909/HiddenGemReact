@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../../components";
 import { useAuth } from "../AuthProvider";
 import "./MainMenu.css";
+import Logo from "../../assets/images/logo.png";
 
 interface MainMenuProps {
   className?: string;
@@ -27,9 +28,8 @@ const MainMenu: React.FC<MainMenuProps> = ({ className = "" }) => {
         <div className="main-menu__logo">
           <Link to="/" className="main-menu__logo-link">
             <div className="main-menu__logo-image">
-              {/* TODO: Replace with actual logo image */}
               <div className="main-menu__logo-placeholder">
-                <span>LOGO</span>
+                <img src={Logo} alt="logo" width={86} height={86} />
               </div>
             </div>
             <div className="main-menu__logo-text">

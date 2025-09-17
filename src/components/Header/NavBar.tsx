@@ -17,21 +17,6 @@ const NavBar: React.FC<NavBarProps> = ({ className = "" }) => {
   return (
     <div className={`nav-bar ${className}`}>
       <div className="nav-bar__container">
-        {/* Location Selector */}
-        <div className="nav-bar__location">
-          <div className="nav-bar__location-selector">
-            <span className="nav-bar__location-text">All Location</span>
-            <div className="nav-bar__location-chevron-placeholder">
-              {/* TODO: Replace with chevron icon */}
-              <span>▼</span>
-            </div>
-            <div className="nav-bar__location-icon-placeholder">
-              {/* TODO: Replace with location icon */}
-              <span>📍</span>
-            </div>
-          </div>
-        </div>
-
         {/* Navigation Links */}
         <nav className="nav-bar__navigation">
           <Link

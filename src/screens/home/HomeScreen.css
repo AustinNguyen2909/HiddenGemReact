@@ -30,14 +30,41 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-size: cover;
-  background-position: center;
+  object-fit: cover;
+  object-position: center;
   opacity: 0;
   transition: opacity 0.5s ease-in-out;
 }
 
 .hero-image.active {
   opacity: 1;
+}
+
+.hero-image.loading {
+  background: var(--color-bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-image.error {
+  background: var(--color-bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-image.loading img,
+.hero-image.error img {
+  display: none;
+}
+
+.loading-spinner {
+  text-align: center;
+}
+
+.error-message {
+  text-align: center;
 }
 
 .hero-search {
@@ -291,6 +318,168 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+/* Hidden Gems Stories Section */
+.hidden-gems-stories-section {
+  position: relative;
+  height: 718px;
+  overflow: hidden;
+  background: var(--color-bg-primary);
+}
+
+.stories-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.stories-background img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.stories-content {
+  position: relative;
+  z-index: 2;
+  padding: 80px 219px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.stories-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.stories-title {
+  margin-bottom: 20px;
+  color: var(--color-coffee);
+}
+
+.stories-subtitle {
+  color: var(--color-text-secondary);
+}
+
+.story-card {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  background: var(--color-bg-secondary);
+  border: 1px solid rgba(249, 192, 106, 0.42);
+  border-radius: 8px;
+  padding: 40px;
+  max-width: 980px;
+  width: 100%;
+}
+
+.story-content {
+  flex: 1;
+}
+
+.story-quote {
+  font-size: 220px;
+  font-weight: 700;
+  color: var(--color-coffee);
+  line-height: 0.5;
+  margin-bottom: 20px;
+}
+
+.story-text {
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+.story-author {
+  text-align: center;
+}
+
+.author-name {
+  font-weight: 700;
+  color: var(--color-coffee);
+  margin-bottom: 8px;
+}
+
+.author-role {
+  margin-bottom: 8px;
+}
+
+.story-time {
+  font-weight: 700;
+}
+
+.story-avatar {
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.story-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* What our Customers Section */
+.customers-section {
+  position: relative;
+  height: 609px;
+  overflow: hidden;
+}
+
+.customers-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.customers-background img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.customers-content {
+  position: relative;
+  z-index: 2;
+  padding: 128px 115px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.customers-header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 60px;
+}
+
+.customers-line {
+  width: 300px;
+  height: 1px;
+  background: var(--color-text-white);
+}
+
+.customers-title {
+  white-space: nowrap;
+  color: white;
+  font-size: 2rem;
+  font-weight: 700;
 }
 
 /* All Coffees Section */
@@ -574,7 +763,6 @@
 }
 
 .newsletter-button {
-  background: var(--color-primary);
   color: white;
   border: none;
   padding: var(--spacing-4) var(--spacing-6);

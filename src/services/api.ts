@@ -113,6 +113,22 @@ class ApiClient {
   delete<T>(path: string, params?: Record<string, any>, options?: Omit<RequestOptions, 'params' | 'body'>): Promise<T> {
     return this.request<T>('DELETE', path, { ...options, params });
   }
+
+  // Form-data POST helper (e.g., file uploads). Does not set Content-Type so browser can set multipart boundary.
+  async postForm<T>(path: string, formData: FormData, options?: Omit<RequestOptions, 'body' | 'headers'>): Promise<T> {
+    const url = this.buildUrl(path);
+    const headers: HeadersInit = {
+      ...getAuthHeader(),
+    };
+    const init: RequestInit = {
+      method: 'POST',
+      headers,
+      body: formData,
+      signal: options?.signal,
+    };
+    const res = await fetch(url, init);
+    return handleResponse<T>(res);
+  }
 }
 
 export const apiClient = new ApiClient(BASE_URL);

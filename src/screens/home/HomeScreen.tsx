@@ -1,6 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Footer, Title, Text, Button, Input } from '../../components';
+import { bannersService } from '../../services/banners';
+import { Banner } from '../../services/types';
 import './HomeScreen.css';
+import HomeStory from "../../assets/images/home-story.png";
+import HomeReview from "../../assets/images/home-review.png";
+import HomeNewsletter from "../../assets/images/home-newsletter.png";
 
 // Reusable Components
 const StoreCard: React.FC<{ 
@@ -110,15 +115,45 @@ const TestimonialCard: React.FC<{ testimonial: any }> = ({ testimonial }) => {
 
 const HomeScreen: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [banners, setBanners] = useState<Banner[]>([]);
+  const [isLoadingBanners, setIsLoadingBanners] = useState(true);
+  const [bannerError, setBannerError] = useState<string | null>(null);
 
-  // Sample data
-  const heroImages = [
-    '/api/placeholder/1920/1080',
-    '/api/placeholder/1920/1080',
-    '/api/placeholder/1920/1080',
-    '/api/placeholder/1920/1080',
-    '/api/placeholder/1920/1080'
-  ];
+  // Fetch banners on component mount
+  useEffect(() => {
+    const fetchBanners = async () => {
+      try {
+        setIsLoadingBanners(true);
+        setBannerError(null);
+        const response = await bannersService.list({ vi_tri: 'Home', active: 1 });
+        console.log('bannersService', response.data);
+        setBanners(response.data);
+      } catch (error) {
+        console.error('Error fetching banners:', error);
+        setBannerError('Failed to load hero images');
+        // Fallback to placeholder images
+        setBanners([]);
+      } finally {
+        setIsLoadingBanners(false);
+      }
+    };
+
+    fetchBanners();
+  }, []);
+
+  // Get hero images from banners, sorted by thu_tu (order)
+  const heroImages = banners
+    .sort((a, b) => a.thu_tu - b.thu_tu)
+    .map(banner => banner.link_url);
+
+  const hiddenGemsStory = {
+    id: 1,
+    name: "Jonny Thomas",
+    role: "Project Manager",
+    text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset.....",
+    timeAgo: "Old story",
+    avatar: "/api/placeholder/80/80"
+  };
 
   const testimonials = [
     {
@@ -189,63 +224,6 @@ const HomeScreen: React.FC = () => {
     }
   ];
 
-  const nearbyCoffees = [
-    {
-      id: 1,
-      name: "Sumatra mandheling",
-      image: "/api/placeholder/305/288",
-      hours: "9:00AM - 10:00PM",
-      priceRange: "$18.50 – $87.50",
-      distance: "2.5 Km",
-      rating: 4
-    },
-    {
-      id: 2,
-      name: "Sumatra mandheling",
-      image: "/api/placeholder/305/288",
-      hours: "9:00AM - 10:00PM",
-      priceRange: "$18.50 – $87.50",
-      distance: "2.5 Km",
-      rating: 4
-    },
-    {
-      id: 3,
-      name: "Sumatra mandheling",
-      image: "/api/placeholder/305/288",
-      hours: "9:00AM - 10:00PM",
-      priceRange: "$18.50 – $87.50",
-      distance: "2.5 Km",
-      rating: 4
-    },
-    {
-      id: 4,
-      name: "Sumatra mandheling",
-      image: "/api/placeholder/305/288",
-      hours: "9:00AM - 10:00PM",
-      priceRange: "$18.50 – $87.50",
-      distance: "2.5 Km",
-      rating: 4
-    },
-    {
-      id: 5,
-      name: "Sumatra mandheling",
-      image: "/api/placeholder/305/288",
-      hours: "9:00AM - 10:00PM",
-      priceRange: "$18.50 – $87.50",
-      distance: "0.5 Km",
-      rating: 4
-    },
-    {
-      id: 6,
-      name: "Sumatra mandheling",
-      image: "/api/placeholder/305/288",
-      hours: "9:00AM - 10:00PM",
-      priceRange: "$18.50 – $87.50",
-      distance: "1.5 Km",
-      rating: 4
-    }
-  ];
-
   const handleViewStoreDetail = (storeId: number) => {
     console.log('View store details:', storeId);
     // Navigate to store detail page
@@ -257,13 +235,30 @@ const HomeScreen: React.FC = () => {
       <section className="hero-section">
         <div className="hero-slider">
           <div className="hero-images">
-            {heroImages.map((image, index) => (
-              <div 
-                key={index} 
-                className={`hero-image ${index === currentSlide ? 'active' : ''}`}
-                style={{ backgroundImage: `url(${image})` }}
-              />
-            ))}
+            {isLoadingBanners ? (
+              <div className="hero-image active loading">
+                <div className="loading-spinner">
+                  <Text variant="p" size="md" color="white">Loading...</Text>
+                </div>
+              </div>
+            ) : heroImages.length > 0 ? (
+              heroImages.map((image, index) => (
+                <img 
+                  key={index} 
+                  src={image}
+                  alt={`Hero banner ${index + 1}`}
+                  className={`hero-image ${index === currentSlide ? 'active' : ''}`}
+                />
+              ))
+            ) : (
+              <div className="hero-image active error">
+                <div className="error-message">
+                  <Text variant="p" size="md" color="white">
+                    {bannerError || 'No hero images available'}
+                  </Text>
+                </div>
+              </div>
+            )}
           </div>
           
           <div className="hero-search">
@@ -289,54 +284,34 @@ const HomeScreen: React.FC = () => {
             </div>
           </div>
 
-          {/* Slider Controls */}
-          <div className="slider-controls">
-            <div className="slider-dots">
-              {heroImages.map((_, index) => (
-                <button
-                  key={index}
-                  className={`slider-dot ${index === currentSlide ? 'active' : ''}`}
-                  onClick={() => setCurrentSlide(index)}
-                />
-              ))}
+          {/* Slider Controls - only show if we have images and not loading */}
+          {!isLoadingBanners && heroImages.length > 1 && (
+            <div className="slider-controls">
+              <div className="slider-dots">
+                {heroImages.map((_, index) => (
+                  <button
+                    key={index}
+                    className={`slider-dot ${index === currentSlide ? 'active' : ''}`}
+                    onClick={() => setCurrentSlide(index)}
+                  />
+                ))}
+              </div>
+              <div className="slider-arrows">
+                <button 
+                  className="slider-arrow left"
+                  onClick={() => setCurrentSlide((prev) => prev > 0 ? prev - 1 : heroImages.length - 1)}
+                >
+                  ‹
+                </button>
+                <button 
+                  className="slider-arrow right"
+                  onClick={() => setCurrentSlide((prev) => prev < heroImages.length - 1 ? prev + 1 : 0)}
+                >
+                  ›
+                </button>
+              </div>
             </div>
-            <div className="slider-arrows">
-              <button 
-                className="slider-arrow left"
-                onClick={() => setCurrentSlide((prev) => prev > 0 ? prev - 1 : heroImages.length - 1)}
-              >
-                ‹
-              </button>
-              <button 
-                className="slider-arrow right"
-                onClick={() => setCurrentSlide((prev) => prev < heroImages.length - 1 ? prev + 1 : 0)}
-              >
-                ›
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section className="testimonials-section">
-        <div className="testimonials-background">
-          <img src="/api/placeholder/1441/609" alt="Coffee background" />
-        </div>
-        <div className="testimonials-content">
-          <div className="testimonials-header">
-            <div className="testimonials-line"></div>
-            <Title level="h2" size="lg" color="white" className="testimonials-title">
-              What our Customers
-            </Title>
-            <div className="testimonials-line"></div>
-          </div>
-          
-          <div className="testimonials-grid">
-            {testimonials.map((testimonial) => (
-              <TestimonialCard key={testimonial.id} testimonial={testimonial} />
-            ))}
-          </div>
+          )}
         </div>
       </section>
 
@@ -360,17 +335,68 @@ const HomeScreen: React.FC = () => {
         </div>
       </section>
 
-      {/* Coffees Nearby Section */}
-      <section className="coffees-nearby-section">
-        <div className="section-background"></div>
-        <div className="section-content">
-          <Title level="h2" size="xl" color="primary" className="section-title">
-            Coffees nearby
-          </Title>
-          <div className="coffees-grid">
-            {nearbyCoffees.map((coffee) => (
-              <StoreCard key={coffee.id} store={coffee} onViewDetails={handleViewStoreDetail} />
+      {/* What our Customers Section */}
+      <section className="customers-section">
+        <div className="customers-background">
+          <img src={HomeReview} alt="Coffee background" />
+        </div>
+        <div className="customers-content">
+          <div className="customers-header">
+            <div className="customers-line"></div>
+            <Title level="h2" size="lg" color="white" className="customers-title">
+              What our Customers
+            </Title>
+            <div className="customers-line"></div>
+          </div>
+          
+          <div className="testimonials-grid">
+            {testimonials.map((testimonial) => (
+              <TestimonialCard key={testimonial.id} testimonial={testimonial} />
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Hidden Gems Stories Section */}
+      <section className="hidden-gems-stories-section">
+        <div className="stories-background">
+          <img src={HomeStory} alt="Coffee background" />
+        </div>
+        <div className="stories-content">
+          <div className="stories-header">
+            <Title level="h2" size="lg" color="primary" className="stories-title">
+              Hidden Gems Stories
+            </Title>
+            <Text variant="p" size="md" color="secondary" className="stories-subtitle">
+              Our customers has amazing things to say about us
+            </Text>
+          </div>
+          
+          <div className="story-card">
+            <div className="story-content">
+              <div className="story-quote">
+                <Text variant="p" size="lg" color="primary">
+                  "
+                </Text>
+              </div>
+              <Text variant="p" size="md" color="secondary" className="story-text">
+                {hiddenGemsStory.text}
+              </Text>
+              <div className="story-author">
+                <Text variant="p" size="lg" color="primary" className="author-name">
+                  {hiddenGemsStory.name}
+                </Text>
+                <Text variant="p" size="md" color="secondary" className="author-role">
+                  {hiddenGemsStory.role}
+                </Text>
+                <Text variant="p" size="sm" color="secondary" className="story-time">
+                  {hiddenGemsStory.timeAgo}
+                </Text>
+              </div>
+            </div>
+            <div className="story-avatar">
+              <img src={hiddenGemsStory.avatar} alt={hiddenGemsStory.name} />
+            </div>
           </div>
         </div>
       </section>
@@ -378,7 +404,7 @@ const HomeScreen: React.FC = () => {
       {/* Newsletter Section */}
       <section className="newsletter-section">
         <div className="newsletter-background">
-          <img src="/api/placeholder/1441/374" alt="Newsletter background" />
+          <img src={HomeNewsletter} alt="Newsletter background" />
         </div>
         <div className="newsletter-content">
           <div className="newsletter-text">

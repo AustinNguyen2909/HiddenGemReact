@@ -216,3 +216,23 @@
 [data-theme="dark"] .banner-manage__image {
   background: var(--color-surface-2);
 }
+
+/* Loading and Error States */
+.banner-manage__loading,
+.banner-manage__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
+  padding: 2rem;
+}
+
+.banner-manage__error {
+  gap: 1rem;
+}
+
+.banner-manage__retry-btn {
+  margin-top: 1rem;
+}
