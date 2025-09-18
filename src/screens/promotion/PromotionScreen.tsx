@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Footer, Title, Text, Button } from '../../components';
-import { promotionHero, featuredPromotions, allPromotions, promotionCategories, howToUse, termsAndConditions } from '../../dummyData';
+import { promotionsService, Promotion } from '../../services/promotions';
 import './PromotionScreen.css';
 
 interface PromotionScreenProps {
@@ -9,8 +9,29 @@ interface PromotionScreenProps {
 
 
 const PromotionScreen: React.FC<PromotionScreenProps> = ({ className = '' }) => {
+  const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+
+  // Fetch promotions from API
+  useEffect(() => {
+    const fetchPromotions = async () => {
+      try {
+        setLoading(true);
+        const response = await promotionsService.getAllPromotions();
+        setPromotions(response.data);
+      } catch (err) {
+        setError('Failed to load promotions');
+        console.error('Error fetching promotions:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPromotions();
+  }, []);
 
   const handleCategoryChange = (categoryId: string) => {
     setSelectedCategory(categoryId);
@@ -22,9 +43,21 @@ const PromotionScreen: React.FC<PromotionScreenProps> = ({ className = '' }) => 
     setTimeout(() => setCopiedCode(null), 2000);
   };
 
+  // Filter promotions based on category (for now, we'll use all since API doesn't have categories)
   const filteredPromotions = selectedCategory === 'all' 
-    ? allPromotions 
-    : allPromotions.filter(promo => promo.category.toLowerCase().replace(' ', '-') === selectedCategory);
+    ? promotions 
+    : promotions.filter(promo => {
+        // For now, we'll filter by store name or description
+        const searchTerm = selectedCategory.toLowerCase();
+        return (
+          promo.store?.ten_cua_hang.toLowerCase().includes(searchTerm) ||
+          promo.mo_ta?.toLowerCase().includes(searchTerm) ||
+          promo.ten_chuong_trinh.toLowerCase().includes(searchTerm)
+        );
+      });
+
+  // Get featured promotions (first 3)
+  const featuredPromotions = promotions.slice(0, 3);
 
   const formatDate = (dateString: string) => {
     if (dateString === 'Ongoing') return 'Ongoing';
@@ -35,6 +68,90 @@ const PromotionScreen: React.FC<PromotionScreenProps> = ({ className = '' }) => 
       day: 'numeric' 
     });
   };
+
+  // Generate categories from promotions data
+  const promotionCategories = [
+    { id: 'all', label: 'All Promotions', count: promotions.length },
+    { id: 'coffee', label: 'Coffee', count: promotions.filter(p => p.mo_ta?.toLowerCase().includes('coffee')).length },
+    { id: 'food', label: 'Food', count: promotions.filter(p => p.mo_ta?.toLowerCase().includes('food') || p.mo_ta?.toLowerCase().includes('brunch')).length },
+    { id: 'drink', label: 'Drinks', count: promotions.filter(p => p.mo_ta?.toLowerCase().includes('drink')).length },
+    { id: 'discount', label: 'Discount', count: promotions.filter(p => p.ten_chuong_trinh.toLowerCase().includes('discount')).length }
+  ];
+
+  // Static content for hero and other sections
+  const promotionHero = {
+    title: "Special Offers & Promotions",
+    subtitle: "Discover amazing deals and exclusive offers from your favorite coffee shops"
+  };
+
+  const howToUse = [
+    {
+      step: 1,
+      title: "Browse Promotions",
+      description: "Explore our collection of current promotions and special offers from participating coffee shops.",
+      icon: "🔍"
+    },
+    {
+      step: 2,
+      title: "Choose Your Deal",
+      description: "Select the promotion that interests you and check the participating locations and terms.",
+      icon: "🎯"
+    },
+    {
+      step: 3,
+      title: "Visit the Shop",
+      description: "Go to the participating coffee shop and show the promotion code or mention the offer.",
+      icon: "🏪"
+    },
+    {
+      step: 4,
+      title: "Enjoy Your Savings",
+      description: "Get your discounted coffee and enjoy the savings! Don't forget to leave a review.",
+      icon: "☕"
+    }
+  ];
+
+  const termsAndConditions = [
+    "Promotions are valid only at participating coffee shops listed in the offer details.",
+    "Each promotion has specific terms and conditions that must be met to qualify for the discount.",
+    "Promotion codes are case-sensitive and must be presented at the time of purchase.",
+    "Some promotions may have minimum purchase requirements or exclusions on certain items.",
+    "Promotions cannot be combined with other offers unless specifically stated.",
+    "Expired promotions will not be honored, so please check the validity period before visiting.",
+    "The coffee shop reserves the right to modify or cancel promotions at any time.",
+    "Promotions are subject to availability and may be limited to certain times or days."
+  ];
+
+  if (loading) {
+    return (
+      <div className={`promotion-screen ${className}`}>
+        <div className="promotion-screen__loading">
+          <Text>Loading promotions...</Text>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={`promotion-screen ${className}`}>
+        <div className="promotion-screen__error">
+          <Title level="h1" size="lg" color="primary">
+            {error}
+          </Title>
+          <Button
+            variant="primary"
+            size="md"
+            onClick={() => window.location.reload()}
+          >
+            Try Again
+          </Button>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className={`promotion-screen ${className}`}>
@@ -67,41 +184,41 @@ const PromotionScreen: React.FC<PromotionScreenProps> = ({ className = '' }) => 
 
             <div className="featured-promotions__grid">
               {featuredPromotions.map((promotion) => (
-                <div key={promotion.id} className="featured-promotion-card">
+                <div key={promotion.id_khuyen_mai} className="featured-promotion-card">
                   <div className="featured-promotion-card__image">
-                    <img src={promotion.image} alt={promotion.title} />
+                    <img 
+                      src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                      alt={promotion.ten_chuong_trinh} 
+                    />
                     <div className="featured-promotion-card__badge">
-                      <span className="featured-promotion-card__discount">{promotion.discount}</span>
+                      <span className="featured-promotion-card__discount">Special</span>
                     </div>
                   </div>
                   
                   <div className="featured-promotion-card__content">
                     <div className="featured-promotion-card__category">
                       <Text variant="span" size="xs" color="secondary">
-                        {promotion.category}
+                        {promotion.store?.ten_cua_hang || 'Coffee Shop'}
                       </Text>
                     </div>
                     
                     <Title level="h3" size="md" color="primary" className="featured-promotion-card__title">
-                      {promotion.title}
+                      {promotion.ten_chuong_trinh}
                     </Title>
                     
                     <Text variant="p" size="sm" color="secondary" className="featured-promotion-card__description">
-                      {promotion.description}
+                      {promotion.mo_ta || 'Special promotion available at this location.'}
                     </Text>
                     
                     <div className="featured-promotion-card__pricing">
                       <div className="featured-promotion-card__price">
                         <Text variant="span" size="sm" color="muted" className="featured-promotion-card__original-price">
-                          {promotion.originalPrice}
-                        </Text>
-                        <Text variant="span" size="lg" color="primary" className="featured-promotion-card__discounted-price">
-                          {promotion.discountedPrice}
+                          Valid until: {formatDate(promotion.ngay_ket_thuc)}
                         </Text>
                       </div>
                       <div className="featured-promotion-card__shops">
                         <Text variant="span" size="xs" color="secondary">
-                          {promotion.participatingShops} shops
+                          {promotion.store?.ten_cua_hang || 'Coffee Shop'}
                         </Text>
                       </div>
                     </div>
@@ -109,121 +226,22 @@ const PromotionScreen: React.FC<PromotionScreenProps> = ({ className = '' }) => 
                     <div className="featured-promotion-card__code">
                       <div className="featured-promotion-card__code-label">
                         <Text variant="span" size="xs" color="secondary">
-                          Code: {promotion.code}
+                          Promotion ID: {promotion.id_khuyen_mai}
                         </Text>
                       </div>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleCopyCode(promotion.code)}
+                        onClick={() => handleCopyCode(promotion.id_khuyen_mai.toString())}
                         className="featured-promotion-card__copy-btn"
                       >
-                        {copiedCode === promotion.code ? 'Copied!' : 'Copy'}
+                        {copiedCode === promotion.id_khuyen_mai.toString() ? 'Copied!' : 'Copy ID'}
                       </Button>
                     </div>
                     
                     <div className="featured-promotion-card__validity">
                       <Text variant="span" size="xs" color="secondary">
-                        Valid until: {formatDate(promotion.validUntil)}
-                      </Text>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Category Filter Section */}
-          <section className="category-filter-section">
-            <div className="category-filter__header">
-              <Title level="h2" size="lg" color="primary" className="category-filter__title">
-                Browse by Category
-              </Title>
-              <Text variant="p" size="md" color="secondary" className="category-filter__subtitle">
-                Find promotions that match your preferences
-              </Text>
-            </div>
-
-            <div className="category-filter__buttons">
-              {promotionCategories.map((category) => (
-                <button
-                  key={category.id}
-                  className={`category-filter__button ${selectedCategory === category.id ? 'category-filter__button--active' : ''}`}
-                  onClick={() => handleCategoryChange(category.id)}
-                >
-                  <span className="category-filter__button-text">{category.label}</span>
-                  <span className="category-filter__button-count">({category.count})</span>
-                </button>
-              ))}
-            </div>
-          </section>
-
-          {/* All Promotions Section */}
-          <section className="all-promotions-section">
-            <div className="all-promotions__header">
-              <Title level="h2" size="lg" color="primary" className="all-promotions__title">
-                All Promotions
-              </Title>
-              <Text variant="p" size="md" color="secondary" className="all-promotions__subtitle">
-                Showing {filteredPromotions.length} promotion{filteredPromotions.length !== 1 ? 's' : ''}
-              </Text>
-            </div>
-
-            <div className="all-promotions__grid">
-              {filteredPromotions.map((promotion) => (
-                <div key={promotion.id} className="promotion-card">
-                  <div className="promotion-card__image">
-                    <img src={promotion.image} alt={promotion.title} />
-                    <div className="promotion-card__badge">
-                      <span className="promotion-card__discount">{promotion.discount}</span>
-                    </div>
-                  </div>
-                  
-                  <div className="promotion-card__content">
-                    <div className="promotion-card__category">
-                      <Text variant="span" size="xs" color="secondary">
-                        {promotion.category}
-                      </Text>
-                    </div>
-                    
-                    <Title level="h3" size="sm" color="primary" className="promotion-card__title">
-                      {promotion.title}
-                    </Title>
-                    
-                    <Text variant="p" size="xs" color="secondary" className="promotion-card__description">
-                      {promotion.description}
-                    </Text>
-                    
-                    <div className="promotion-card__pricing">
-                      <div className="promotion-card__price">
-                        <Text variant="span" size="xs" color="muted" className="promotion-card__original-price">
-                          {promotion.originalPrice}
-                        </Text>
-                        <Text variant="span" size="md" color="primary" className="promotion-card__discounted-price">
-                          {promotion.discountedPrice}
-                        </Text>
-                      </div>
-                    </div>
-                    
-                    <div className="promotion-card__code">
-                      <div className="promotion-card__code-label">
-                        <Text variant="span" size="xs" color="secondary">
-                          {promotion.code}
-                        </Text>
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleCopyCode(promotion.code)}
-                        className="promotion-card__copy-btn"
-                      >
-                        {copiedCode === promotion.code ? 'Copied!' : 'Copy'}
-                      </Button>
-                    </div>
-                    
-                    <div className="promotion-card__validity">
-                      <Text variant="span" size="xs" color="secondary">
-                        Valid until: {formatDate(promotion.validUntil)}
+                        Valid until: {formatDate(promotion.ngay_ket_thuc)}
                       </Text>
                     </div>
                   </div>

@@ -9,6 +9,41 @@
   max-width: 100%;
 }
 
+/* Status Badge Styles */
+.store-detail-manage__status-badge {
+  display: inline-block;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.store-detail-manage__status-badge--pending {
+  background-color: #fef3c7;
+  color: #d97706;
+  border: 1px solid #fbbf24;
+}
+
+.store-detail-manage__status-badge--active {
+  background-color: #d1fae5;
+  color: #059669;
+  border: 1px solid #10b981;
+}
+
+.store-detail-manage__status-badge--deleted {
+  background-color: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #f87171;
+}
+
+.store-detail-manage__status-badge--unknown {
+  background-color: #f3f4f6;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+}
+
 .store-detail-manage__not-found {
   text-align: center;
   padding: var(--spacing-xl);
@@ -455,4 +490,29 @@
 [data-theme="dark"] .store-detail-manage__settings-placeholder {
   background-color: var(--color-bg-secondary-dark);
   border-color: var(--color-border-dark);
+}
+
+/* Dark Theme Status Badges */
+[data-theme="dark"] .store-detail-manage__status-badge--pending {
+  background-color: #451a03;
+  color: #fbbf24;
+  border-color: #f59e0b;
+}
+
+[data-theme="dark"] .store-detail-manage__status-badge--active {
+  background-color: #064e3b;
+  color: #34d399;
+  border-color: #10b981;
+}
+
+[data-theme="dark"] .store-detail-manage__status-badge--deleted {
+  background-color: #7f1d1d;
+  color: #f87171;
+  border-color: #ef4444;
+}
+
+[data-theme="dark"] .store-detail-manage__status-badge--unknown {
+  background-color: #374151;
+  color: #9ca3af;
+  border-color: #6b7280;
 }

@@ -1,15 +1,23 @@
 import apiClient from './api';
-import { BlogCreateRequest, BlogUpdateRequest } from './types';
+import { BaseListData, BlogCreateRequest, BlogUpdateRequest } from './types';
 
 export interface BlogPost {
   id: number;
   tieu_de: string;
   noi_dung: string;
   created_at?: string;
+  // Additional fields for display
+  excerpt?: string;
+  author?: string;
+  publishDate?: string;
+  category?: string;
+  image?: string;
+  readTime?: string;
+  featured?: boolean;
 }
 
 export interface BlogListResponse {
-  data: BlogPost[];
+  data: BaseListData<BlogPost[]>;
 }
 
 class BlogService {

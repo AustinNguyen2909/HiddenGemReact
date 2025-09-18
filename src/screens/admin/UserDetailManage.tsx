@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Title, Text, Button, Input, AdminStatsCard } from '../../components';
-import { users, User } from '../../dummyData';
+import { User } from '../../services/types';
 import './UserDetailManage.css';
 
 interface UserDetailManageProps {
@@ -11,6 +11,7 @@ interface UserDetailManageProps {
 const UserDetailManage: React.FC<UserDetailManageProps> = ({ className = '' }) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState('overview');
   const [user, setUser] = useState<User | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -18,13 +19,18 @@ const UserDetailManage: React.FC<UserDetailManageProps> = ({ className = '' }) =
 
   useEffect(() => {
     if (id) {
-      const foundUser = users.find(u => u.id === parseInt(id));
-      if (foundUser) {
-        setUser(foundUser);
-        setEditForm(foundUser);
+      // First try to get from location state (if navigated from user list)
+      if (location.state?.user) {
+        setUser(location.state.user);
+        setEditForm(location.state.user);
+        return;
       }
+
+      // If not in state, this would require a separate API call
+      // For now, we'll show a message that user data is not available
+      setUser(null);
     }
-  }, [id]);
+  }, [id, location.state]);
 
   if (!user) {
     return (
@@ -34,7 +40,10 @@ const UserDetailManage: React.FC<UserDetailManageProps> = ({ className = '' }) =
             User Not Found
           </Title>
           <Text variant="p" size="md" color="secondary">
-            The user you're looking for doesn't exist.
+            {location.state?.user 
+              ? 'User data is not available. Please navigate from the user list.'
+              : 'The user you\'re looking for doesn\'t exist or data is not available.'
+            }
           </Text>
           <Button
             variant="primary"
@@ -73,13 +82,6 @@ const UserDetailManage: React.FC<UserDetailManageProps> = ({ className = '' }) =
     }));
   };
 
-  const getStatusBadge = (status: string) => {
-    return (
-      <span className={`user-detail-manage__status-badge user-detail-manage__status-badge--${status}`}>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
-      </span>
-    );
-  };
 
   const getRoleBadge = (role: string) => {
     return (
@@ -101,28 +103,28 @@ const UserDetailManage: React.FC<UserDetailManageProps> = ({ className = '' }) =
     <div className="user-detail-manage__overview">
       <div className="user-detail-manage__stats-grid">
         <AdminStatsCard
-          title="Total Orders"
-          value={user.totalOrders.toString()}
-          icon="🛒"
-          trend={{ value: 5, isPositive: true }}
+          title="User ID"
+          value={user.id_user.toString()}
+          icon="🆔"
+          trend={{ value: 0, isPositive: true }}
         />
         <AdminStatsCard
-          title="Total Spent"
-          value={`$${user.totalSpent.toFixed(2)}`}
-          icon="💰"
-          trend={{ value: 12, isPositive: true }}
+          title="Role"
+          value={user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+          icon="👤"
+          trend={{ value: 0, isPositive: true }}
         />
         <AdminStatsCard
-          title="Favorite Stores"
-          value={user.favoriteStores.length.toString()}
-          icon="❤️"
-          trend={{ value: 2, isPositive: true }}
+          title="Account Status"
+          value="Active"
+          icon="✅"
+          trend={{ value: 0, isPositive: true }}
         />
         <AdminStatsCard
-          title="Days Active"
-          value="45"
+          title="Member Since"
+          value={new Date(user.joined_at).toLocaleDateString()}
           icon="📅"
-          trend={{ value: 8, isPositive: true }}
+          trend={{ value: 0, isPositive: true }}
         />
       </div>
 
@@ -132,7 +134,6 @@ const UserDetailManage: React.FC<UserDetailManageProps> = ({ className = '' }) =
             Account Status
           </Title>
           <div className="user-detail-manage__status-info">
-            {getStatusBadge(user.status)}
             {getRoleBadge(user.role)}
           </div>
         </div>
@@ -146,10 +147,10 @@ const UserDetailManage: React.FC<UserDetailManageProps> = ({ className = '' }) =
               📧 {user.email}
             </Text>
             <Text variant="p" size="sm" color="primary">
-              📞 {user.phone}
+              📞 {user.phone_number}
             </Text>
             <Text variant="p" size="sm" color="primary">
-              📍 {user.location.city}, {user.location.state}
+              👤 {user.username}
             </Text>
           </div>
         </div>
@@ -160,13 +161,13 @@ const UserDetailManage: React.FC<UserDetailManageProps> = ({ className = '' }) =
           </Title>
           <div className="user-detail-manage__account-info">
             <Text variant="p" size="sm" color="primary">
-              <strong>Joined:</strong> {new Date(user.joinDate).toLocaleDateString()}
+              <strong>Joined:</strong> {new Date(user.joined_at).toLocaleDateString()}
             </Text>
             <Text variant="p" size="sm" color="primary">
-              <strong>Last Login:</strong> {new Date(user.lastLogin).toLocaleDateString()}
+              <strong>User ID:</strong> {user.id_user}
             </Text>
             <Text variant="p" size="sm" color="primary">
-              <strong>Member for:</strong> {Math.floor((new Date().getTime() - new Date(user.joinDate).getTime()) / (1000 * 60 * 60 * 24))} days
+              <strong>Member for:</strong> {Math.floor((new Date().getTime() - new Date(user.joined_at).getTime()) / (1000 * 60 * 60 * 24))} days
             </Text>
           </div>
         </div>
@@ -183,22 +184,22 @@ const UserDetailManage: React.FC<UserDetailManageProps> = ({ className = '' }) =
         
         <div className="user-detail-manage__form-grid">
           <div className="user-detail-manage__form-group">
-            <label className="user-detail-manage__label">First Name</label>
+            <label className="user-detail-manage__label">Full Name</label>
             <Input
               type="text"
-              value={isEditing ? editForm.firstName || '' : user.firstName}
-              onChange={(e) => handleInputChange('firstName', e.target.value)}
+              value={isEditing ? editForm.full_name || '' : user.full_name}
+              onChange={(e) => handleInputChange('full_name', e.target.value)}
               disabled={!isEditing}
               className="user-detail-manage__input"
             />
           </div>
 
           <div className="user-detail-manage__form-group">
-            <label className="user-detail-manage__label">Last Name</label>
+            <label className="user-detail-manage__label">Username</label>
             <Input
               type="text"
-              value={isEditing ? editForm.lastName || '' : user.lastName}
-              onChange={(e) => handleInputChange('lastName', e.target.value)}
+              value={isEditing ? editForm.username || '' : user.username}
+              onChange={(e) => handleInputChange('username', e.target.value)}
               disabled={!isEditing}
               className="user-detail-manage__input"
             />
@@ -216,33 +217,11 @@ const UserDetailManage: React.FC<UserDetailManageProps> = ({ className = '' }) =
           </div>
 
           <div className="user-detail-manage__form-group">
-            <label className="user-detail-manage__label">Phone</label>
+            <label className="user-detail-manage__label">Phone Number</label>
             <Input
               type="text"
-              value={isEditing ? editForm.phone || '' : user.phone}
-              onChange={(e) => handleInputChange('phone', e.target.value)}
-              disabled={!isEditing}
-              className="user-detail-manage__input"
-            />
-          </div>
-
-          <div className="user-detail-manage__form-group">
-            <label className="user-detail-manage__label">City</label>
-            <Input
-              type="text"
-              value={isEditing ? editForm.location?.city || '' : user.location.city}
-              onChange={(e) => handleInputChange('location', { ...user.location, city: e.target.value })}
-              disabled={!isEditing}
-              className="user-detail-manage__input"
-            />
-          </div>
-
-          <div className="user-detail-manage__form-group">
-            <label className="user-detail-manage__label">State</label>
-            <Input
-              type="text"
-              value={isEditing ? editForm.location?.state || '' : user.location.state}
-              onChange={(e) => handleInputChange('location', { ...user.location, state: e.target.value })}
+              value={isEditing ? editForm.phone_number || '' : user.phone_number}
+              onChange={(e) => handleInputChange('phone_number', e.target.value)}
               disabled={!isEditing}
               className="user-detail-manage__input"
             />
@@ -259,21 +238,6 @@ const UserDetailManage: React.FC<UserDetailManageProps> = ({ className = '' }) =
               <option value="customer">Customer</option>
               <option value="admin">Admin</option>
               <option value="moderator">Moderator</option>
-            </select>
-          </div>
-
-          <div className="user-detail-manage__form-group">
-            <label className="user-detail-manage__label">Status</label>
-            <select
-              value={isEditing ? editForm.status || 'active' : user.status}
-              onChange={(e) => handleInputChange('status', e.target.value)}
-              disabled={!isEditing}
-              className="user-detail-manage__select"
-            >
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-              <option value="suspended">Suspended</option>
-              <option value="pending">Pending</option>
             </select>
           </div>
         </div>
@@ -341,7 +305,7 @@ const UserDetailManage: React.FC<UserDetailManageProps> = ({ className = '' }) =
           Order History
         </Title>
         <Text variant="p" size="md" color="secondary">
-          Total Orders: {user.totalOrders} | Total Spent: ${user.totalSpent.toFixed(2)}
+          Order management for user: {user.full_name}
         </Text>
       </div>
       
@@ -411,17 +375,17 @@ const UserDetailManage: React.FC<UserDetailManageProps> = ({ className = '' }) =
           </Button>
           <div className="user-detail-manage__title-section">
             <Title level="h1" size="xl" color="primary" className="user-detail-manage__title">
-              {user.firstName} {user.lastName}
+              {user.full_name}
             </Title>
             <Text variant="p" size="md" color="secondary" className="user-detail-manage__subtitle">
-              {user.email} • {user.location.city}, {user.location.state}
+              {user.email} • {user.username}
             </Text>
           </div>
         </div>
         
         <div className="user-detail-manage__header-right">
           <div className="user-detail-manage__user-avatar">
-            <img src={user.avatar} alt={`${user.firstName} ${user.lastName}`} className="user-detail-manage__avatar-img" />
+            <img src={'https://icons.veryicon.com/png/o/miscellaneous/two-color-webpage-small-icon/user-244.png'} alt={user.full_name} className="user-detail-manage__avatar-img" />
           </div>
         </div>
       </div>

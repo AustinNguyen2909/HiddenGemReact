@@ -12,6 +12,7 @@ import {
   UserProfileScreen,
   AboutScreen,
   BlogScreen,
+  BlogDetailScreen,
   ContactScreen,
   PromotionScreen,
 } from "./screens";
@@ -43,6 +44,7 @@ function App() {
                     <Route path="/profile" element={<UserProfileScreen />} />
                     <Route path="/about" element={<AboutScreen />} />
                     <Route path="/blog" element={<BlogScreen />} />
+                    <Route path="/blog/:id" element={<BlogDetailScreen />} />
                     <Route path="/contact" element={<ContactScreen />} />
                     <Route path="/promotion" element={<PromotionScreen />} />
                     <Route path="*" element={<HomeScreen />} />

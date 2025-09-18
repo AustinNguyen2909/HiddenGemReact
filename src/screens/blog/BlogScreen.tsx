@@ -1,12 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Footer, Button, Input, Text, Title } from "../../components";
-import {
-  featuredBlogPost,
-  blogPosts,
-  blogCategories,
-  blogFilters,
-  blogHeroContent,
-} from "../../dummyData";
+import { blogService, BlogPost } from "../../services/blog";
 import "./BlogScreen.css";
 
 interface BlogScreenProps {
@@ -14,26 +9,131 @@ interface BlogScreenProps {
 }
 
 const BlogScreen: React.FC<BlogScreenProps> = ({ className = "" }) => {
+  const navigate = useNavigate();
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [dateFrom, setDateFrom] = useState("12.12.2025");
   const [dateTo, setDateTo] = useState("12.12.2025");
   const [visiblePosts, setVisiblePosts] = useState(8);
 
+  // Fetch blog posts from API
+  useEffect(() => {
+    const fetchBlogPosts = async () => {
+      try {
+        setLoading(true);
+        const response = await blogService.list(searchQuery);
+        setBlogPosts(response.data.items);
+      } catch (err) {
+        setError("Failed to load blog posts");
+        console.error("Error fetching blog posts:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBlogPosts();
+  }, [searchQuery]);
+
+  // Filter posts based on category and search
   const filteredPosts = blogPosts.filter((post) => {
     const matchesCategory =
       selectedCategory === "all" || post.category === selectedCategory;
     const matchesSearch =
-      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
+      post.tieu_de.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (post.excerpt && post.excerpt.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesCategory && matchesSearch;
   });
 
   const displayedPosts = filteredPosts.slice(0, visiblePosts);
 
+  // Get featured post (first post or one marked as featured)
+  const featuredPost = blogPosts.find(post => post.featured) || blogPosts[0];
+
   const handleLoadMore = () => {
     setVisiblePosts((prev) => Math.min(prev + 4, filteredPosts.length));
   };
+
+  const handleBlogClick = (post: BlogPost) => {
+    navigate(`/blog/${post.id}`, { state: { blogPost: post } });
+  };
+
+  // Format date for display
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "Unknown date";
+    try {
+      return new Date(dateString).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    } catch {
+      return "Unknown date";
+    }
+  };
+
+  // Create excerpt from content if not provided
+  const getExcerpt = (content: string, maxLength: number = 150) => {
+    if (content.length <= maxLength) return content;
+    return content.substring(0, maxLength) + "...";
+  };
+
+  // Blog categories (static for now)
+  const blogCategories = [
+    { id: 'all', name: 'All Topics' },
+    { id: 'brewing', name: 'Brewing Methods' },
+    { id: 'coffee-beans', name: 'Coffee Beans' },
+    { id: 'recipes', name: 'Recipes' },
+    { id: 'news', name: 'News & Updates' },
+    { id: 'reviews', name: 'Reviews' }
+  ];
+
+  // Static content for hero and filters
+  const blogHeroContent = {
+    highlightText: "Latest news, tips, and insights",
+    mainTitle: "Coffee Blog & Articles",
+    searchPlaceholder: "Search articles...",
+    searchButtonText: "Search"
+  };
+
+  const blogFilters = {
+    searchPlaceholder: "Search articles...",
+    topicsLabel: "Topics",
+    loadMoreText: "LOAD MORE"
+  };
+
+  if (loading) {
+    return (
+      <div className={`blog-screen ${className}`}>
+        <div className="blog-screen__loading">
+          <Text>Loading blog posts...</Text>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={`blog-screen ${className}`}>
+        <div className="blog-screen__error">
+          <Title level="h1" size="lg" color="primary">
+            {error}
+          </Title>
+          <Button
+            variant="primary"
+            size="md"
+            onClick={() => window.location.reload()}
+          >
+            Try Again
+          </Button>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className={`blog-screen ${className}`}>
@@ -140,65 +240,74 @@ const BlogScreen: React.FC<BlogScreenProps> = ({ className = "" }) => {
           </section>
 
           {/* Featured Blog Post */}
-          <section className="blog-featured">
-            <div className="blog-featured__image">
-              <img src={featuredBlogPost.image} alt={featuredBlogPost.title} />
-            </div>
-            <div className="blog-featured__content">
-              <div className="blog-featured__meta">
-                <Text className="blog-featured__date" color="secondary">
-                  {featuredBlogPost.publishDate}
-                </Text>
-              </div>
-              <Title
-                level="h3"
-                size="lg"
-                color="primary"
-                className="blog-featured__title"
-              >
-                {featuredBlogPost.title}
-              </Title>
-              <div className="blog-featured__excerpt">
-                {featuredBlogPost.excerpt
-                  .split("\n")
-                  .map((paragraph, index) => (
-                    <Text
-                      key={index}
-                      color="secondary"
-                      className="blog-featured__paragraph"
-                    >
-                      {paragraph}
+          {featuredPost && (
+            <section className="blog-featured">
+              {featuredPost.image && (
+                <div className="blog-featured__image">
+                  <img src={featuredPost.image} alt={featuredPost.tieu_de} />
+                </div>
+              )}
+              <div className="blog-featured__content">
+                <div className="blog-featured__meta">
+                  <Text className="blog-featured__date" color="secondary">
+                    {formatDate(featuredPost.created_at)}
+                  </Text>
+                  {featuredPost.author && (
+                    <Text className="blog-featured__author" color="secondary">
+                      By {featuredPost.author}
                     </Text>
-                  ))}
+                  )}
+                </div>
+                <Title
+                  level="h3"
+                  size="lg"
+                  color="primary"
+                  className="blog-featured__title"
+                >
+                  {featuredPost.tieu_de}
+                </Title>
+                <div className="blog-featured__excerpt">
+                  <Text
+                    color="secondary"
+                    className="blog-featured__paragraph"
+                  >
+                    {featuredPost.excerpt || getExcerpt(featuredPost.noi_dung, 200)}
+                  </Text>
+                </div>
+                <Button
+                  variant="outline"
+                  size="md"
+                  className="blog-featured__button"
+                  onClick={() => handleBlogClick(featuredPost)}
+                >
+                  Read More
+                </Button>
               </div>
-              <Button
-                variant="outline"
-                size="md"
-                className="blog-featured__button"
-              >
-                Read More
-              </Button>
-            </div>
-          </section>
+            </section>
+          )}
 
           {/* Blog Posts Grid */}
           <section className="blog-posts">
             <div className="blog-posts__grid">
               {displayedPosts.map((post) => (
                 <article key={post.id} className="blog-post-card">
-                  <div className="blog-post-card__image">
-                    <img src={post.image} alt={post.title} />
-                  </div>
+                  {post.image && (
+                    <div className="blog-post-card__image">
+                      <img src={post.image} alt={post.tieu_de} />
+                    </div>
+                  )}
                   <div className="blog-post-card__content">
                     <div className="blog-post-card__meta">
-                      <Text
-                        className="blog-post-card__author"
-                        color="secondary"
-                      >
-                        {post.author}
-                      </Text>
+                      {post.author && (
+                        <Text
+                          className="blog-post-card__author"
+                          color="secondary"
+                        >
+                          {post.author}
+                        </Text>
+                      )}
                       <Text className="blog-post-card__date" color="secondary">
-                        {post.publishDate}
+                        {formatDate(post.created_at)}
                       </Text>
                     </div>
                     <Title
@@ -207,15 +316,16 @@ const BlogScreen: React.FC<BlogScreenProps> = ({ className = "" }) => {
                       color="primary"
                       className="blog-post-card__title"
                     >
-                      {post.title}
+                      {post.tieu_de}
                     </Title>
                     <Text className="blog-post-card__excerpt" color="secondary">
-                      {post.excerpt}
+                      {post.excerpt || getExcerpt(post.noi_dung)}
                     </Text>
                     <Button
                       variant="outline"
                       size="sm"
                       className="blog-post-card__button"
+                      onClick={() => handleBlogClick(post)}
                     >
                       Read More
                     </Button>

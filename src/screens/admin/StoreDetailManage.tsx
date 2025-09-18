@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Title, Text, Button, Input, AdminStatsCard } from '../../components';
-import { stores, Store } from '../../dummyData';
+import { Cafe } from '../../services/types';
 import './StoreDetailManage.css';
 
 interface StoreDetailManageProps {
@@ -11,20 +11,26 @@ interface StoreDetailManageProps {
 const StoreDetailManage: React.FC<StoreDetailManageProps> = ({ className = '' }) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState('overview');
-  const [store, setStore] = useState<Store | null>(null);
+  const [store, setStore] = useState<Cafe | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState<Partial<Store>>({});
+  const [editForm, setEditForm] = useState<Partial<Cafe>>({});
 
   useEffect(() => {
     if (id) {
-      const foundStore = stores.find(s => s.id === parseInt(id));
-      if (foundStore) {
-        setStore(foundStore);
-        setEditForm(foundStore);
+      // First try to get from location state (if navigated from store list)
+      if (location.state?.store) {
+        setStore(location.state.store);
+        setEditForm(location.state.store);
+        return;
       }
+
+      // If not in state, this would require a separate API call
+      // For now, we'll show a message that store data is not available
+      setStore(null);
     }
-  }, [id]);
+  }, [id, location.state]);
 
   if (!store) {
     return (
@@ -34,7 +40,10 @@ const StoreDetailManage: React.FC<StoreDetailManageProps> = ({ className = '' })
             Store Not Found
           </Title>
           <Text variant="p" size="md" color="secondary">
-            The store you're looking for doesn't exist.
+            {location.state?.store 
+              ? 'Store data is not available. Please navigate from the store list.'
+              : 'The store you\'re looking for doesn\'t exist or data is not available.'
+            }
           </Text>
           <Button
             variant="primary"
@@ -66,11 +75,37 @@ const StoreDetailManage: React.FC<StoreDetailManageProps> = ({ className = '' })
     setIsEditing(false);
   };
 
-  const handleInputChange = (field: keyof Store, value: any) => {
+  const handleInputChange = (field: keyof Cafe, value: any) => {
     setEditForm(prev => ({
       ...prev,
       [field]: value
     }));
+  };
+
+  const getStatusLabel = (statusId: number | null | undefined) => {
+    switch (statusId) {
+      case 1:
+        return 'Waiting for Approval';
+      case 2:
+        return 'Active';
+      case 3:
+        return 'Deleted';
+      default:
+        return 'Unknown';
+    }
+  };
+
+  const getStatusClass = (statusId: number | null | undefined) => {
+    switch (statusId) {
+      case 1:
+        return 'pending';
+      case 2:
+        return 'active';
+      case 3:
+        return 'deleted';
+      default:
+        return 'unknown';
+    }
   };
 
   const tabs = [
@@ -86,28 +121,28 @@ const StoreDetailManage: React.FC<StoreDetailManageProps> = ({ className = '' })
     <div className="store-detail-manage__overview">
       <div className="store-detail-manage__stats-grid">
         <AdminStatsCard
-          title="Total Reviews"
-          value={store.reviewCount.toString()}
-          icon="⭐"
-          trend={{ value: 12, isPositive: true }}
+          title="Store ID"
+          value={store.id_cua_hang.toString()}
+          icon="🆔"
+          trend={{ value: 0, isPositive: true }}
         />
         <AdminStatsCard
           title="Average Rating"
-          value={store.rating.toFixed(1)}
-          icon="📊"
-          trend={{ value: 5, isPositive: true }}
+          value={parseFloat(store.diem_danh_gia_trung_binh).toFixed(1)}
+          icon="⭐"
+          trend={{ value: 0, isPositive: true }}
         />
         <AdminStatsCard
-          title="Products Listed"
-          value="24"
-          icon="☕"
-          trend={{ value: 3, isPositive: true }}
+          title="Total Views"
+          value={store.luot_xem.toString()}
+          icon="👁️"
+          trend={{ value: 0, isPositive: true }}
         />
         <AdminStatsCard
-          title="Monthly Visitors"
-          value="1,234"
-          icon="👥"
-          trend={{ value: 8, isPositive: true }}
+          title="Owner ID"
+          value={store.id_chu_so_huu.toString()}
+          icon="👤"
+          trend={{ value: 0, isPositive: true }}
         />
       </div>
 
@@ -117,28 +152,25 @@ const StoreDetailManage: React.FC<StoreDetailManageProps> = ({ className = '' })
             Store Status
           </Title>
           <div className="store-detail-manage__status-info">
-            <div className={`store-detail-manage__status-badge store-detail-manage__status-badge--${store.isActive ? 'active' : 'inactive'}`}>
-              {store.isActive ? 'Active' : 'Inactive'}
-            </div>
-            <div className={`store-detail-manage__status-badge store-detail-manage__status-badge--${store.isOpen ? 'open' : 'closed'}`}>
-              {store.isOpen ? 'Open' : 'Closed'}
+            <div className={`store-detail-manage__status-badge store-detail-manage__status-badge--${getStatusClass(store.id_trang_thai)}`}>
+              {getStatusLabel(store.id_trang_thai)}
             </div>
           </div>
         </div>
 
         <div className="store-detail-manage__info-card">
           <Title level="h3" size="md" color="primary">
-            Contact Information
+            Store Information
           </Title>
           <div className="store-detail-manage__contact-info">
             <Text variant="p" size="sm" color="primary">
-              📞 {store.phone}
+              🏪 {store.ten_cua_hang}
             </Text>
             <Text variant="p" size="sm" color="primary">
-              ✉️ {store.email}
+              📝 {store.mo_ta || 'No description available'}
             </Text>
             <Text variant="p" size="sm" color="primary">
-              🕒 {store.hours}
+              📅 Created: {new Date(store.ngay_tao).toLocaleDateString()}
             </Text>
           </div>
         </div>
@@ -158,97 +190,90 @@ const StoreDetailManage: React.FC<StoreDetailManageProps> = ({ className = '' })
             <label className="store-detail-manage__label">Store Name</label>
             <Input
               type="text"
-              value={isEditing ? editForm.name || '' : store.name}
-              onChange={(e) => handleInputChange('name', e.target.value)}
+              value={isEditing ? editForm.ten_cua_hang || '' : store.ten_cua_hang}
+              onChange={(e) => handleInputChange('ten_cua_hang', e.target.value)}
               disabled={!isEditing}
               className="store-detail-manage__input"
             />
           </div>
 
           <div className="store-detail-manage__form-group">
-            <label className="store-detail-manage__label">Owner</label>
+            <label className="store-detail-manage__label">Store ID</label>
             <Input
               type="text"
-              value={isEditing ? editForm.owner || '' : store.owner}
-              onChange={(e) => handleInputChange('owner', e.target.value)}
-              disabled={!isEditing}
+              value={store.id_cua_hang.toString()}
+              disabled={true}
               className="store-detail-manage__input"
             />
           </div>
 
           <div className="store-detail-manage__form-group">
-            <label className="store-detail-manage__label">Address</label>
+            <label className="store-detail-manage__label">Owner ID</label>
             <Input
               type="text"
-              value={isEditing ? editForm.address || '' : store.address}
-              onChange={(e) => handleInputChange('address', e.target.value)}
-              disabled={!isEditing}
+              value={store.id_chu_so_huu.toString()}
+              disabled={true}
               className="store-detail-manage__input"
             />
           </div>
 
           <div className="store-detail-manage__form-group">
-            <label className="store-detail-manage__label">City</label>
+            <label className="store-detail-manage__label">Description</label>
             <Input
               type="text"
-              value={isEditing ? editForm.city || '' : store.city}
-              onChange={(e) => handleInputChange('city', e.target.value)}
+              value={isEditing ? editForm.mo_ta || '' : store.mo_ta || ''}
+              onChange={(e) => handleInputChange('mo_ta', e.target.value)}
               disabled={!isEditing}
               className="store-detail-manage__input"
             />
           </div>
 
           <div className="store-detail-manage__form-group">
-            <label className="store-detail-manage__label">State</label>
+            <label className="store-detail-manage__label">Average Rating</label>
             <Input
               type="text"
-              value={isEditing ? editForm.state || '' : store.state}
-              onChange={(e) => handleInputChange('state', e.target.value)}
-              disabled={!isEditing}
+              value={parseFloat(store.diem_danh_gia_trung_binh).toFixed(1)}
+              disabled={true}
               className="store-detail-manage__input"
             />
           </div>
 
           <div className="store-detail-manage__form-group">
-            <label className="store-detail-manage__label">Zip Code</label>
+            <label className="store-detail-manage__label">Total Views</label>
             <Input
               type="text"
-              value={isEditing ? editForm.zipCode || '' : store.zipCode}
-              onChange={(e) => handleInputChange('zipCode', e.target.value)}
-              disabled={!isEditing}
+              value={store.luot_xem.toString()}
+              disabled={true}
               className="store-detail-manage__input"
             />
           </div>
 
           <div className="store-detail-manage__form-group">
-            <label className="store-detail-manage__label">Phone</label>
+            <label className="store-detail-manage__label">Status ID</label>
             <Input
               type="text"
-              value={isEditing ? editForm.phone || '' : store.phone}
-              onChange={(e) => handleInputChange('phone', e.target.value)}
-              disabled={!isEditing}
+              value={store.id_trang_thai?.toString() || 'Not set'}
+              disabled={true}
               className="store-detail-manage__input"
             />
           </div>
 
           <div className="store-detail-manage__form-group">
-            <label className="store-detail-manage__label">Email</label>
-            <Input
-              type="email"
-              value={isEditing ? editForm.email || '' : store.email}
-              onChange={(e) => handleInputChange('email', e.target.value)}
-              disabled={!isEditing}
-              className="store-detail-manage__input"
-            />
-          </div>
-
-          <div className="store-detail-manage__form-group">
-            <label className="store-detail-manage__label">Hours</label>
+            <label className="store-detail-manage__label">Location ID</label>
             <Input
               type="text"
-              value={isEditing ? editForm.hours || '' : store.hours}
-              onChange={(e) => handleInputChange('hours', e.target.value)}
-              disabled={!isEditing}
+              value={store.id_vi_tri?.toString() || 'Not set'}
+              disabled={true}
+              className="store-detail-manage__input"
+            />
+          </div>
+
+          <div className="store-detail-manage__form-group">
+            <label className="store-detail-manage__label">Created Date</label>
+            <Input
+              type="text"
+              value={new Date(store.ngay_tao).toLocaleDateString()}
+              disabled={true}
               className="store-detail-manage__input"
             />
           </div>
@@ -327,10 +352,10 @@ const StoreDetailManage: React.FC<StoreDetailManageProps> = ({ className = '' })
         </Title>
         <div className="store-detail-manage__review-stats">
           <Text variant="p" size="md" color="primary">
-            Average Rating: {store.rating.toFixed(1)} ⭐
+            Average Rating: {parseFloat(store.diem_danh_gia_trung_binh).toFixed(1)} ⭐
           </Text>
           <Text variant="p" size="sm" color="muted">
-            Based on {store.reviewCount} reviews
+            Total Views: {store.luot_xem}
           </Text>
         </div>
       </div>
@@ -424,17 +449,21 @@ const StoreDetailManage: React.FC<StoreDetailManageProps> = ({ className = '' })
           </Button>
           <div className="store-detail-manage__title-section">
             <Title level="h1" size="xl" color="primary" className="store-detail-manage__title">
-              {store.name}
+              {store.ten_cua_hang}
             </Title>
             <Text variant="p" size="md" color="secondary" className="store-detail-manage__subtitle">
-              {store.address}, {store.city}, {store.state} {store.zipCode}
+              ID: {store.id_cua_hang} • Owner: {store.id_chu_so_huu}
             </Text>
           </div>
         </div>
         
         <div className="store-detail-manage__header-right">
           <div className="store-detail-manage__store-image">
-            <img src={store.image} alt={store.name} className="store-detail-manage__image" />
+            <img 
+              src={'https://via.placeholder.com/80x80/8B4513/FFFFFF?text=☕'} 
+              alt={store.ten_cua_hang} 
+              className="store-detail-manage__image" 
+            />
           </div>
         </div>
       </div>

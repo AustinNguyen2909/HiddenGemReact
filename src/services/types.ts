@@ -5,6 +5,13 @@ export interface BaseData<T> {
   data: T;
 }
 
+export interface BaseListData<T> {
+  items: T;
+  page: number;
+  per_page: number;
+  total: number;
+}
+
 // Auth
 export type LoginRequest = { email?: string; username?: string; password: string };
 export type TokenResponse = { access_token: string; refresh_token: string };
@@ -17,6 +24,16 @@ export type ChangePasswordRequest = { current_password: string; new_password: st
 export type VerifyEmailConfirmRequest = { token: string };
 
 // Users
+export interface User {
+  id_user: number;
+  email: string;
+  full_name: string;
+  username: string;
+  phone_number: string;
+  joined_at: string;
+  role: 'customer' | 'admin' | 'moderator';
+}
+
 export type UpdateProfileRequest = { full_name?: string; phone_number?: string; email?: string };
 export type ConsentRequest = { terms_version?: string; privacy_version?: string };
 

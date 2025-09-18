@@ -9,6 +9,22 @@
   background-color: var(--color-bg-primary);
 }
 
+/* Loading and Error States */
+.promotion-screen__loading,
+.promotion-screen__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  padding: var(--spacing-xl);
+}
+
+.promotion-screen__error {
+  gap: var(--spacing-lg);
+}
+
 /* ========================================
    HERO SECTION
    ======================================== */

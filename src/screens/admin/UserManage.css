@@ -11,6 +11,22 @@
   overflow-x: hidden;
 }
 
+/* Loading and Error States */
+.user-manage__loading,
+.user-manage__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  padding: var(--spacing-xl);
+}
+
+.user-manage__error {
+  gap: var(--spacing-lg);
+}
+
 .user-manage__header {
   display: flex;
   align-items: flex-start;

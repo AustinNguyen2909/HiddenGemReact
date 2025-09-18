@@ -9,6 +9,112 @@
   max-width: 100%;
 }
 
+/* Loading and Error States */
+.stores-manage__loading,
+.stores-manage__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  padding: var(--spacing-xl);
+}
+
+.stores-manage__error {
+  gap: var(--spacing-lg);
+}
+
+/* Store Image Styles */
+.stores-manage__store-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+}
+
+.stores-manage__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Status Badge Styles */
+.stores-manage__status-badge {
+  display: inline-block;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stores-manage__status-badge--pending {
+  background-color: #fef3c7;
+  color: #d97706;
+  border: 1px solid #fbbf24;
+}
+
+.stores-manage__status-badge--active {
+  background-color: #d1fae5;
+  color: #059669;
+  border: 1px solid #10b981;
+}
+
+.stores-manage__status-badge--deleted {
+  background-color: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #f87171;
+}
+
+.stores-manage__status-badge--unknown {
+  background-color: #f3f4f6;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+}
+
+/* Status Cell Styles */
+.stores-manage__status-cell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  align-items: flex-start;
+}
+
+.stores-manage__approve-btn {
+  font-size: 0.75rem;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  min-width: auto;
+}
+
+/* Modal Styles */
+.stores-manage__modal-text {
+  margin-bottom: var(--spacing-sm);
+}
+
+.stores-manage__modal-subtext {
+  margin-bottom: var(--spacing-lg);
+  opacity: 0.8;
+}
+
+.stores-manage__modal-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: flex-end;
+}
+
+.stores-manage__modal-approve-btn {
+  min-width: 120px;
+}
+
+.stores-manage__modal-cancel-btn {
+  min-width: 80px;
+}
+
 .stores-manage__header {
   display: flex;
   align-items: flex-start;
@@ -308,4 +414,29 @@
 
 [data-theme="dark"] .stores-manage__modal-header {
   border-bottom-color: var(--color-border-dark);
+}
+
+/* Dark Theme Status Badges */
+[data-theme="dark"] .stores-manage__status-badge--pending {
+  background-color: #451a03;
+  color: #fbbf24;
+  border-color: #f59e0b;
+}
+
+[data-theme="dark"] .stores-manage__status-badge--active {
+  background-color: #064e3b;
+  color: #34d399;
+  border-color: #10b981;
+}
+
+[data-theme="dark"] .stores-manage__status-badge--deleted {
+  background-color: #7f1d1d;
+  color: #f87171;
+  border-color: #ef4444;
+}
+
+[data-theme="dark"] .stores-manage__status-badge--unknown {
+  background-color: #374151;
+  color: #9ca3af;
+  border-color: #6b7280;
 }

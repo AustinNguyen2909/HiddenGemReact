@@ -1,7 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Title, Text, Button, Input, AdminTable } from '../../components';
-import { users, userStatuses, userRoles, userFilter, userSortOptions, locationOptions, User } from '../../dummyData';
+import { adminService } from '../../services/admin';
+import { User } from '../../services/types';
 import './UserManage.css';
 
 interface UserManageProps {
@@ -10,72 +11,108 @@ interface UserManageProps {
 
 const UserManage: React.FC<UserManageProps> = ({ className = '' }) => {
   const navigate = useNavigate();
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
   const [roleFilter, setRoleFilter] = useState('all');
-  const [locationFilter, setLocationFilter] = useState('all');
   const [sortBy, setSortBy] = useState('name-asc');
   const [showAddModal, setShowAddModal] = useState(false);
+
+  // Fetch users from API
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setLoading(true);
+        const response = await adminService.getUsers();
+        console.log('response', response)
+        setUsers(response.data);
+      } catch (err) {
+        setError('Failed to load users');
+        console.error('Error fetching users:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
+  // Static data for filters
+  const userRoles = [
+    { id: 'all', label: 'All Roles' },
+    { id: 'customer', label: 'Customer' },
+    { id: 'admin', label: 'Admin' },
+    { id: 'moderator', label: 'Moderator' }
+  ];
+
+  const userSortOptions = [
+    { value: 'name-asc', label: 'Name A-Z' },
+    { value: 'name-desc', label: 'Name Z-A' },
+    { value: 'email-asc', label: 'Email A-Z' },
+    { value: 'email-desc', label: 'Email Z-A' },
+    { value: 'join-desc', label: 'Newest First' },
+    { value: 'join-asc', label: 'Oldest First' }
+  ];
+
+  const userFilter = {
+    searchPlaceholder: 'Search users...'
+  };
 
   // Filter and sort users
   const filteredAndSortedUsers = useMemo(() => {
     let filtered = users.filter(user => {
-      const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
+      const fullName = user.full_name.toLowerCase();
       const matchesSearch = fullName.includes(searchTerm.toLowerCase()) ||
-                           user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           user.location.city.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesStatus = statusFilter === 'all' || user.status === statusFilter;
+        user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.username.toLowerCase().includes(searchTerm.toLowerCase());
+
       const matchesRole = roleFilter === 'all' || user.role === roleFilter;
-      const matchesLocation = locationFilter === 'all' || 
-                             user.location.city.toLowerCase() === locationFilter.toLowerCase();
-      
-      return matchesSearch && matchesStatus && matchesRole && matchesLocation;
+
+      return matchesSearch && matchesRole;
     });
 
     // Sort users
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'name-asc':
-          return `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`);
+          return a.full_name.localeCompare(b.full_name);
         case 'name-desc':
-          return `${b.firstName} ${b.lastName}`.localeCompare(`${a.firstName} ${a.lastName}`);
+          return b.full_name.localeCompare(a.full_name);
         case 'email-asc':
           return a.email.localeCompare(b.email);
         case 'email-desc':
           return b.email.localeCompare(a.email);
         case 'join-desc':
-          return new Date(b.joinDate).getTime() - new Date(a.joinDate).getTime();
+          return new Date(b.joined_at).getTime() - new Date(a.joined_at).getTime();
         case 'join-asc':
-          return new Date(a.joinDate).getTime() - new Date(b.joinDate).getTime();
+          return new Date(a.joined_at).getTime() - new Date(b.joined_at).getTime();
         case 'orders-desc':
-          return b.totalOrders - a.totalOrders;
         case 'orders-asc':
-          return a.totalOrders - b.totalOrders;
         case 'spent-desc':
-          return b.totalSpent - a.totalSpent;
         case 'spent-asc':
-          return a.totalSpent - b.totalSpent;
+          // These fields don't exist in the API, so just return 0
+          return 0;
         default:
           return 0;
       }
     });
 
     return filtered;
-  }, [searchTerm, statusFilter, roleFilter, locationFilter, sortBy]);
+  }, [users, searchTerm, roleFilter, sortBy]);
 
   const handleViewUser = (user: User) => {
-    navigate(`/admin/users/${user.id}`);
+    navigate(`/admin/users/${user.id_user}`, { state: { user } });
   };
 
   const handleEditUser = (user: User) => {
-    navigate(`/admin/users/${user.id}/edit`);
+    navigate(`/admin/users/${user.id_user}/edit`);
   };
 
   const handleDeleteUser = (user: User) => {
-    if (window.confirm(`Are you sure you want to delete user "${user.firstName} ${user.lastName}"?`)) {
+    if (window.confirm(`Are you sure you want to delete user "${user.full_name}"?`)) {
       // In a real app, this would make an API call
-      console.log('Delete user:', user.id);
+      console.log('Delete user:', user.id_user);
     }
   };
 
@@ -88,14 +125,6 @@ const UserManage: React.FC<UserManageProps> = ({ className = '' }) => {
     console.log('Sort by:', key, direction);
   };
 
-  const getStatusBadge = (status: string) => {
-    const statusConfig = userStatuses.find(s => s.id === status);
-    return (
-      <span className={`user-manage__status-badge user-manage__status-badge--${status}`}>
-        {statusConfig?.label || status}
-      </span>
-    );
-  };
 
   const getRoleBadge = (role: string) => {
     const roleConfig = userRoles.find(r => r.id === role);
@@ -113,7 +142,7 @@ const UserManage: React.FC<UserManageProps> = ({ className = '' }) => {
       width: '80px',
       render: (value: string, item: User) => (
         <div className="user-manage__avatar">
-          <img src={item.avatar} alt={`${item.firstName} ${item.lastName}`} className="user-manage__avatar-img" />
+          <img src={'https://icons.veryicon.com/png/o/miscellaneous/two-color-webpage-small-icon/user-244.png'} alt={item.full_name} className="user-manage__avatar-img" />
         </div>
       )
     },
@@ -125,7 +154,7 @@ const UserManage: React.FC<UserManageProps> = ({ className = '' }) => {
       render: (value: string, item: User) => (
         <div className="user-manage__user-info">
           <Text variant="p" size="sm" color="primary" className="user-manage__user-name">
-            {item.firstName} {item.lastName}
+            {item.full_name}
           </Text>
           <Text variant="p" size="xs" color="muted" className="user-manage__user-email">
             {item.email}
@@ -140,13 +169,27 @@ const UserManage: React.FC<UserManageProps> = ({ className = '' }) => {
       render: (value: string) => getRoleBadge(value)
     },
     {
-      key: 'status',
-      label: 'Status',
-      width: '120px',
-      render: (value: string) => getStatusBadge(value)
+      key: 'username',
+      label: 'Username',
+      width: '150px',
+      render: (value: string, item: User) => (
+        <Text variant="span" size="sm" color="muted">
+          {item.username}
+        </Text>
+      )
     },
     {
-      key: 'joinDate',
+      key: 'phone',
+      label: 'Phone',
+      width: '120px',
+      render: (value: string, item: User) => (
+        <Text variant="span" size="sm" color="muted">
+          {item.phone_number}
+        </Text>
+      )
+    },
+    {
+      key: 'joined_at',
       label: 'Joined',
       sortable: true,
       width: '120px',
@@ -157,6 +200,35 @@ const UserManage: React.FC<UserManageProps> = ({ className = '' }) => {
       )
     }
   ];
+
+  if (loading) {
+    return (
+      <div className={`user-manage ${className}`}>
+        <div className="user-manage__loading">
+          <Text>Loading users...</Text>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={`user-manage ${className}`}>
+        <div className="user-manage__error">
+          <Title level="h1" size="lg" color="primary">
+            {error}
+          </Title>
+          <Button
+            variant="primary"
+            size="md"
+            onClick={() => window.location.reload()}
+          >
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`user-manage ${className}`}>
@@ -169,7 +241,7 @@ const UserManage: React.FC<UserManageProps> = ({ className = '' }) => {
             Manage all users in your platform
           </Text>
         </div>
-        
+
         <div className="user-manage__actions">
           <Button
             variant="primary"
@@ -195,20 +267,6 @@ const UserManage: React.FC<UserManageProps> = ({ className = '' }) => {
 
         <div className="user-manage__filter-group">
           <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="user-manage__filter-select"
-          >
-            {userStatuses.map((status) => (
-              <option key={status.id} value={status.id}>
-                {status.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="user-manage__filter-group">
-          <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
             className="user-manage__filter-select"
@@ -216,20 +274,6 @@ const UserManage: React.FC<UserManageProps> = ({ className = '' }) => {
             {userRoles.map((role) => (
               <option key={role.id} value={role.id}>
                 {role.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="user-manage__filter-group">
-          <select
-            value={locationFilter}
-            onChange={(e) => setLocationFilter(e.target.value)}
-            className="user-manage__filter-select"
-          >
-            {locationOptions.map((location) => (
-              <option key={location.value} value={location.value}>
-                {location.label}
               </option>
             ))}
           </select>
@@ -261,10 +305,18 @@ const UserManage: React.FC<UserManageProps> = ({ className = '' }) => {
         </div>
         <div className="user-manage__stat">
           <Text variant="p" size="sm" color="muted" className="user-manage__stat-label">
-            Active Users
+            Customers
           </Text>
           <Text variant="p" size="lg" color="primary" className="user-manage__stat-value">
-            {filteredAndSortedUsers.filter(user => user.status === 'active').length}
+            {filteredAndSortedUsers.filter(user => user.role === 'customer').length}
+          </Text>
+        </div>
+        <div className="user-manage__stat">
+          <Text variant="p" size="sm" color="muted" className="user-manage__stat-label">
+            Admins
+          </Text>
+          <Text variant="p" size="lg" color="primary" className="user-manage__stat-value">
+            {filteredAndSortedUsers.filter(user => user.role === 'admin').length}
           </Text>
         </div>
         <div className="user-manage__stat">
@@ -273,19 +325,11 @@ const UserManage: React.FC<UserManageProps> = ({ className = '' }) => {
           </Text>
           <Text variant="p" size="lg" color="primary" className="user-manage__stat-value">
             {filteredAndSortedUsers.filter(user => {
-              const joinDate = new Date(user.joinDate);
+              const joinDate = new Date(user.joined_at);
               const oneMonthAgo = new Date();
               oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
               return joinDate >= oneMonthAgo;
             }).length}
-          </Text>
-        </div>
-        <div className="user-manage__stat">
-          <Text variant="p" size="sm" color="muted" className="user-manage__stat-label">
-            Total Revenue
-          </Text>
-          <Text variant="p" size="lg" color="primary" className="user-manage__stat-value">
-            ${filteredAndSortedUsers.reduce((sum, user) => sum + user.totalSpent, 0).toFixed(2)}
           </Text>
         </div>
       </div>

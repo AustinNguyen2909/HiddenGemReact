@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Title, Text, Button, AdminStatsCard } from '../../components';
+import { adminService } from '../../services/admin';
+import { AdminDashboardData } from '../../services/types';
 import './AdminDashboard.css';
 
 interface AdminDashboardProps {
@@ -9,44 +11,114 @@ interface AdminDashboardProps {
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ className = '' }) => {
   const navigate = useNavigate();
+  const [dashboardData, setDashboardData] = useState<AdminDashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const statsData = [
+  console.log('dashboardData', dashboardData)
+
+  // Fetch dashboard data from API
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        const response = await adminService.dashboard();
+        setDashboardData(response.data);
+      } catch (err) {
+        setError('Failed to load dashboard data');
+        console.error('Error fetching dashboard data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  // Format numbers with commas
+  const formatNumber = (num: number) => {
+    return num.toLocaleString();
+  };
+
+  // Generate stats data from API response
+  const statsData = dashboardData ? [
     {
       title: 'Total Users',
-      value: '1,234',
+      value: formatNumber(dashboardData.users),
       icon: '👥',
-      trend: { value: 12, isPositive: true }
+      trend: { value: 12, isPositive: true } // This would come from a separate API in a real app
     },
     {
       title: 'Coffee Shops',
-      value: '89',
+      value: formatNumber(dashboardData.shops),
       icon: '🏪',
       trend: { value: 5, isPositive: true }
     },
     {
-      title: 'Active Promotions',
-      value: '12',
-      icon: '🎯',
-      trend: { value: 3, isPositive: false }
+      title: 'Stores',
+      value: formatNumber(dashboardData.stores),
+      icon: '🏬',
+      trend: { value: 3, isPositive: true }
     },
     {
       title: 'Reviews',
-      value: '5,678',
+      value: formatNumber(dashboardData.reviews),
       icon: '💬',
       trend: { value: 8, isPositive: true }
+    },
+    {
+      title: 'Vouchers',
+      value: formatNumber(dashboardData.vouchers),
+      icon: '🎫',
+      trend: { value: 2, isPositive: true }
+    },
+    {
+      title: 'Promotions',
+      value: formatNumber(dashboardData.promos),
+      icon: '🎯',
+      trend: { value: 4, isPositive: true }
     }
-  ];
+  ] : [];
 
   const quickActions = [
-    { label: 'Manage Coffee Shops', path: '/admin/coffee-shops', icon: '🏪' },
-    { label: 'Create Promotion', path: '/admin/promotions', icon: '🎯' },
-    { label: 'View Analytics', path: '/admin/analytics', icon: '📈' },
-    { label: 'User Management', path: '/admin/users', icon: '👥' }
+    { label: 'Manage Stores', path: '/admin/stores', icon: '🏪' },
+    { label: 'Manage Promotions', path: '/admin/store/promotion/manage', icon: '🎯' },
+    { label: 'Manage Users', path: '/admin/users', icon: '👥' },
+    { label: 'Manage Banners', path: '/admin/banners', icon: '📢' }
   ];
 
   const handleQuickAction = (path: string) => {
     navigate(path);
   };
+
+  if (loading) {
+    return (
+      <div className={`admin-dashboard ${className}`}>
+        <div className="admin-dashboard__loading">
+          <Text>Loading dashboard data...</Text>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={`admin-dashboard ${className}`}>
+        <div className="admin-dashboard__error">
+          <Title level="h1" size="lg" color="primary">
+            {error}
+          </Title>
+          <Button
+            variant="primary"
+            size="md"
+            onClick={() => window.location.reload()}
+          >
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`admin-dashboard ${className}`}>
