@@ -1,5 +1,6 @@
-import React from 'react';
-import { Footer } from '../../components';
+import React, { useState, useEffect } from 'react';
+import { Footer, ProfileEditModal } from '../../components';
+import { meService, UserProfile } from '../../services/me';
 import './UserProfileScreen.css';
 
 interface UserProfileScreenProps {
@@ -7,8 +8,45 @@ interface UserProfileScreenProps {
 }
 
 const UserProfileScreen: React.FC<UserProfileScreenProps> = ({ className = '' }) => {
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  // Sample data for the profile sections
+  console.log('userProfile', userProfile)
+
+  const fetchUserProfile = async () => {
+    try {
+      setLoading(true);
+      const profile = await meService.getProfile();
+      setUserProfile(profile.data);
+      setError(null);
+    } catch (err) {
+      console.error('Failed to fetch user profile:', err);
+      setError('Failed to load profile data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch user profile data
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
+
+  const handleEditClick = () => {
+    setIsEditModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsEditModalOpen(false);
+  };
+
+  const handleProfileUpdated = () => {
+    fetchUserProfile();
+  };
+
+  // Sample data for other sections (to be updated later)
   const profileData = {
     name: "I am Cat, 21",
     bio: "So be careful, the snobbish cat",
@@ -47,6 +85,40 @@ const UserProfileScreen: React.FC<UserProfileScreenProps> = ({ className = '' })
     }
   };
 
+  // Loading state
+  if (loading) {
+    return (
+      <div className={`user-profile-screen ${className}`}>
+        <main className="profile-main">
+          <div className="profile-container">
+            <div className="loading-container">
+              <div className="loading-spinner"></div>
+              <p>Loading profile...</p>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className={`user-profile-screen ${className}`}>
+        <main className="profile-main">
+          <div className="profile-container">
+            <div className="error-container">
+              <p>Error: {error}</p>
+              <button onClick={() => window.location.reload()}>Retry</button>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className={`user-profile-screen ${className}`}>
       <main className="profile-main">
@@ -55,7 +127,7 @@ const UserProfileScreen: React.FC<UserProfileScreenProps> = ({ className = '' })
           <div className="avatar-section">
             <div className="avatar-card">
               <div className="avatar-image">
-                <img src="/api/placeholder/264/264" alt="Profile" />
+                <img src={'https://icons.veryicon.com/png/o/miscellaneous/two-color-webpage-small-icon/user-244.png'} alt="Profile" />
               </div>
               <div className="avatar-actions">
                 <button className="become-vendor-btn">
@@ -74,10 +146,24 @@ const UserProfileScreen: React.FC<UserProfileScreenProps> = ({ className = '' })
           {/* Profile Info Section */}
           <div className="profile-info-section">
             <div className="profile-header">
-              <h1 className="profile-name">{profileData.name}</h1>
-              <button className="edit-btn">Edit</button>
+              <h1 className="profile-name">
+                {userProfile?.full_name || userProfile?.username || 'User'}
+              </h1>
+              <button className="edit-btn" onClick={handleEditClick}>Edit</button>
             </div>
-            <p className="profile-bio">{profileData.bio}</p>
+            <p className="profile-bio">
+              {userProfile?.email || 'No bio available'}
+            </p>
+            {userProfile?.phone_number && (
+              <p className="profile-phone">
+                📞 {userProfile.phone_number}
+              </p>
+            )}
+            {userProfile?.role && (
+              <p className="profile-role">
+                👤 {userProfile.role}
+              </p>
+            )}
             <div className="divider"></div>
           </div>
 
@@ -192,6 +278,14 @@ const UserProfileScreen: React.FC<UserProfileScreenProps> = ({ className = '' })
       </main>
 
       <Footer />
+
+      {/* Profile Edit Modal */}
+      <ProfileEditModal
+        isOpen={isEditModalOpen}
+        onClose={handleModalClose}
+        userProfile={userProfile}
+        onProfileUpdated={handleProfileUpdated}
+      />
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import apiClient from './api';
-import { UpdateProfileRequest, ConsentRequest } from './types';
+import { UpdateProfileRequest, ConsentRequest, BaseData } from './types';
 
 export interface UserProfile {
   id: number;
@@ -11,12 +11,12 @@ export interface UserProfile {
 }
 
 class MeService {
-  getProfile(): Promise<UserProfile> {
-    return apiClient.get<UserProfile>('/me/profile');
+  getProfile(): Promise<BaseData<UserProfile>> {
+    return apiClient.get<BaseData<UserProfile>>('/me/profile');
   }
 
-  updateProfile(payload: UpdateProfileRequest): Promise<UserProfile> {
-    return apiClient.patch<UserProfile>('/me/profile', payload);
+  updateProfile(payload: UpdateProfileRequest): Promise<BaseData<UserProfile>> {
+    return apiClient.patch<BaseData<UserProfile>>('/me/profile', payload);
   }
 
   recordConsent(payload: ConsentRequest): Promise<void> {

@@ -27,6 +27,7 @@ export { default as InfoCard } from './InfoCard';
 export { default as LocationItem } from './LocationItem';
 export { default as StoreCard } from './StoreCard';
 export { default as MapComponent } from './MapComponent';
+export { default as ProfileEditModal } from './ProfileEditModal';
 
 // Carousel Components
 export { default as HeroCarousel } from './HeroCarousel';
