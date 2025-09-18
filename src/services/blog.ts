@@ -2,18 +2,11 @@ import apiClient from './api';
 import { BaseListData, BlogCreateRequest, BlogUpdateRequest } from './types';
 
 export interface BlogPost {
-  id: number;
+  id_blog: number;
   tieu_de: string;
   noi_dung: string;
-  created_at?: string;
-  // Additional fields for display
-  excerpt?: string;
   author?: string;
-  publishDate?: string;
-  category?: string;
-  image?: string;
-  readTime?: string;
-  featured?: boolean;
+  thoi_gian_tao?: string;
 }
 
 export interface BlogListResponse {
@@ -31,6 +24,17 @@ class BlogService {
 
   update(id: number, payload: BlogUpdateRequest): Promise<BlogPost> {
     return apiClient.patch<BlogPost>(`/blog/${id}`, payload);
+  }
+
+  async getById(id: number): Promise<BlogPost | null> {
+    try {
+      const response = await this.list();
+      const blog = response.data.items.find((item: BlogPost) => item.id_blog === id);
+      return blog || null;
+    } catch (error) {
+      console.error('Error fetching blog by ID:', error);
+      return null;
+    }
   }
 }
 

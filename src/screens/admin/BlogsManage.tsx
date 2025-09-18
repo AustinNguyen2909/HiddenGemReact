@@ -1,7 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Title, Text, Button, Input, AdminStatsCard, AdminTable } from '../../components';
-import { blogs, blogStatuses, adminBlogCategories, blogAuthors, blogSortOptions, Blog, BlogStatus } from '../../dummyData';
+import { blogService, BlogPost } from '../../services/blog';
 import './BlogsManage.css';
 
 interface BlogsManageProps {
@@ -11,37 +11,59 @@ interface BlogsManageProps {
 const BlogsManage: React.FC<BlogsManageProps> = ({ className = '' }) => {
   const navigate = useNavigate();
   
+  // Data states
+  const [blogs, setBlogs] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<BlogStatus | 'all'>('all');
-  const [categoryFilter, setCategoryFilter] = useState('all');
   const [authorFilter, setAuthorFilter] = useState('all');
   
   // Sort states
-  const [sortColumn, setSortColumn] = useState<string>('publishedAt');
+  const [sortColumn, setSortColumn] = useState<string>('thoi_gian_tao');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
+  // Fetch blogs data
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await blogService.list(searchTerm || undefined);
+        console.log(response.data.items);
+        setBlogs(response.data.items || []);
+      } catch (err) {
+        setError('Failed to fetch blogs');
+        console.error('Error fetching blogs:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBlogs();
+  }, [searchTerm]);
 
   // Filter and sort blogs
   const filteredAndSortedBlogs = useMemo(() => {
     let filtered = blogs.filter(blog => {
-      const matchesSearch = blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           blog.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           blog.author.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus = statusFilter === 'all' || blog.status === statusFilter;
-      const matchesCategory = categoryFilter === 'all' || blog.category === categoryFilter;
-      const matchesAuthor = authorFilter === 'all' || blog.author === authorFilter;
+      const matchesSearch = blog.tieu_de.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           blog.noi_dung.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           (blog.author && blog.author.toLowerCase().includes(searchTerm.toLowerCase()));
+      const matchesAuthor = authorFilter === 'all' || 
+        (blog.author && blog.author === authorFilter);
       
-      return matchesSearch && matchesStatus && matchesCategory && matchesAuthor;
+      return matchesSearch && matchesAuthor;
     });
 
     // Sort blogs
     filtered.sort((a, b) => {
-      let aValue: any = a[sortColumn as keyof Blog];
-      let bValue: any = b[sortColumn as keyof Blog];
+      let aValue: any = a[sortColumn as keyof BlogPost];
+      let bValue: any = b[sortColumn as keyof BlogPost];
       
-      if (sortColumn === 'publishedAt' || sortColumn === 'updatedAt') {
-        aValue = new Date(aValue).getTime();
-        bValue = new Date(bValue).getTime();
+      if (sortColumn === 'thoi_gian_tao') {
+        aValue = new Date(aValue || 0).getTime();
+        bValue = new Date(bValue || 0).getTime();
       }
       
       if (typeof aValue === 'string') {
@@ -57,7 +79,7 @@ const BlogsManage: React.FC<BlogsManageProps> = ({ className = '' }) => {
     });
 
     return filtered;
-  }, [searchTerm, statusFilter, categoryFilter, authorFilter, sortColumn, sortDirection]);
+  }, [blogs, searchTerm, authorFilter, sortColumn, sortDirection]);
 
   // Statistics
   const statsData = [
@@ -68,21 +90,30 @@ const BlogsManage: React.FC<BlogsManageProps> = ({ className = '' }) => {
       trend: { value: 12, isPositive: true }
     },
     {
-      title: 'Published',
-      value: blogs.filter(blog => blog.status === 'published').length.toString(),
-      icon: '✅',
+      title: 'This Month',
+      value: blogs.filter(blog => {
+        const blogDate = new Date(blog.thoi_gian_tao || '');
+        const now = new Date();
+        return blogDate.getMonth() === now.getMonth() && blogDate.getFullYear() === now.getFullYear();
+      }).length.toString(),
+      icon: '📅',
       trend: { value: 8, isPositive: true }
     },
     {
-      title: 'Drafts',
-      value: blogs.filter(blog => blog.status === 'draft').length.toString(),
-      icon: '📄',
-      trend: { value: 3, isPositive: false }
+      title: 'Authors',
+      value: Array.from(new Set(blogs.map(blog => blog.author).filter(Boolean))).length.toString(),
+      icon: '👥',
+      trend: { value: 3, isPositive: true }
     },
     {
-      title: 'Total Views',
-      value: blogs.reduce((sum, blog) => sum + blog.views, 0).toLocaleString(),
-      icon: '👀',
+      title: 'Recent Activity',
+      value: blogs.filter(blog => {
+        const blogDate = new Date(blog.thoi_gian_tao || '');
+        const weekAgo = new Date();
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        return blogDate > weekAgo;
+      }).length.toString(),
+      icon: '⚡',
       trend: { value: 15, isPositive: true }
     }
   ];
@@ -96,18 +127,23 @@ const BlogsManage: React.FC<BlogsManageProps> = ({ className = '' }) => {
     }
   };
 
-  const handleViewBlog = (blog: Blog) => {
-    navigate(`/admin/blogs/${blog.id}`);
+  const handleViewBlog = (blog: BlogPost) => {
+    navigate(`/admin/blogs/${blog.id_blog}`);
   };
 
-  const handleEditBlog = (blog: Blog) => {
-    navigate(`/admin/blogs/${blog.id}/edit`);
+  const handleEditBlog = (blog: BlogPost) => {
+    navigate(`/admin/blogs/new/${blog.id_blog}`);
   };
 
-  const handleDeleteBlog = (blog: Blog) => {
-    if (window.confirm(`Are you sure you want to delete "${blog.title}"?`)) {
-      console.log('Delete blog:', blog.id);
-      // In a real app, this would make an API call
+  const handleDeleteBlog = async (blog: BlogPost) => {
+    if (window.confirm(`Are you sure you want to delete "${blog.tieu_de}"?`)) {
+      // try {
+      //   await blogService.delete(blog.id_blog);
+      //   setBlogs(prev => prev.filter(b => b.id_blog !== blog.id_blog));
+      // } catch (err) {
+      //   console.error('Error deleting blog:', err);
+      //   setError('Failed to delete blog');
+      // }
     }
   };
 
@@ -115,16 +151,8 @@ const BlogsManage: React.FC<BlogsManageProps> = ({ className = '' }) => {
     navigate('/admin/blogs/new');
   };
 
-  const getStatusBadge = (status: string) => {
-    const statusConfig = blogStatuses.find(s => s.id === status);
-    return (
-      <span className={`blogs-manage__status-badge blogs-manage__status-badge--${status}`}>
-        {statusConfig?.label || status}
-      </span>
-    );
-  };
-
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return '-';
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -132,73 +160,68 @@ const BlogsManage: React.FC<BlogsManageProps> = ({ className = '' }) => {
     });
   };
 
+  const getAuthorName = (author: string | undefined) => {
+    if (!author) return 'Unknown Author';
+    return author;
+  };
+
+  const getUniqueAuthors = () => {
+    const authors = blogs
+      .map(blog => blog.author)
+      .filter(Boolean);
+    return Array.from(new Set(authors));
+  };
+
   const tableColumns = [
     {
-      key: 'featuredImage',
-      label: 'Image',
-      width: '80px',
-      render: (value: string, item: Blog) => (
-        <div className="blogs-manage__image">
-          <img src={item.featuredImage} alt={item.title} className="blogs-manage__image-img" />
-        </div>
+      key: 'id_blog',
+      label: 'ID',
+      width: '60px',
+      render: (value: number) => (
+        <Text variant="span" size="sm" color="muted">
+          #{value}
+        </Text>
       )
     },
     {
-      key: 'title',
+      key: 'tieu_de',
       label: 'Title',
       sortable: true,
       width: '300px',
-      render: (value: string, item: Blog) => (
+      render: (value: string, item: BlogPost) => (
         <div className="blogs-manage__blog-info">
           <Text variant="p" size="sm" color="primary" className="blogs-manage__blog-title">
-            {item.title}
+            {item.tieu_de}
           </Text>
           <Text variant="p" size="xs" color="muted" className="blogs-manage__blog-excerpt">
-            {item.excerpt}
+            {item.noi_dung.length > 100 ? `${item.noi_dung.substring(0, 100)}...` : item.noi_dung}
           </Text>
           <div className="blogs-manage__blog-meta">
             <Text variant="span" size="xs" color="muted">
-              by {item.author} • {item.readingTime} min read
+              by {getAuthorName(item.author)}
             </Text>
           </div>
         </div>
       )
     },
     {
-      key: 'category',
-      label: 'Category',
+      key: 'author',
+      label: 'Author',
+      width: '150px',
+      render: (value: string | undefined) => (
+        <Text variant="span" size="sm" color="secondary">
+          {getAuthorName(value)}
+        </Text>
+      )
+    },
+    {
+      key: 'thoi_gian_tao',
+      label: 'Created',
+      sortable: true,
       width: '120px',
       render: (value: string) => (
-        <Text variant="span" size="sm" color="secondary">
-          {value}
-        </Text>
-      )
-    },
-    {
-      key: 'status',
-      label: 'Status',
-      width: '100px',
-      render: (value: string) => getStatusBadge(value)
-    },
-    {
-      key: 'publishedAt',
-      label: 'Published',
-      sortable: true,
-      width: '100px',
-      render: (value: string, item: Blog) => (
         <Text variant="span" size="sm" color="muted">
-          {item.status === 'published' ? formatDate(value) : '-'}
-        </Text>
-      )
-    },
-    {
-      key: 'views',
-      label: 'Views',
-      sortable: true,
-      width: '80px',
-      render: (value: number) => (
-        <Text variant="span" size="sm" color="muted">
-          {value.toLocaleString()}
+          {formatDate(value)}
         </Text>
       )
     }
@@ -250,36 +273,6 @@ const BlogsManage: React.FC<BlogsManageProps> = ({ className = '' }) => {
             className="blogs-manage__search-input"
           />
         </div>
-        
-        <div className="blogs-manage__filter-group">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as BlogStatus | 'all')}
-            className="blogs-manage__filter-select"
-          >
-            <option value="all">All Status</option>
-            {blogStatuses.map(status => (
-              <option key={status.id} value={status.id}>
-                {status.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="blogs-manage__filter-group">
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="blogs-manage__filter-select"
-          >
-            <option value="all">All Categories</option>
-            {adminBlogCategories.map(category => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
-        </div>
 
         <div className="blogs-manage__filter-group">
           <select
@@ -288,7 +281,7 @@ const BlogsManage: React.FC<BlogsManageProps> = ({ className = '' }) => {
             className="blogs-manage__filter-select"
           >
             <option value="all">All Authors</option>
-            {blogAuthors.map(author => (
+            {getUniqueAuthors().map(author => (
               <option key={author} value={author}>
                 {author}
               </option>
@@ -306,30 +299,42 @@ const BlogsManage: React.FC<BlogsManageProps> = ({ className = '' }) => {
             }}
             className="blogs-manage__filter-select"
           >
-            {blogSortOptions.map(option => (
-              <option key={`${option.id}-asc`} value={`${option.id}-asc`}>
-                {option.label} (A-Z)
-              </option>
-            ))}
-            {blogSortOptions.map(option => (
-              <option key={`${option.id}-desc`} value={`${option.id}-desc`}>
-                {option.label} (Z-A)
-              </option>
-            ))}
+            <option value="tieu_de-asc">Title (A-Z)</option>
+            <option value="tieu_de-desc">Title (Z-A)</option>
+            <option value="thoi_gian_tao-asc">Created (Oldest)</option>
+            <option value="thoi_gian_tao-desc">Created (Newest)</option>
           </select>
         </div>
       </div>
 
-      <div className="blogs-manage__table-section">
-        <AdminTable
-          data={filteredAndSortedBlogs}
-          columns={tableColumns}
-          onView={handleViewBlog}
-          onEdit={handleEditBlog}
-          onDelete={handleDeleteBlog}
-          onSort={handleSort}
-        />
-      </div>
+      {loading ? (
+        <div className="blogs-manage__loading">
+          <Text variant="p" size="md" color="muted">Loading blogs...</Text>
+        </div>
+      ) : error ? (
+        <div className="blogs-manage__error">
+          <Text variant="p" size="md" color="primary">{error}</Text>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => window.location.reload()}
+            className="blogs-manage__retry-btn"
+          >
+            Retry
+          </Button>
+        </div>
+      ) : (
+        <div className="blogs-manage__table-section">
+          <AdminTable
+            data={filteredAndSortedBlogs}
+            columns={tableColumns}
+            onView={handleViewBlog}
+            onEdit={handleEditBlog}
+            onDelete={handleDeleteBlog}
+            onSort={handleSort}
+          />
+        </div>
+      )}
 
       {/* Placeholder modals - would be implemented in a real app */}
       <div className="blogs-manage__modals">

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Title, Text, Button, Input } from '../../components';
 import { bannersService } from '../../services/banners';
 import { BannerCreateRequest } from '../../services/types';
@@ -11,6 +11,7 @@ interface BannerAddProps {
 
 const BannerAdd: React.FC<BannerAddProps> = ({ className = '' }) => {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   
   // Form states
   const [formData, setFormData] = useState<BannerCreateRequest>({
@@ -23,9 +24,19 @@ const BannerAdd: React.FC<BannerAddProps> = ({ className = '' }) => {
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+
+  // Check if we're in edit mode
+  useEffect(() => {
+    if (id) {
+      setIsEditMode(true);
+      loadBannerForEdit(Number(id));
+    }
+  }, [id]);
 
   // Position options
   const positionOptions = [
@@ -34,6 +45,35 @@ const BannerAdd: React.FC<BannerAddProps> = ({ className = '' }) => {
     { value: 'Promotion-2', label: 'Promotion-2' }
   ];
 
+  const loadBannerForEdit = async (bannerId: number) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const banner = await bannersService.getById(bannerId);
+      if (banner) {
+        setFormData({
+          tieu_de: banner.tieu_de || '',
+          url_anh: banner.url_anh || '',
+          link_url: banner.link_url || '',
+          vi_tri: banner.vi_tri || 'Home',
+          thu_tu: banner.thu_tu || 1,
+          active: banner.active ? 1 : 0
+        });
+        // Set image preview if URL exists
+        if (banner.url_anh) {
+          setImagePreview(banner.url_anh);
+        }
+      } else {
+        setError('Banner not found');
+      }
+    } catch (err) {
+      setError('Failed to load banner for editing');
+      console.error('Error loading banner:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -41,6 +81,7 @@ const BannerAdd: React.FC<BannerAddProps> = ({ className = '' }) => {
       ...prev,
       [name]: name === 'thu_tu' ? parseInt(value) || 1 : value
     }));
+    if (error) setError(null);
   };
 
   // Handle image file selection
@@ -82,11 +123,17 @@ const BannerAdd: React.FC<BannerAddProps> = ({ className = '' }) => {
         formData.url_anh = URL.createObjectURL(imageFile);
       }
 
-      await bannersService.create(formData);
+      if (isEditMode && id) {
+        // Update existing banner
+        await bannersService.update(Number(id), formData);
+      } else {
+        // Create new banner
+        await bannersService.create(formData);
+      }
       navigate('/admin/banners');
     } catch (error) {
-      console.error('Error creating banner:', error);
-      setError('Failed to create banner. Please try again.');
+      console.error('Error saving banner:', error);
+      setError(isEditMode ? 'Failed to update banner. Please try again.' : 'Failed to create banner. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -97,14 +144,24 @@ const BannerAdd: React.FC<BannerAddProps> = ({ className = '' }) => {
     navigate('/admin/banners');
   };
 
+  if (loading) {
+    return (
+      <div className={`banner-add ${className}`}>
+        <div className="banner-add__loading">
+          <Text variant="p" size="md" color="muted">Loading banner...</Text>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`banner-add ${className}`}>
       <div className="banner-add__header">
         <Title level="h1" size="xl" color="primary" className="banner-add__title">
-          Add New Banner
+          {isEditMode ? 'Edit Banner' : 'Add New Banner'}
         </Title>
         <Text variant="p" size="md" color="secondary" className="banner-add__subtitle">
-          Create a new promotional banner
+          {isEditMode ? 'Update the banner information' : 'Create a new promotional banner'}
         </Text>
       </div>
 
@@ -259,7 +316,7 @@ const BannerAdd: React.FC<BannerAddProps> = ({ className = '' }) => {
             disabled={isSubmitting}
             className="banner-add__submit-btn"
           >
-            {isSubmitting ? 'Creating...' : 'Create Banner'}
+            {isSubmitting ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Update Banner' : 'Create Banner')}
           </Button>
         </div>
       </form>

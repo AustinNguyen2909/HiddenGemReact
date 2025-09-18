@@ -1,8 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Title, Text, Button, AdminStatsCard } from '../../components';
+import { Title, Text, Button } from '../../components';
+import { blogService, BlogPost } from '../../services/blog';
 import './BlogDetailManage.css';
-import { blogs, blogStatuses } from '../../dummyData';
 
 interface BlogDetailManageProps {
   className?: string;
@@ -12,24 +12,60 @@ const BlogDetailManage: React.FC<BlogDetailManageProps> = ({ className = '' }) =
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const blogId = Number(id);
+  
+  const [blog, setBlog] = useState<BlogPost | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const blog = useMemo(() => blogs.find(b => b.id === blogId), [blogId]);
+  useEffect(() => {
+    const fetchBlog = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const blogData = await blogService.getById(blogId);
+        if (blogData) {
+          setBlog(blogData);
+        } else {
+          setError('Blog not found');
+        }
+      } catch (err) {
+        setError('Failed to load blog');
+        console.error('Error fetching blog:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const statusBadge = (status: string) => {
-    const conf = blogStatuses.find(s => s.id === status);
-    return (
-      <span className={`blog-detail-manage__status-badge blog-detail-manage__status-badge--${status}`}>
-        {conf?.label || status}
-      </span>
-    );
+    if (blogId) {
+      fetchBlog();
+    }
+  }, [blogId]);
+
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return 'Unknown date';
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
   };
 
-  if (!blog) {
+  if (loading) {
+    return (
+      <div className={`blog-detail-manage ${className}`}>
+        <div className="blog-detail-manage__loading">
+          <Text variant="p" size="md" color="muted">Loading blog...</Text>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !blog) {
     return (
       <div className={`blog-detail-manage ${className}`}>
         <div className="blog-detail-manage__empty">
           <Title level="h2" size="lg" color="primary">Blog not found</Title>
-          <Text variant="p" size="md" color="secondary">The blog you are looking for does not exist.</Text>
+          <Text variant="p" size="md" color="secondary">{error || 'The blog you are looking for does not exist.'}</Text>
           <div className="blog-detail-manage__empty-actions">
             <Button variant="secondary" size="md" onClick={() => navigate('/admin/blogs')}>Back to Blogs</Button>
           </div>
@@ -43,52 +79,30 @@ const BlogDetailManage: React.FC<BlogDetailManageProps> = ({ className = '' }) =
       <div className="blog-detail-manage__header">
         <div className="blog-detail-manage__header-left">
           <Title level="h1" size="xl" color="primary" className="blog-detail-manage__title">
-            {blog.title}
+            {blog.tieu_de}
           </Title>
           <div className="blog-detail-manage__meta">
-            {statusBadge(blog.status)}
             <Text variant="span" size="sm" color="muted" className="blog-detail-manage__meta-item">
-              {new Date(blog.publishedAt).toLocaleDateString()}
+              {formatDate(blog.thoi_gian_tao)}
             </Text>
             <Text variant="span" size="sm" color="muted" className="blog-detail-manage__meta-item">•</Text>
             <Text variant="span" size="sm" color="muted" className="blog-detail-manage__meta-item">
-              {blog.readingTime} min read
-            </Text>
-            <Text variant="span" size="sm" color="muted" className="blog-detail-manage__meta-item">•</Text>
-            <Text variant="span" size="sm" color="muted" className="blog-detail-manage__meta-item">
-              by {blog.author}
+              by {blog.author || 'Unknown Author'}
             </Text>
           </div>
         </div>
         <div className="blog-detail-manage__header-right">
           <Button variant="secondary" size="md" onClick={() => navigate('/admin/blogs')}>Back</Button>
-          <Button variant="primary" size="md" onClick={() => navigate(`/admin/blogs/${blog.id}/edit`)} className="blog-detail-manage__edit-btn">Edit</Button>
+          <Button variant="primary" size="md" onClick={() => navigate(`/admin/blogs/new/${blog.id_blog}`)} className="blog-detail-manage__edit-btn">Edit</Button>
         </div>
-      </div>
-
-      <div className="blog-detail-manage__stats">
-        <AdminStatsCard title="Views" value={blog.views.toLocaleString()} icon="👀" trend={{ value: 0, isPositive: true }} />
-        <AdminStatsCard title="Likes" value={blog.likes.toLocaleString()} icon="❤️" trend={{ value: 0, isPositive: true }} />
-        <AdminStatsCard title="Comments" value={blog.comments.toString()} icon="💬" trend={{ value: 0, isPositive: true }} />
       </div>
 
       <div className="blog-detail-manage__content">
         <div className="blog-detail-manage__left">
-          <div className="blog-detail-manage__image">
-            <img src={blog.featuredImage} alt={blog.title} className="blog-detail-manage__image-img" />
-          </div>
-
-          <div className="blog-detail-manage__section">
-            <Title level="h2" size="lg" color="primary" className="blog-detail-manage__section-title">Excerpt</Title>
-            <Text variant="p" size="md" color="secondary" className="blog-detail-manage__excerpt">
-              {blog.excerpt}
-            </Text>
-          </div>
-
           <div className="blog-detail-manage__section">
             <Title level="h2" size="lg" color="primary" className="blog-detail-manage__section-title">Content</Title>
             <div className="blog-detail-manage__body">
-              <Text variant="p" size="md" color="primary">{blog.content}</Text>
+              <Text variant="p" size="md" color="primary">{blog.noi_dung}</Text>
             </div>
           </div>
         </div>
@@ -96,18 +110,17 @@ const BlogDetailManage: React.FC<BlogDetailManageProps> = ({ className = '' }) =
         <div className="blog-detail-manage__right">
           <div className="blog-detail-manage__panel">
             <Title level="h3" size="md" color="primary" className="blog-detail-manage__panel-title">Details</Title>
-            <div className="blog-detail-manage__panel-row"><Text variant="span" size="sm" color="secondary">Category</Text><Text variant="span" size="sm" color="primary">{blog.category}</Text></div>
-            <div className="blog-detail-manage__panel-row"><Text variant="span" size="sm" color="secondary">Tags</Text><Text variant="span" size="sm" color="primary">{blog.tags.join(', ')}</Text></div>
-            <div className="blog-detail-manage__panel-row"><Text variant="span" size="sm" color="secondary">Updated</Text><Text variant="span" size="sm" color="primary">{new Date(blog.updatedAt).toLocaleString()}</Text></div>
-            <div className="blog-detail-manage__panel-row"><Text variant="span" size="sm" color="secondary">Featured</Text><Text variant="span" size="sm" color="primary">{blog.isFeatured ? 'Yes' : 'No'}</Text></div>
-          </div>
-
-          <div className="blog-detail-manage__panel">
-            <Title level="h3" size="md" color="primary" className="blog-detail-manage__panel-title">SEO</Title>
-            <div className="blog-detail-manage__panel-row"><Text variant="span" size="sm" color="secondary">SEO Title</Text><Text variant="span" size="sm" color="primary">{blog.seoTitle || '-'}</Text></div>
-            <div className="blog-detail-manage__panel-row"><Text variant="span" size="sm" color="secondary">SEO Description</Text><Text variant="span" size="sm" color="primary">{blog.seoDescription || '-'}</Text></div>
-            <div className="blog-detail-manage__panel-actions">
-              <Button variant="secondary" size="sm" onClick={() => navigate(`/admin/blogs/${blog.id}/edit#seo`)}>Edit SEO</Button>
+            <div className="blog-detail-manage__panel-row">
+              <Text variant="span" size="sm" color="secondary">ID</Text>
+              <Text variant="span" size="sm" color="primary">#{blog.id_blog}</Text>
+            </div>
+            <div className="blog-detail-manage__panel-row">
+              <Text variant="span" size="sm" color="secondary">Author</Text>
+              <Text variant="span" size="sm" color="primary">{blog.author || 'Unknown'}</Text>
+            </div>
+            <div className="blog-detail-manage__panel-row">
+              <Text variant="span" size="sm" color="secondary">Created</Text>
+              <Text variant="span" size="sm" color="primary">{formatDate(blog.thoi_gian_tao)}</Text>
             </div>
           </div>
         </div>

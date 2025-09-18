@@ -113,7 +113,7 @@ const HomeScreen: React.FC = () => {
   // Get hero images from banners, sorted by thu_tu (order)
   const heroImages = banners
     .sort((a, b) => a.thu_tu - b.thu_tu)
-    .map(banner => banner.link_url);
+    .map(banner => banner.url_anh);
 
   const hiddenGemsStory = {
     id: 1,

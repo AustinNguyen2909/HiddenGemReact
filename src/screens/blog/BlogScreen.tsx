@@ -13,10 +13,7 @@ const BlogScreen: React.FC<BlogScreenProps> = ({ className = "" }) => {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [dateFrom, setDateFrom] = useState("12.12.2025");
-  const [dateTo, setDateTo] = useState("12.12.2025");
   const [visiblePosts, setVisiblePosts] = useState(8);
 
   // Fetch blog posts from API
@@ -37,27 +34,25 @@ const BlogScreen: React.FC<BlogScreenProps> = ({ className = "" }) => {
     fetchBlogPosts();
   }, [searchQuery]);
 
-  // Filter posts based on category and search
+  // Filter posts based on search
   const filteredPosts = blogPosts.filter((post) => {
-    const matchesCategory =
-      selectedCategory === "all" || post.category === selectedCategory;
     const matchesSearch =
       post.tieu_de.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (post.excerpt && post.excerpt.toLowerCase().includes(searchQuery.toLowerCase()));
-    return matchesCategory && matchesSearch;
+      post.noi_dung.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesSearch;
   });
 
   const displayedPosts = filteredPosts.slice(0, visiblePosts);
 
-  // Get featured post (first post or one marked as featured)
-  const featuredPost = blogPosts.find(post => post.featured) || blogPosts[0];
+  // Get featured post (first post)
+  const featuredPost = blogPosts[0];
 
   const handleLoadMore = () => {
     setVisiblePosts((prev) => Math.min(prev + 4, filteredPosts.length));
   };
 
   const handleBlogClick = (post: BlogPost) => {
-    navigate(`/blog/${post.id}`, { state: { blogPost: post } });
+    navigate(`/blog/${post.id_blog}`, { state: { blogPost: post } });
   };
 
   // Format date for display
@@ -80,15 +75,6 @@ const BlogScreen: React.FC<BlogScreenProps> = ({ className = "" }) => {
     return content.substring(0, maxLength) + "...";
   };
 
-  // Blog categories (static for now)
-  const blogCategories = [
-    { id: 'all', name: 'All Topics' },
-    { id: 'brewing', name: 'Brewing Methods' },
-    { id: 'coffee-beans', name: 'Coffee Beans' },
-    { id: 'recipes', name: 'Recipes' },
-    { id: 'news', name: 'News & Updates' },
-    { id: 'reviews', name: 'Reviews' }
-  ];
 
   // Static content for hero and filters
   const blogHeroContent = {
@@ -189,38 +175,6 @@ const BlogScreen: React.FC<BlogScreenProps> = ({ className = "" }) => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <div className="blog-filters__controls">
-                <div className="blog-filters__topics">
-                  <select
-                    className="blog-filters__topics-select"
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                  >
-                    {blogCategories.map((category) => (
-                      <option key={category.id} value={category.id}>
-                        {category.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="blog-filters__date-inputs">
-                  <Input
-                    type="text"
-                    placeholder={dateFrom}
-                    className="blog-filters__date-input"
-                    value={dateFrom}
-                    onChange={(e) => setDateFrom(e.target.value)}
-                  />
-                  <div className="blog-filters__date-separator"></div>
-                  <Input
-                    type="text"
-                    placeholder={dateTo}
-                    className="blog-filters__date-input"
-                    value={dateTo}
-                    onChange={(e) => setDateTo(e.target.value)}
-                  />
-                </div>
-              </div>
             </div>
           </section>
 
@@ -242,15 +196,10 @@ const BlogScreen: React.FC<BlogScreenProps> = ({ className = "" }) => {
           {/* Featured Blog Post */}
           {featuredPost && (
             <section className="blog-featured">
-              {featuredPost.image && (
-                <div className="blog-featured__image">
-                  <img src={featuredPost.image} alt={featuredPost.tieu_de} />
-                </div>
-              )}
               <div className="blog-featured__content">
                 <div className="blog-featured__meta">
                   <Text className="blog-featured__date" color="secondary">
-                    {formatDate(featuredPost.created_at)}
+                    {formatDate(featuredPost.thoi_gian_tao)}
                   </Text>
                   {featuredPost.author && (
                     <Text className="blog-featured__author" color="secondary">
@@ -271,7 +220,7 @@ const BlogScreen: React.FC<BlogScreenProps> = ({ className = "" }) => {
                     color="secondary"
                     className="blog-featured__paragraph"
                   >
-                    {featuredPost.excerpt || getExcerpt(featuredPost.noi_dung, 200)}
+                    {getExcerpt(featuredPost.noi_dung, 200)}
                   </Text>
                 </div>
                 <Button
@@ -290,12 +239,7 @@ const BlogScreen: React.FC<BlogScreenProps> = ({ className = "" }) => {
           <section className="blog-posts">
             <div className="blog-posts__grid">
               {displayedPosts.map((post) => (
-                <article key={post.id} className="blog-post-card">
-                  {post.image && (
-                    <div className="blog-post-card__image">
-                      <img src={post.image} alt={post.tieu_de} />
-                    </div>
-                  )}
+                <article key={post.id_blog} className="blog-post-card">
                   <div className="blog-post-card__content">
                     <div className="blog-post-card__meta">
                       {post.author && (
@@ -307,7 +251,7 @@ const BlogScreen: React.FC<BlogScreenProps> = ({ className = "" }) => {
                         </Text>
                       )}
                       <Text className="blog-post-card__date" color="secondary">
-                        {formatDate(post.created_at)}
+                        {formatDate(post.thoi_gian_tao)}
                       </Text>
                     </div>
                     <Title
@@ -319,7 +263,7 @@ const BlogScreen: React.FC<BlogScreenProps> = ({ className = "" }) => {
                       {post.tieu_de}
                     </Title>
                     <Text className="blog-post-card__excerpt" color="secondary">
-                      {post.excerpt || getExcerpt(post.noi_dung)}
+                      {getExcerpt(post.noi_dung)}
                     </Text>
                     <Button
                       variant="outline"

@@ -1,5 +1,16 @@
 .shop-profile { display: flex; flex-direction: column; gap: 24px; }
 
+.shop-profile__loading,
+.shop-profile__error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xxl);
+  background-color: var(--color-bg-primary);
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--color-border-light);
+}
+
 .shop-profile__top { background: var(--color-surface-primary, #fff); border-radius: 8px; padding: 16px; box-shadow: 14px 17px 40px 4px rgba(112,144,176,0.08); }
 .shop-profile__cover { display: grid; grid-template-columns: 160px 1fr; gap: 20px; align-items: center; }
 .shop-profile__photo { width: 160px; height: 199px; border-radius: 16px; background: #d9d9d9; }
@@ -18,7 +29,7 @@
 .shop-profile__bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .shop-profile__ownerCard, .shop-profile__menuCard { background: var(--color-surface-primary, #fff); border-radius: 8px; padding: 24px; box-shadow: 14px 17px 40px 4px rgba(112,144,176,0.08); }
 .shop-profile__ownerHeader { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
-.shop-profile__ownerAvatar { width: 70px; height: 70px; border-radius: 50%; background: #bbb; }
+.shop-profile__ownerAvatar { width: 70px; height: 70px; border-radius: 50%; }
 .shop-profile__muted { opacity: .6; }
 .shop-profile__subtle { color: var(--color-text-secondary, #4B5563); }
 .shop-profile__ownerField { display: flex; flex-direction: column; gap: 8px; }

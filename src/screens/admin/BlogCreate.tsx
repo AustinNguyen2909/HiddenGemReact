@@ -1,51 +1,61 @@
-import React, { useMemo, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Title, Text, Button, Input } from '../../components';
+import { blogService } from '../../services/blog';
 import './BlogCreate.css';
-import { adminBlogCategories, blogAuthors, blogStatuses } from '../../dummyData';
 
 interface BlogCreateProps {
   className?: string;
 }
 
 interface BlogForm {
-  title: string;
-  author: string;
-  category: string;
-  status: string;
-  excerpt: string;
-  content: string;
-  tags: string;
-  featuredImage: string;
-  isFeatured: boolean;
-  seoTitle: string;
-  seoDescription: string;
+  tieu_de: string;
+  noi_dung: string;
 }
 
 const defaultForm: BlogForm = {
-  title: '',
-  author: '',
-  category: '',
-  status: 'draft',
-  excerpt: '',
-  content: '',
-  tags: '',
-  featuredImage: '',
-  isFeatured: false,
-  seoTitle: '',
-  seoDescription: ''
+  tieu_de: '',
+  noi_dung: ''
 };
 
 const BlogCreate: React.FC<BlogCreateProps> = ({ className = '' }) => {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   const formRef = useRef<HTMLFormElement | null>(null);
   const [form, setForm] = useState<BlogForm>(defaultForm);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
 
-  const categoryOptions = useMemo(() => adminBlogCategories, []);
-  const authorOptions = useMemo(() => blogAuthors, []);
-  const statusOptions = useMemo(() => blogStatuses, []);
+  // Check if we're in edit mode
+  useEffect(() => {
+    if (id) {
+      setIsEditMode(true);
+      loadBlogForEdit(Number(id));
+    }
+  }, [id]);
+
+  const loadBlogForEdit = async (blogId: number) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const blog = await blogService.getById(blogId);
+      if (blog) {
+        setForm({
+          tieu_de: blog.tieu_de,
+          noi_dung: blog.noi_dung
+        });
+      } else {
+        setError('Blog not found');
+      }
+    } catch (err) {
+      setError('Failed to load blog for editing');
+      console.error('Error loading blog:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const updateField = (name: keyof BlogForm, value: any) => {
     setForm(prev => ({ ...prev, [name]: value }));
@@ -56,117 +66,86 @@ const BlogCreate: React.FC<BlogCreateProps> = ({ className = '' }) => {
     e.preventDefault();
     setError(null);
 
-    if (!form.title || !form.author || !form.category) {
-      setError('Please fill in the required fields: Title, Author, Category');
+    if (!form.tieu_de || !form.noi_dung) {
+      setError('Please fill in both title and content');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      // Mock API call
-      await new Promise(r => setTimeout(r, 1000));
-      // Navigate back to blogs list for now
+      if (isEditMode && id) {
+        // Update existing blog
+        await blogService.update(Number(id), {
+          tieu_de: form.tieu_de,
+          noi_dung: form.noi_dung
+        });
+      } else {
+        // Create new blog
+        await blogService.create({
+          tieu_de: form.tieu_de,
+          noi_dung: form.noi_dung
+        });
+      }
       navigate('/admin/blogs');
     } catch (err: any) {
-      setError('Failed to create blog');
+      setError(isEditMode ? 'Failed to update blog' : 'Failed to create blog');
+      console.error('Error saving blog:', err);
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  if (loading) {
+    return (
+      <div className={`blog-create ${className}`}>
+        <div className="blog-create__loading">
+          <Text variant="p" size="md" color="muted">Loading blog...</Text>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`blog-create ${className}`}>
       <div className="blog-create__header">
         <div className="blog-create__header-left">
-          <Title level="h1" size="xl" color="primary">Create Blog Post</Title>
-          <Text variant="p" size="md" color="secondary">Add a new blog post with content, SEO, and publish settings</Text>
+          <Title level="h1" size="xl" color="primary">
+            {isEditMode ? 'Edit Blog Post' : 'Create Blog Post'}
+          </Title>
+          <Text variant="p" size="md" color="secondary">
+            {isEditMode ? 'Update the blog post content' : 'Add a new blog post with title and content'}
+          </Text>
         </div>
         <div className="blog-create__header-right">
           <Button variant="secondary" size="md" onClick={() => navigate('/admin/blogs')}>Cancel</Button>
-          <Button variant="primary" size="md" onClick={() => formRef.current?.requestSubmit()} disabled={isSubmitting}>Save</Button>
+          <Button variant="primary" size="md" onClick={() => formRef.current?.requestSubmit()} disabled={isSubmitting}>
+            {isSubmitting ? 'Saving...' : (isEditMode ? 'Update' : 'Create')}
+          </Button>
         </div>
       </div>
 
       <form ref={formRef} className="blog-create__form" onSubmit={handleSubmit}>
-        <div className="blog-create__grid">
-          <div className="blog-create__left">
-            <div className="blog-create__card">
-              <div className="blog-create__field">
-                <label className="blog-create__label">Title *</label>
-                <Input value={form.title} onChange={(e) => updateField('title', e.target.value)} placeholder="Enter title" fullWidth />
-              </div>
-
-              <div className="blog-create__field">
-                <label className="blog-create__label">Excerpt</label>
-                <textarea className="blog-create__textarea" value={form.excerpt} onChange={(e) => updateField('excerpt', e.target.value)} placeholder="Short summary" rows={3} />
-              </div>
-
-              <div className="blog-create__field">
-                <label className="blog-create__label">Content</label>
-                <textarea className="blog-create__textarea" value={form.content} onChange={(e) => updateField('content', e.target.value)} placeholder="Write your content..." rows={12} />
-              </div>
-
-              <div className="blog-create__field">
-                <label className="blog-create__label">Featured Image URL</label>
-                <Input value={form.featuredImage} onChange={(e) => updateField('featuredImage', e.target.value)} placeholder="https://..." fullWidth />
-                {form.featuredImage && (
-                  <div className="blog-create__image-preview">
-                    <img src={form.featuredImage} alt="Preview" />
-                  </div>
-                )}
-              </div>
-
-              <div className="blog-create__field">
-                <label className="blog-create__label">Tags (comma separated)</label>
-                <Input value={form.tags} onChange={(e) => updateField('tags', e.target.value)} placeholder="espresso, brew, tips" fullWidth />
-              </div>
-            </div>
-          </div>
-
-          <div className="blog-create__right">
-            <div className="blog-create__card">
-              <div className="blog-create__field">
-                <label className="blog-create__label">Author *</label>
-                <select className="blog-create__select" value={form.author} onChange={(e) => updateField('author', e.target.value)}>
-                  <option value="">Select author</option>
-                  {authorOptions.map(a => <option key={a} value={a}>{a}</option>)}
-                </select>
-              </div>
-
-              <div className="blog-create__field">
-                <label className="blog-create__label">Category *</label>
-                <select className="blog-create__select" value={form.category} onChange={(e) => updateField('category', e.target.value)}>
-                  <option value="">Select category</option>
-                  {categoryOptions.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-
-              <div className="blog-create__field">
-                <label className="blog-create__label">Status</label>
-                <select className="blog-create__select" value={form.status} onChange={(e) => updateField('status', e.target.value)}>
-                  {statusOptions.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
-                </select>
-              </div>
-
-              <div className="blog-create__field">
-                <label className="blog-create__label">Featured</label>
-                <label className="blog-create__switch">
-                  <input type="checkbox" checked={form.isFeatured} onChange={(e) => updateField('isFeatured', e.target.checked)} />
-                  <span className="blog-create__switch-slider"></span>
-                </label>
-              </div>
+        <div className="blog-create__content">
+          <div className="blog-create__card">
+            <div className="blog-create__field">
+              <label className="blog-create__label">Title *</label>
+              <Input 
+                value={form.tieu_de} 
+                onChange={(e) => updateField('tieu_de', e.target.value)} 
+                placeholder="Enter blog title" 
+                fullWidth 
+              />
             </div>
 
-            <div className="blog-create__card">
-              <Title level="h3" size="md" color="primary">SEO</Title>
-              <div className="blog-create__field">
-                <label className="blog-create__label">SEO Title</label>
-                <Input value={form.seoTitle} onChange={(e) => updateField('seoTitle', e.target.value)} placeholder="SEO title" fullWidth />
-              </div>
-              <div className="blog-create__field">
-                <label className="blog-create__label">SEO Description</label>
-                <textarea className="blog-create__textarea" value={form.seoDescription} onChange={(e) => updateField('seoDescription', e.target.value)} placeholder="SEO description" rows={3} />
-              </div>
+            <div className="blog-create__field">
+              <label className="blog-create__label">Content *</label>
+              <textarea 
+                className="blog-create__textarea" 
+                value={form.noi_dung} 
+                onChange={(e) => updateField('noi_dung', e.target.value)} 
+                placeholder="Write your blog content..." 
+                rows={15} 
+              />
             </div>
           </div>
         </div>
@@ -179,7 +158,9 @@ const BlogCreate: React.FC<BlogCreateProps> = ({ className = '' }) => {
 
         <div className="blog-create__footer-actions">
           <Button variant="secondary" size="md" onClick={() => navigate('/admin/blogs')}>Cancel</Button>
-          <Button variant="primary" size="md" type="submit" disabled={isSubmitting}>{isSubmitting ? 'Saving...' : 'Save'}</Button>
+          <Button variant="primary" size="md" type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Saving...' : (isEditMode ? 'Update Blog' : 'Create Blog')}
+          </Button>
         </div>
       </form>
     </div>

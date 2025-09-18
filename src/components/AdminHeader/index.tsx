@@ -140,17 +140,6 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ className = '' }) => {
                   Profile Settings
                 </Text>
               </button>
-              <button
-                className="admin-header__user-menu-item"
-                onClick={() => {
-                  setShowUserMenu(false);
-                  navigate('/admin/settings');
-                }}
-              >
-                <Text variant="span" size="sm" color="primary">
-                  System Settings
-                </Text>
-              </button>
               <div className="admin-header__user-menu-divider"></div>
               <button
                 className="admin-header__user-menu-item admin-header__user-menu-item--logout"

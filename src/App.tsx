@@ -90,6 +90,11 @@ function App() {
                     <BlogCreate />
                   </AdminRouteGuard>
                 } />
+                <Route path="blogs/new/:id" element={
+                  <AdminRouteGuard>
+                    <BlogCreate />
+                  </AdminRouteGuard>
+                } />
                 <Route path="blogs/:id" element={
                   <AdminRouteGuard>
                     <BlogDetailManage />
@@ -191,6 +196,11 @@ function App() {
                   </AdminRouteGuard>
                 } />
                 <Route path="banners/new" element={
+                  <AdminRouteGuard>
+                    <BannerAdd />
+                  </AdminRouteGuard>
+                } />
+                <Route path="banners/new/:id" element={
                   <AdminRouteGuard>
                     <BannerAdd />
                   </AdminRouteGuard>

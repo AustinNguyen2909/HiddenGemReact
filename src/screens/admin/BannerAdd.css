@@ -5,6 +5,16 @@
   background: var(--color-bg-primary);
 }
 
+.banner-add__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xxl);
+  background-color: var(--color-bg-primary);
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--color-border-light);
+}
+
 .banner-add__header {
   margin-bottom: 2rem;
   text-align: center;

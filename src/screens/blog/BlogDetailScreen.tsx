@@ -36,7 +36,7 @@ const BlogDetailScreen: React.FC<BlogDetailScreenProps> = ({ className = "" }) =
 
         // If not in state, fetch from API list and find the specific post
         const response = await blogService.list();
-        const post = response.data.items.find(p => p.id === parseInt(id));
+        const post = response.data.items.find(p => p.id_blog === parseInt(id));
         
         if (post) {
           setBlogPost(post);
@@ -125,16 +125,11 @@ const BlogDetailScreen: React.FC<BlogDetailScreenProps> = ({ className = "" }) =
           <header className="blog-detail-screen__header">
             <div className="blog-detail-screen__meta">
               <Text className="blog-detail-screen__date" color="secondary">
-                {formatDate(blogPost.created_at)}
+                {formatDate(blogPost.thoi_gian_tao)}
               </Text>
               {blogPost.author && (
                 <Text className="blog-detail-screen__author" color="secondary">
                   By {blogPost.author}
-                </Text>
-              )}
-              {blogPost.readTime && (
-                <Text className="blog-detail-screen__read-time" color="secondary">
-                  {blogPost.readTime}
                 </Text>
               )}
             </div>
@@ -146,19 +141,13 @@ const BlogDetailScreen: React.FC<BlogDetailScreenProps> = ({ className = "" }) =
             >
               {blogPost.tieu_de}
             </Title>
-            {blogPost.excerpt && (
+            {blogPost.noi_dung && (
               <Text className="blog-detail-screen__excerpt" color="secondary">
-                {blogPost.excerpt}
+                {blogPost.noi_dung.length > 200 ? `${blogPost.noi_dung.substring(0, 200)}...` : blogPost.noi_dung}
               </Text>
             )}
           </header>
 
-          {/* Blog Post Image */}
-          {blogPost.image && (
-            <div className="blog-detail-screen__image">
-              <img src={blogPost.image} alt={blogPost.tieu_de} />
-            </div>
-          )}
 
           {/* Blog Post Content */}
           <article className="blog-detail-screen__content">
@@ -179,13 +168,6 @@ const BlogDetailScreen: React.FC<BlogDetailScreenProps> = ({ className = "" }) =
 
           {/* Blog Post Footer */}
           <footer className="blog-detail-screen__footer">
-            <div className="blog-detail-screen__tags">
-              {blogPost.category && (
-                <span className="blog-detail-screen__tag">
-                  {blogPost.category}
-                </span>
-              )}
-            </div>
             <div className="blog-detail-screen__actions">
               <Button
                 variant="outline"

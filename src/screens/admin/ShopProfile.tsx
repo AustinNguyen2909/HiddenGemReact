@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Text, Input, Button } from '../../components';
 import { useAuth } from '../../components/AuthProvider';
+import { cafesService } from '../../services/cafes';
+import { Cafe } from '../../services/types';
 import './ShopProfile.css';
 
 interface ShopProfileProps {
@@ -16,6 +18,38 @@ const ShopProfile: React.FC<ShopProfileProps> = ({ className = '' }) => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  
+  // Store data states
+  const [storeData, setStoreData] = useState<Cafe | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [storeError, setStoreError] = useState<string | null>(null);
+
+  // Fetch store data on component mount
+  useEffect(() => {
+    const fetchStoreData = async () => {
+      try {
+        setLoading(true);
+        setStoreError(null);
+        
+        // For now, we'll fetch the first store from the list
+        // In a real app, you might have a specific store ID for the current user
+        const response = await cafesService.list(1, 1);
+        if (response.data.items.length > 0) {
+          const store = response.data.items[0];
+          setStoreData(store);
+        } else {
+          setStoreError('No store data found');
+        }
+      } catch (error) {
+        console.error('Error fetching store data:', error);
+        setStoreError('Failed to load store data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStoreData();
+  }, []);
 
   const goEditStore = () => navigate('/admin/store/profile/edit');
 
@@ -49,7 +83,7 @@ const ShopProfile: React.FC<ShopProfileProps> = ({ className = '' }) => {
   // Edit profile state
   const [editName, setEditName] = useState<string>(user?.username || '');
   const [editEmail, setEditEmail] = useState<string>(user?.email || '');
-  const [editMobile, setEditMobile] = useState<string>('');
+  const [editMobile, setEditMobile] = useState<string>(user?.phone_number || '');
   const [editLocation, setEditLocation] = useState<string>('');
 
   const openEditProfile = () => {
@@ -76,6 +110,26 @@ const ShopProfile: React.FC<ShopProfileProps> = ({ className = '' }) => {
     setPanelMode('menu');
   };
 
+  if (loading) {
+    return (
+      <div className={`shop-profile ${className}`}>
+        <div className="shop-profile__loading">
+          <Text variant="p" size="md" color="muted">Loading store profile...</Text>
+        </div>
+      </div>
+    );
+  }
+
+  if (storeError) {
+    return (
+      <div className={`shop-profile ${className}`}>
+        <div className="shop-profile__error">
+          <Text variant="p" size="md" color="primary">{storeError}</Text>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`shop-profile ${className}`}>
       <div className="shop-profile__top">
@@ -83,33 +137,37 @@ const ShopProfile: React.FC<ShopProfileProps> = ({ className = '' }) => {
           <div className="shop-profile__photo" aria-hidden="true" />
           <div className="shop-profile__topRight">
             <div className="shop-profile__titleRow">
-              <Text variant="p" size="xl" color="black" className="shop-profile__storeName">The coffee house</Text>
+              <Text variant="p" size="xl" color="black" className="shop-profile__storeName">
+                {storeData?.ten_cua_hang || 'Store Name'}
+              </Text>
               <button className="shop-profile__editBtn" onClick={goEditStore} aria-label="Edit store">
                 <Text variant="p" size="md" color="black">Edit</Text>
               </button>
             </div>
             <div className="shop-profile__details">
-              <Text variant="p" size="md" color="black">Free Wi-Fi, Suitable for children</Text>
-              <Text variant="p" size="md" color="black">Group, Welcoming LGBTQ+ people</Text>
-              <Text variant="p" size="md" color="black">Take-out, single dining, group and family dining</Text>
+              <Text variant="p" size="md" color="black">
+                {storeData?.mo_ta || 'Store description not available'}
+              </Text>
             </div>
             <div className="shop-profile__details">
-              <Text variant="p" size="md" color="black">Free parking, Plenty of parking</Text>
-              <Text variant="p" size="md" color="black">Debit card, Credit card</Text>
-              <Text variant="p" size="md" color="black">Ho Chi Minh</Text>
+              <Text variant="p" size="md" color="black">
+                Rating: {storeData?.diem_danh_gia_trung_binh || 'N/A'} ⭐
+              </Text>
+              <Text variant="p" size="md" color="black">
+                Views: {storeData?.luot_xem || 0}
+              </Text>
+              <Text variant="p" size="md" color="black">
+                Store ID: {storeData?.id_cua_hang || 'N/A'}
+              </Text>
             </div>
             <div className="shop-profile__contacts">
               <div className="shop-profile__contactItem">
                 <span className="shop-profile__icon shop-profile__icon--phone" />
-                <Text variant="p" size="md" color="black">+84 8009396321</Text>
-              </div>
-              <div className="shop-profile__contactItem">
-                <span className="shop-profile__icon shop-profile__icon--calendar" />
-                <Text variant="p" size="md" color="black">8:00 AM - 22:00 PM</Text>
+                <Text variant="p" size="md" color="black">{user?.phone_number || ''}</Text>
               </div>
               <div className="shop-profile__contactItem">
                 <span className="shop-profile__icon shop-profile__icon--email" />
-                <Text variant="p" size="md" color="black">thecoffehouse@gmail.com</Text>
+                <Text variant="p" size="md" color="black">{user?.email || ''}</Text>
               </div>
             </div>
           </div>
@@ -119,7 +177,10 @@ const ShopProfile: React.FC<ShopProfileProps> = ({ className = '' }) => {
       <div className="shop-profile__bottom">
         <div className="shop-profile__ownerCard">
           <div className="shop-profile__ownerHeader">
-            <div className="shop-profile__ownerAvatar" aria-hidden="true" />
+            <div className="shop-profile__ownerAvatar" aria-hidden="true">
+            <img src={'https://icons.veryicon.com/png/o/miscellaneous/two-color-webpage-small-icon/user-244.png'} alt={user?.full_name} className="shop-profile__ownerAvatar" />
+
+              </div>
             <div>
               <Text variant="p" size="md" color="black">{user?.username || 'LE THACH PHUOC'}</Text>
               <Text variant="p" size="sm" color="black" className="shop-profile__muted">{user?.email || 'phuoc@gmail.com'}</Text>
@@ -137,8 +198,7 @@ const ShopProfile: React.FC<ShopProfileProps> = ({ className = '' }) => {
             </div>
             <div className="shop-profile__ownerFieldCol">
               <Text variant="p" size="sm" color="black">Mobile number </Text>
-              <Text variant="p" size="sm" color="black" className="shop-profile__subtle">Add number</Text>
-              <Text variant="p" size="sm" color="black" className="shop-profile__subtle">Vietnam</Text>
+              <Text variant="p" size="sm" color="black" className="shop-profile__subtle">{user?.phone_number || ''}</Text>
             </div>
           </div>
           <div className="shop-profile__divider" />

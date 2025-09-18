@@ -2,6 +2,16 @@
   padding: 24px;
 }
 
+.blog-create__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xxl);
+  background-color: var(--color-bg-primary);
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--color-border-light);
+}
+
 .blog-create__header {
   display: flex;
   align-items: center;
@@ -18,10 +28,9 @@
   margin-top: 16px;
 }
 
-.blog-create__grid {
-  display: grid;
-  grid-template-columns: 3fr 1.2fr;
-  gap: 24px;
+.blog-create__content {
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .blog-create__card {

@@ -13,6 +13,17 @@ class BannersService {
   update(id: number, payload: Partial<BannerCreateRequest>): Promise<Banner> {
     return apiClient.patch<Banner>(`/banners/${id}`, payload);
   }
+
+  async getById(id: number): Promise<Banner | null> {
+    try {
+      const response = await this.list();
+      const banner = response.data.find((item: Banner) => item.id_banner === id);
+      return banner || null;
+    } catch (error) {
+      console.error('Error fetching banner by ID:', error);
+      return null;
+    }
+  }
 }
 
 export const bannersService = new BannersService();

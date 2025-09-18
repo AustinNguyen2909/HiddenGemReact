@@ -141,11 +141,11 @@ const BannerManage: React.FC<BannerManageProps> = ({ className = '' }) => {
   ];
 
   const handleViewBanner = (banner: Banner) => {
-    navigate(`/admin/banners/${banner.id_banner}`);
+    navigate(`/admin/banners/new/${banner.id_banner}`);
   };
 
   const handleEditBanner = (banner: Banner) => {
-    navigate(`/admin/banners/${banner.id_banner}/edit`);
+    navigate(`/admin/banners/new/${banner.id_banner}`);
   };
 
   const handleDeleteBanner = async (banner: Banner) => {
@@ -201,7 +201,7 @@ const BannerManage: React.FC<BannerManageProps> = ({ className = '' }) => {
       width: '100px',
       render: (value: string, item: Banner) => (
         <div className="banner-manage__image">
-          <img src={item.link_url} alt={item.tieu_de || 'Banner'} className="banner-manage__image-img" />
+          <img src={item.url_anh} alt={item.tieu_de || 'Banner'} className="banner-manage__image-img" />
         </div>
       )
     },
