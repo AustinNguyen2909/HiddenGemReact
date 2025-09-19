@@ -19,7 +19,7 @@ import {
 import {
   AdminLayout, AdminLogin, AdminDashboard, StoresManage, StoreDetailManage, UserManage, UserDetailManage, BlogsManage, BlogDetailManage, BlogCreate, SubService, BannerManage, BannerAdd, ServiceManage, ClientManage, PayManage, ParkingManage, AmenitiesManage, ServiceAdd, MenuManage, MenuAdd, CategoryManage, CategoryAdd, ReviewManage, ReviewView, PromotionManage, PromotionAdd, AdminProfile, ShopProfile, StoreProfileEdit
 } from "./screens/admin";
-import { ThemeProvider, Header, AuthProvider, AdminRouteGuard } from "./components";
+import { ThemeProvider, Header, AuthProvider, LoadingProvider, AdminRouteGuard } from "./components";
 import "./App.css";
 import { Bounce, ToastContainer } from "react-toastify";
 
@@ -27,8 +27,9 @@ function App() {
   return (
     <MantineProvider>
       <AuthProvider>
-        <ThemeProvider>
-          <Router>
+        <LoadingProvider>
+          <ThemeProvider>
+            <Router>
             <Routes>
               {/* Public Routes */}
               <Route path="/*" element={
@@ -210,6 +211,7 @@ function App() {
             </Routes>
           </Router>
         </ThemeProvider>
+        </LoadingProvider>
       </AuthProvider>
       <ToastContainer
         position="bottom-center"

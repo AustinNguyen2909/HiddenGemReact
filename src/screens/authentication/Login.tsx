@@ -1,25 +1,33 @@
 import React, { useState } from 'react';
 import './Login.css';
-import { useAuth } from '../../components';
+import { useAuth, useLoading } from '../../components';
 import { useNavigate } from 'react-router-dom';
 
 const Login: React.FC = () => {
   let navigate = useNavigate();
   const {loading, login} = useAuth();
+  const { showLoading, hideLoading } = useLoading();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Handle login logic here
     console.log('Login attempt with:', { email, password });
-    login({email, password}). then(res => {
+    
+    try {
+      showLoading('Signing in...');
+      const res = await login({email, password});
       console.log('Login successful:', res);
       if (res.user) {
-        navigate('/')
+        navigate('/');
       }
-    });
+    } catch (error) {
+      console.error('Login failed:', error);
+    } finally {
+      hideLoading();
+    }
   };
 
   const goToRegister = () => {

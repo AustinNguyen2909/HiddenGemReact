@@ -1,13 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Footer, ProfileEditModal } from '../../components';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Button, Footer, ProfileEditModal, useLoading } from '../../components';
+import { useAuth } from '../../components/AuthProvider';
 import { meService, UserProfile } from '../../services/me';
 import './UserProfileScreen.css';
+import { useNavigate } from 'react-router-dom';
 
 interface UserProfileScreenProps {
   className?: string;
 }
 
 const UserProfileScreen: React.FC<UserProfileScreenProps> = ({ className = '' }) => {
+  const { logout } = useAuth();
+  const { showLoading, hideLoading } = useLoading();
+  const navigate = useNavigate();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -15,9 +20,10 @@ const UserProfileScreen: React.FC<UserProfileScreenProps> = ({ className = '' })
 
   console.log('userProfile', userProfile)
 
-  const fetchUserProfile = async () => {
+  const fetchUserProfile = useCallback(async () => {
     try {
       setLoading(true);
+      showLoading('Loading profile...');
       const profile = await meService.getProfile();
       setUserProfile(profile.data);
       setError(null);
@@ -26,13 +32,14 @@ const UserProfileScreen: React.FC<UserProfileScreenProps> = ({ className = '' })
       setError('Failed to load profile data');
     } finally {
       setLoading(false);
+      hideLoading();
     }
-  };
+  }, [showLoading, hideLoading]);
 
   // Fetch user profile data
   useEffect(() => {
     fetchUserProfile();
-  }, []);
+  }, [fetchUserProfile]);
 
   const handleEditClick = () => {
     setIsEditModalOpen(true);
@@ -44,6 +51,28 @@ const UserProfileScreen: React.FC<UserProfileScreenProps> = ({ className = '' })
 
   const handleProfileUpdated = () => {
     fetchUserProfile();
+  };
+
+  const handleDeleteAccount = async () => {
+    const confirmed = window.confirm(
+      'Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently removed.'
+    );
+
+    if (!confirmed) return;
+
+    try {
+      showLoading('Deleting your account...');
+      await meService.deleteAccount();
+      // Clean up auth data and redirect to home
+      logout();
+      navigate('/');
+      // The logout function should handle redirecting to login/home
+    } catch (err) {
+      console.error('Failed to delete account:', err);
+      setError('Failed to delete account. Please try again.');
+    } finally {
+      hideLoading();
+    }
   };
 
   // Sample data for other sections (to be updated later)
@@ -117,7 +146,10 @@ const UserProfileScreen: React.FC<UserProfileScreenProps> = ({ className = '' })
                 <Button variant='primary'>
                   Change Password
                 </Button>
-                <Button variant='danger'>
+                <Button
+                  variant='danger'
+                  onClick={handleDeleteAccount}
+                >
                   Delete Account
                 </Button>
               </div>

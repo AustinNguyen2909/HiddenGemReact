@@ -10,6 +10,7 @@ export { default as Container } from './Container';
 export { ThemeProvider, useTheme } from './ThemeProvider';
 export { ThemeToggle } from './ThemeToggle';
 export { AuthProvider, useAuth } from './AuthProvider';
+export { LoadingProvider, useLoading } from './LoadingProvider';
 export { default as AdminRouteGuard } from './AdminRouteGuard';
 
 // Admin Components
@@ -28,6 +29,7 @@ export { default as LocationItem } from './LocationItem';
 export { default as StoreCard } from './StoreCard';
 export { default as MapComponent } from './MapComponent';
 export { default as ProfileEditModal } from './ProfileEditModal';
+export { default as LoadingModal } from './LoadingModal';
 
 // Carousel Components
 export { default as HeroCarousel } from './HeroCarousel';

@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import './Register.css';
-import { useAuth } from '../../components';
+import { useAuth, useLoading } from '../../components';
 import { useNavigate } from 'react-router-dom';
 
 const Register: React.FC = () => {
   const {loading, register} = useAuth();
+  const { showLoading, hideLoading } = useLoading();
 
   const [name, setName] = useState('');
   const [mobile, setMobile] = useState('');
@@ -13,16 +14,23 @@ const Register: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Handle registration logic here
     console.log('Registration attempt with:', { name, mobile, email, password });
-    register({email, password, username: email, full_name: name, phone_number: mobile}). then(res => {
-      console.log('Login successful:', res);
+    
+    try {
+      showLoading('Creating your account...');
+      const res = await register({email, password, username: email, full_name: name, phone_number: mobile});
+      console.log('Registration successful:', res);
       if (res.user_id) {
-        navigate('/login')
+        navigate('/login');
       }
-    });
+    } catch (error) {
+      console.error('Registration failed:', error);
+    } finally {
+      hideLoading();
+    }
   };
 
   return (

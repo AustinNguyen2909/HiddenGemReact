@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Text, Input, Button } from '../../components';
+import { Text, Input, Button, useLoading } from '../../components';
 import { useAuth } from '../../components/AuthProvider';
 import { cafesService } from '../../services/cafes';
 import { Cafe } from '../../services/types';
@@ -13,6 +13,7 @@ interface ShopProfileProps {
 const ShopProfile: React.FC<ShopProfileProps> = ({ className = '' }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { showLoading, hideLoading } = useLoading();
   const [panelMode, setPanelMode] = useState<'menu' | 'change-password' | 'edit-profile'>('menu');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -30,6 +31,7 @@ const ShopProfile: React.FC<ShopProfileProps> = ({ className = '' }) => {
       try {
         setLoading(true);
         setStoreError(null);
+        showLoading('Loading store profile...');
         
         // For now, we'll fetch the first store from the list
         // In a real app, you might have a specific store ID for the current user
@@ -45,11 +47,12 @@ const ShopProfile: React.FC<ShopProfileProps> = ({ className = '' }) => {
         setStoreError('Failed to load store data');
       } finally {
         setLoading(false);
+        hideLoading();
       }
     };
 
     fetchStoreData();
-  }, []);
+  }, [showLoading, hideLoading]);
 
   const goEditStore = () => navigate('/admin/store/profile/edit');
 
