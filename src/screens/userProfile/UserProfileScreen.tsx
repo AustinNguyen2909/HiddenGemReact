@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Footer, ProfileEditModal } from '../../components';
+import { Button, Footer, ProfileEditModal } from '../../components';
 import { meService, UserProfile } from '../../services/me';
 import './UserProfileScreen.css';
 
@@ -50,8 +50,6 @@ const UserProfileScreen: React.FC<UserProfileScreenProps> = ({ className = '' })
   const profileData = {
     name: "I am Cat, 21",
     bio: "So be careful, the snobbish cat",
-    lookingFor: ["Guy", "Pink", "from 21 to 30", "Friendship", "Windy and Flowery"],
-    locationPreference: "Quiet place and relaxing mind",
     favoriteCoffeeShops: [
       { id: 1, image: "/api/placeholder/88/96", name: "Coffee Shop 1" },
       { id: 2, image: "/api/placeholder/88/96", name: "Coffee Shop 2" },
@@ -69,20 +67,6 @@ const UserProfileScreen: React.FC<UserProfileScreenProps> = ({ className = '' })
       { id: 3, image: "/api/placeholder/88/96", count: 12 },
       { id: 4, image: "/api/placeholder/88/96", count: 1 }
     ],
-    interests: [
-      "Journeys", "Snowboarding", "Design", "Video games", "Cross stitc", "Foreign languages", "Dances",
-      "Watching horror movies", "Detectives", "Game of thrones", "Evening walks"
-    ],
-    personalInfo: {
-      appearance: "188 cm, 91 kg, athletic build, brown hair and brown eyes",
-      relationships: "Free",
-      children: "No, and I'm looking without children",
-      education: "Higher",
-      smoking: "Against smoking",
-      alcohol: "I don't drink, but I don't mind",
-      languages: "Russian (native); English (initial)",
-      pets: "Cat"
-    }
   };
 
   // Loading state
@@ -130,15 +114,12 @@ const UserProfileScreen: React.FC<UserProfileScreenProps> = ({ className = '' })
                 <img src={'https://icons.veryicon.com/png/o/miscellaneous/two-color-webpage-small-icon/user-244.png'} alt="Profile" />
               </div>
               <div className="avatar-actions">
-                <button className="become-vendor-btn">
-                  <span className="close-icon">×</span>
-                  Become a Vendor
-                </button>
-                <div className="divider"></div>
-                <button className="change-password-btn">
-                  <span className="warning-icon">⚠</span>
+                <Button variant='primary'>
                   Change Password
-                </button>
+                </Button>
+                <Button variant='danger'>
+                  Delete Account
+                </Button>
               </div>
             </div>
           </div>
@@ -164,27 +145,6 @@ const UserProfileScreen: React.FC<UserProfileScreenProps> = ({ className = '' })
                 👤 {userProfile.role}
               </p>
             )}
-            <div className="divider"></div>
-          </div>
-
-          {/* Looking For Section */}
-          <div className="preferences-section">
-            <div className="preference-card">
-              <h3 className="preference-title">I'm looking for</h3>
-              <div className="preference-tags">
-                {profileData.lookingFor.map((item, index) => (
-                  <span key={index} className="preference-tag">{item}</span>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Location Preference Section */}
-          <div className="preferences-section">
-            <div className="preference-card">
-              <h3 className="preference-title">Where do I want to find</h3>
-              <p className="preference-text">{profileData.locationPreference}</p>
-            </div>
           </div>
 
           {/* Favorite Coffee Shops Section */}
@@ -223,55 +183,6 @@ const UserProfileScreen: React.FC<UserProfileScreenProps> = ({ className = '' })
                   </div>
                 </div>
               ))}
-            </div>
-          </div>
-
-          {/* Interests Section */}
-          <div className="interests-section">
-            <h3 className="interests-title">Interests</h3>
-            <div className="interests-tags">
-              {profileData.interests.map((interest, index) => (
-                <span key={index} className="interest-tag">{interest}</span>
-              ))}
-            </div>
-          </div>
-
-          {/* Personal Information Section */}
-          <div className="personal-info-section">
-            <h3 className="personal-info-title">Personal information</h3>
-            <div className="personal-info-list">
-              <div className="info-item">
-                <span className="info-label">Appearance:</span>
-                <span className="info-value">{profileData.personalInfo.appearance}</span>
-              </div>
-              <div className="info-item">
-                <span className="info-label">Relationships:</span>
-                <span className="info-value">{profileData.personalInfo.relationships}</span>
-              </div>
-              <div className="info-item">
-                <span className="info-label">Children:</span>
-                <span className="info-value">{profileData.personalInfo.children}</span>
-              </div>
-              <div className="info-item">
-                <span className="info-label">Education:</span>
-                <span className="info-value">{profileData.personalInfo.education}</span>
-              </div>
-              <div className="info-item">
-                <span className="info-label">Smoking:</span>
-                <span className="info-value">{profileData.personalInfo.smoking}</span>
-              </div>
-              <div className="info-item">
-                <span className="info-label">Alcohol:</span>
-                <span className="info-value">{profileData.personalInfo.alcohol}</span>
-              </div>
-              <div className="info-item">
-                <span className="info-label">Foreign languages:</span>
-                <span className="info-value">{profileData.personalInfo.languages}</span>
-              </div>
-              <div className="info-item">
-                <span className="info-label">Pets:</span>
-                <span className="info-value">{profileData.personalInfo.pets}</span>
-              </div>
             </div>
           </div>
         </div>

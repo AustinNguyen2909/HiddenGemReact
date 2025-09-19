@@ -42,7 +42,6 @@
 
 
 .admin-layout__content {
-  padding: var(--spacing-xl);
   max-width: 100%;
   min-height: 100%;
 }

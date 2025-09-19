@@ -101,7 +101,7 @@
   gap: 24px;
 }
 
-.become-vendor-btn,
+
 .change-password-btn {
   display: flex;
   align-items: center;
@@ -117,7 +117,6 @@
   transition: all 0.2s ease;
 }
 
-.become-vendor-btn:hover,
 .change-password-btn:hover {
   background: #f0b85a;
 }

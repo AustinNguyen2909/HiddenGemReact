@@ -113,14 +113,28 @@ export type ChatSendRequest = { noi_dung: string; to_user_id?: number };
 // Wallet
 export type SimulateBankTransferRequest = { noi_dung: string; so_tien: number };
 
-// Ads
-export type AdsCreateRequest = { id_cua_hang: number; goi: string; ngay_bat_dau?: ISODateString };
-
 // Admin
 export type AdminDashboardData = { users: number; shops: number; stores: number; reviews: number; vouchers: number; promos: number };
 export type AdminDashboardResponse = { data: AdminDashboardData };
 export type AdminSetRoleRequest = { id_user: number; role: 'admin' | 'shop' | 'customer' };
 export type AdminStoreApproveRequest = { action: 'approve' | 'reject' };
+export type AdminReviewStatusRequest = { trang_thai: 'cho_duyet' | 'da_duyet' | 'tu_choi' | 'an' };
+export type AdminCommentStatusRequest = { trang_thai: 'cho_duyet' | 'da_duyet' | 'tu_choi' | 'an' };
+export type AdminBlogStatusRequest = { trang_thai: 'nhap' | 'cong_bo' | 'an' };
+
+// Content
+export type ContentUpdateRequest = { content: string };
+
+// Contact
+export type ContactInfo = {
+  email: string;
+  zalo: string;
+  phone: string;
+};
+
+// Ads
+export type AdsCreateRequest = { id_cua_hang: number; goi: string; ngay_bat_dau?: ISODateString };
+export type AdsReviewRequest = { trang_thai: 'da_duyet' | 'tu_choi' };
 
 // Generic API shapes
 export type ApiSuccess<T> = T;

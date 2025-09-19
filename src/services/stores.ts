@@ -1,5 +1,5 @@
 import apiClient from './api';
-import { CreateStoreRequest } from './types';
+import { CreateStoreRequest, BaseData } from './types';
 
 export interface StoreSummary {
   id_cua_hang: number;
@@ -44,6 +44,14 @@ class StoresService {
     fd.append('file', file);
     if (typeof is_avatar !== 'undefined') fd.append('is_avatar', String(is_avatar));
     return apiClient.postForm<void>(`/stores/${id}/images`, fd);
+  }
+
+  getImages(id: number): Promise<BaseData<{ images: any[] }>> {
+    return apiClient.get<BaseData<{ images: any[] }>>(`/stores/${id}/images`);
+  }
+
+  getDashboard(id: number): Promise<BaseData<any>> {
+    return apiClient.get<BaseData<any>>(`/me/stores/${id}/dashboard`);
   }
 }
 

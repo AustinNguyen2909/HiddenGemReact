@@ -16,3 +16,5 @@ export { default as walletService } from './wallet';
 export { default as adsService } from './ads';
 export { default as adminService } from './admin';
 export { default as opsService } from './ops';
+export { default as contentService } from './content';
+export { default as contactService } from './contact';

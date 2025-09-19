@@ -30,16 +30,6 @@
   background: rgba(0, 0, 0, 0);
 }
 
-.footer__content::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 24px;
-  right: 24px;
-  height: 1px;
-  background: #FFFFFF;
-}
-
 .footer__section {
   flex: 1;
   width: 284px;

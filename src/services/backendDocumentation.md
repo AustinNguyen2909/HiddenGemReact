@@ -87,6 +87,14 @@ Request email verification token.
 Confirm email verification token.
 - Body: `{ token }`
 
+### GET /api/users
+List all users (Admin only).
+- Auth: required (Admin)
+
+### DELETE /api/me
+Delete current user account.
+- Auth: required
+
 Example (login):
 ```bash
 curl -X POST http://127.0.0.1:8000/api/auth/login \
@@ -128,6 +136,15 @@ Get Terms of Service.
 ### GET /api/policies/privacy
 Get Privacy Policy.
 
+### GET /api/content/{slug}
+Get content by slug (about, testimonials).
+- Query: none
+
+### PUT /api/content/{slug}
+Update content by slug (Admin).
+- Auth: required (Admin)
+- Body: `{ content }`
+
 ---
 
 ## Stores (Cafes) and Reviews
@@ -144,7 +161,7 @@ List stores with pagination.
         "id_cua_hang": 1,
         "ten_cua_hang": "Hidden Gem",
         "mo_ta": "Quan ca phe thu vi",
-        "diem_danh_gia_trung_binh": "4.8",
+        "diem_danh_gia_trung_binh": 4.8,
         "luot_xem": 1234,
         "id_trang_thai": 2,
         "id_vi_tri": 1,
@@ -169,11 +186,21 @@ const data: CafeListResponse = await res.json();
 
 ### GET /api/cafes/search
 Search stores by name.
-- Query: `q`
+- Query: `q`, `page?`, `per_page?`
 
 Example:
 ```bash
 curl 'http://127.0.0.1:8000/api/cafes/search?q=Hidden'
+```
+
+### GET /api/cafes/near
+Find nearby stores by coordinates.
+- Query: `lat`, `lng`, `radius_km?` (default 5km), `limit?` (default 20)
+- Response includes center coordinates and radius info
+
+Example:
+```bash
+curl 'http://127.0.0.1:8000/api/cafes/near?lat=10.762622&lng=106.660172&radius_km=10'
 ```
 
 ### GET /api/cafes/{id}
@@ -181,6 +208,7 @@ Get store detail by ID.
 
 ### GET /api/cafes/{id}/reviews
 List reviews for a store.
+- Query: `page?`, `per_page?`
 
 ### POST /api/cafes/{id}/reviews
 Create a review.
@@ -243,11 +271,21 @@ Create a branch for a store (Shop role).
 ### GET /api/me/stores
 List stores owned by current user.
 - Auth: required
+- Query: `page?`, `per_page?`
+
+### GET /api/stores/{id}/images
+List images for a store.
+- Query: none
 
 ### POST /api/stores/{id}/images
 Upload store image.
 - Auth: required
 - Form-data: `file` (binary), `is_avatar?` (integer)
+
+### GET /api/me/stores/{id}/dashboard
+Get store dashboard metrics.
+- Auth: required (owner or admin)
+- Returns store analytics and metrics
 
 Examples:
 ```bash
@@ -308,6 +346,9 @@ curl -X POST http://127.0.0.1:8000/api/vouchers/assign \
 ### GET /api/stores/{id}/vouchers
 List vouchers assigned to a store by ID.
 
+### GET /api/vouchers/global
+List global vouchers available to all stores.
+
 ---
 
 ## Promotions
@@ -354,18 +395,22 @@ curl -X POST http://127.0.0.1:8000/api/promotions/1/review \
 ### GET /api/stores/{id}/promotions
 List promotions a store participates in.
 
+### GET /api/promotions/global
+List global promotions.
+- Query: `trang_thai?` (default: "dang_hoat_dong")
+
 ---
 
 ## Blog
 
 ### GET /api/blog
 List/search blog posts.
-- Query: `q?`
+- Query: `q?`, `page?`, `per_page?`
 
 ### POST /api/blog
 Create blog post (Admin).
 - Auth: required (Admin)
-- Body: `{ tieu_de, noi_dung }`
+- Body: `{ tieu_de, noi_dung, trang_thai? }`
 
 Example:
 ```bash
@@ -378,7 +423,12 @@ curl -X POST http://127.0.0.1:8000/api/blog \
 ### PATCH /api/blog/{id}
 Update blog post (Admin).
 - Auth: required (Admin)
-- Body: `{ tieu_de, noi_dung }`
+- Body: `{ tieu_de, noi_dung, trang_thai? }`
+
+### PATCH /api/admin/blog/{id}/status
+Update blog post status (Admin).
+- Auth: required (Admin)
+- Body: `{ trang_thai: "nhap"|"cong_bo"|"an" }`
 
 ---
 
@@ -403,6 +453,15 @@ Create banner (Admin).
 Update banner (Admin).
 - Auth: required (Admin)
 - Body: partial banner fields
+
+### PATCH /api/banners/reorder
+Reorder banners (Admin).
+- Auth: required (Admin)
+- Body: `{ order: [id1, id2, ...] }`
+
+### DELETE /api/banners/{id}
+Delete banner (Admin).
+- Auth: required (Admin)
 
 ---
 
@@ -429,6 +488,20 @@ List messages.
 ### GET /api/chat/conversations
 List conversations.
 - Auth: required
+
+### PATCH /api/chat/read
+Mark messages as read.
+- Auth: required
+- Body: `{ from_user_id?, message_ids? }`
+
+### GET /api/chat/unread-counts
+Get unread message counts per conversation.
+- Auth: required
+
+### POST /api/chat/send-file
+Send a file message.
+- Auth: required
+- Form-data: `file` (binary), `to_user_id?`, `caption?`
 
 ---
 
@@ -494,6 +567,7 @@ List my ad requests.
 
 ### GET /api/ads/active
 List active ads.
+- Query: `tai_ngay?` (YYYY-MM-DD or Y-m-d H:i:s)
 
 Admin review:
 - `GET /api/admin/ads/requests/pending` — pending requests (Admin, Auth)
@@ -524,6 +598,22 @@ Example:
 curl -H "Authorization: Bearer $ACCESS_TOKEN" http://127.0.0.1:8000/api/admin/dashboard
 ```
 
+### GET /api/admin/users
+List users with pagination and filters.
+- Auth: required (Admin)
+- Query: `page?`, `per_page?`, `q?`, `role?`
+
+### GET /api/admin/search
+Search across different domains.
+- Auth: required (Admin)
+- Query: `domain` (reviews|promotions|users), `q?`, `trang_thai?`, `role?`, `page?`, `per_page?`
+
+### GET /api/admin/reports/summary
+Get reports summary with optional date range.
+- Auth: required (Admin)
+- Query: `from?`, `to?`, `format?` (json|csv)
+- Returns CSV if format=csv
+
 ### POST /api/admin/users/role
 Set user role.
 - Auth: required (Admin)
@@ -541,6 +631,25 @@ List pending stores for approval.
 Approve or reject a store.
 - Auth: required (Admin)
 - Body: `{ action: "approve"|"reject" }`
+
+### GET /api/contact
+Get contact information.
+- Returns: email, zalo, phone from environment
+
+### PATCH /api/admin/reviews/{id}
+Update review status (Admin).
+- Auth: required (Admin)
+- Body: `{ trang_thai: "cho_duyet"|"da_duyet"|"tu_choi"|"an" }`
+
+### GET /api/admin/comments
+List comments for moderation.
+- Auth: required (Admin)
+- Query: `page?`, `per_page?`, `q?`, `trang_thai?`, `loai?`
+
+### PATCH /api/admin/comments/{id}
+Update comment status.
+- Auth: required (Admin)
+- Body: `{ trang_thai: "cho_duyet"|"da_duyet"|"tu_choi"|"an" }`
 
 ---
 
@@ -669,7 +778,7 @@ export type Cafe = {
   id_chu_so_huu: number;
   ten_cua_hang: string;
   mo_ta?: string | null;
-  diem_danh_gia_trung_binh: string;
+  diem_danh_gia_trung_binh: number; // float
   luot_xem: number;
   id_trang_thai?: number | null;
   id_vi_tri?: number | null;
@@ -757,6 +866,8 @@ export type BannersListResponse = { data: Banner[] };
 
 // Chat
 export type ChatSendRequest = { noi_dung: string; to_user_id?: number };
+export type ChatMarkReadRequest = { from_user_id?: number; message_ids?: number[] };
+export type ChatSendFileRequest = { to_user_id?: number; caption?: string; file: File | Blob };
 
 // Wallet
 export type SimulateBankTransferRequest = { noi_dung: string; so_tien: number };
@@ -782,6 +893,12 @@ export type AdminDashboardResponse = { data: AdminDashboardData };
 
 export type AdminSetRoleRequest = { id_user: number; role: 'admin' | 'shop' | 'customer' };
 export type AdminStoreApproveRequest = { action: 'approve' | 'reject' };
+export type AdminReviewStatusRequest = { trang_thai: 'cho_duyet' | 'da_duyet' | 'tu_choi' | 'an' };
+export type AdminCommentStatusRequest = { trang_thai: 'cho_duyet' | 'da_duyet' | 'tu_choi' | 'an' };
+export type AdminBlogStatusRequest = { trang_thai: 'nhap' | 'cong_bo' | 'an' };
+
+// Content
+export type ContentUpdateRequest = { content: string };
 
 // Generic API shapes (optional, use if your backend wraps lists/data consistently)
 export type ApiSuccess<T> = T;

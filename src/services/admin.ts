@@ -1,5 +1,5 @@
 import apiClient from './api';
-import { AdminDashboardResponse, AdminSetRoleRequest, User } from './types';
+import { AdminDashboardResponse, AdminSetRoleRequest, User, AdminReviewStatusRequest, AdminCommentStatusRequest, AdminBlogStatusRequest, BaseData } from './types';
 
 export interface PendingStore {
   id: number;
@@ -37,6 +37,30 @@ class AdminService {
 
   reviewStore(id: number, payload: AdminStoreApproveRequest): Promise<void> {
     return apiClient.post<void>(`/admin/stores/${id}/approve`, payload);
+  }
+
+  search(domain: string, q?: string, trang_thai?: string, role?: string, page?: number, per_page?: number): Promise<BaseData<any>> {
+    return apiClient.get<BaseData<any>>('/admin/search', { domain, q, trang_thai, role, page, per_page });
+  }
+
+  getReportsSummary(from?: string, to?: string, format?: string): Promise<BaseData<any>> {
+    return apiClient.get<BaseData<any>>('/admin/reports/summary', { from, to, format });
+  }
+
+  updateReviewStatus(id: number, payload: AdminReviewStatusRequest): Promise<void> {
+    return apiClient.patch<void>(`/admin/reviews/${id}`, payload);
+  }
+
+  getComments(page?: number, per_page?: number, q?: string, trang_thai?: string, loai?: string): Promise<BaseData<any>> {
+    return apiClient.get<BaseData<any>>('/admin/comments', { page, per_page, q, trang_thai, loai });
+  }
+
+  updateCommentStatus(id: number, payload: AdminCommentStatusRequest): Promise<void> {
+    return apiClient.patch<void>(`/admin/comments/${id}`, payload);
+  }
+
+  updateBlogStatus(id: number, payload: AdminBlogStatusRequest): Promise<void> {
+    return apiClient.patch<void>(`/admin/blog/${id}/status`, payload);
   }
 }
 

@@ -34,6 +34,10 @@ class MeService {
   getPrivacy(): Promise<string> {
     return apiClient.get<string>('/policies/privacy');
   }
+
+  deleteAccount(): Promise<void> {
+    return apiClient.delete<void>('/me');
+  }
 }
 
 export const meService = new MeService();
