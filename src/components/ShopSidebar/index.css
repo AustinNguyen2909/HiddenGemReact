@@ -75,7 +75,7 @@
 }
 
 .shop-sidebar__item-button--active .shop-sidebar__item-label {
-  color: var(--color-text-inverse) !important;
+  /* color: var(--color-text-inverse) !important; */
 }
 
 .shop-sidebar__item-icon {

@@ -16,23 +16,27 @@ const BlogScreen: React.FC<BlogScreenProps> = ({ className = "" }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [visiblePosts, setVisiblePosts] = useState(8);
 
+  const fetchBlogPosts = async () => {
+    try {
+      setLoading(true);
+      const response = await blogService.list(searchQuery);
+      setBlogPosts(response.data.items);
+    } catch (err) {
+      setError("Failed to load blog posts");
+      console.error("Error fetching blog posts:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const searchWithCurrentQuery = () => {
+    fetchBlogPosts();
+  };
+
   // Fetch blog posts from API
   useEffect(() => {
-    const fetchBlogPosts = async () => {
-      try {
-        setLoading(true);
-        const response = await blogService.list(searchQuery);
-        setBlogPosts(response.data.items);
-      } catch (err) {
-        setError("Failed to load blog posts");
-        console.error("Error fetching blog posts:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchBlogPosts();
-  }, [searchQuery]);
+  }, []);
 
   // Filter posts based on search
   const filteredPosts = blogPosts.filter((post) => {
@@ -153,6 +157,7 @@ const BlogScreen: React.FC<BlogScreenProps> = ({ className = "" }) => {
                 variant="primary"
                 size="lg"
                 className="blog-hero__search-button"
+                onClick={searchWithCurrentQuery}
               >
                 {blogHeroContent.searchButtonText}
               </Button>
@@ -163,21 +168,6 @@ const BlogScreen: React.FC<BlogScreenProps> = ({ className = "" }) => {
 
       <main className="blog-screen__main">
         <div className="blog-screen__container">
-          {/* Filter Section */}
-          <section className="blog-filters">
-            <div className="blog-filters__content">
-              <div className="blog-filters__search">
-                <Input
-                  type="text"
-                  placeholder={blogFilters.searchPlaceholder}
-                  className="blog-filters__search-input"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            </div>
-          </section>
-
           {/* Section Title */}
           <section className="blog-section-title">
             <Text className="blog-section-title__subtitle" color="secondary">

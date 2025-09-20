@@ -1,18 +1,16 @@
-import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Title, Text, Button, Input, AdminStatsCard, AdminTable } from '../../components';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Title, Text, Button, AdminStatsCard, AdminTable } from '../../components';
+import { promotionsService, Promotion } from '../../services/promotions';
+import { cafesService } from '../../services/cafes';
 import './PromotionManage.css';
 
 interface PromotionManageProps {
   className?: string;
 }
 
-interface PromotionItem {
-  id: number;
-  promotionName: string;
-  description: string;
-  startDate: string;
-  endDate: string;
+// Extended interface for display purposes
+interface PromotionDisplayItem extends Promotion {
   status: 'active' | 'inactive' | 'draft' | 'expired';
   discountType: 'percentage' | 'fixed' | 'buy_x_get_y';
   discountValue: number;
@@ -25,151 +23,143 @@ interface PromotionItem {
   updatedAt: string;
 }
 
-const promotionItems: PromotionItem[] = [
-  {
-    id: 1,
-    promotionName: 'Summer Coffee Special',
-    description: 'Get 20% off on all iced coffee drinks during summer months',
-    startDate: '2024-06-01T00:00:00Z',
-    endDate: '2024-08-31T23:59:59Z',
-    status: 'active',
-    discountType: 'percentage',
-    discountValue: 20,
-    minOrderAmount: 10,
-    maxDiscountAmount: 50,
-    usageLimit: 100,
-    usedCount: 45,
-    image: '/images/promotions/summer-coffee.jpg',
-    createdAt: '2024-05-15T10:00:00Z',
-    updatedAt: '2024-05-15T10:00:00Z'
-  },
-  {
-    id: 2,
-    promotionName: 'Buy 2 Get 1 Free Pastries',
-    description: 'Purchase any 2 pastries and get the third one free',
-    startDate: '2024-01-01T00:00:00Z',
-    endDate: '2024-12-31T23:59:59Z',
-    status: 'active',
-    discountType: 'buy_x_get_y',
-    discountValue: 1,
-    minOrderAmount: 15,
-    usageLimit: 200,
-    usedCount: 78,
-    image: '/images/promotions/pastry-deal.jpg',
-    createdAt: '2023-12-20T14:30:00Z',
-    updatedAt: '2024-01-15T09:15:00Z'
-  },
-  {
-    id: 3,
-    promotionName: 'Happy Hour Discount',
-    description: '50% off all drinks from 2 PM to 4 PM on weekdays',
-    startDate: '2024-01-15T00:00:00Z',
-    endDate: '2024-03-15T23:59:59Z',
-    status: 'expired',
-    discountType: 'percentage',
-    discountValue: 50,
-    usageLimit: 50,
-    usedCount: 50,
-    image: '/images/promotions/happy-hour.jpg',
-    createdAt: '2024-01-10T11:20:00Z',
-    updatedAt: '2024-03-15T23:59:59Z'
-  },
-  {
-    id: 4,
-    promotionName: 'Student Discount',
-    description: '15% off for students with valid ID',
-    startDate: '2024-09-01T00:00:00Z',
-    endDate: '2024-12-31T23:59:59Z',
-    status: 'draft',
-    discountType: 'percentage',
-    discountValue: 15,
-    minOrderAmount: 5,
-    usageLimit: 500,
-    usedCount: 0,
-    image: '/images/promotions/student-discount.jpg',
-    createdAt: '2024-08-25T16:45:00Z',
-    updatedAt: '2024-08-25T16:45:00Z'
-  },
-  {
-    id: 5,
-    promotionName: 'Free Delivery Weekend',
-    description: 'Free delivery on orders over $25 during weekends',
-    startDate: '2024-02-01T00:00:00Z',
-    endDate: '2024-02-29T23:59:59Z',
-    status: 'inactive',
-    discountType: 'fixed',
-    discountValue: 5,
-    minOrderAmount: 25,
-    usageLimit: 100,
-    usedCount: 23,
-    image: '/images/promotions/free-delivery.jpg',
-    createdAt: '2024-01-28T13:10:00Z',
-    updatedAt: '2024-02-15T10:30:00Z'
-  },
-  {
-    id: 6,
-    promotionName: 'New Customer Welcome',
-    description: 'First-time customers get $5 off their first order',
-    startDate: '2024-01-01T00:00:00Z',
-    endDate: '2024-12-31T23:59:59Z',
-    status: 'active',
-    discountType: 'fixed',
-    discountValue: 5,
-    minOrderAmount: 15,
-    usageLimit: 1000,
-    usedCount: 234,
-    image: '/images/promotions/welcome-offer.jpg',
-    createdAt: '2023-12-15T09:00:00Z',
-    updatedAt: '2024-01-20T14:22:00Z'
-  }
-];
+// Helper function to determine promotion status based on dates
+const getPromotionStatus = (startDate: string, endDate: string): 'active' | 'inactive' | 'draft' | 'expired' => {
+  const now = new Date();
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  
+  if (now < start) return 'draft';
+  if (now > end) return 'expired';
+  return 'active';
+};
 
-const statusOptions = ['All', 'Active', 'Inactive', 'Draft', 'Expired'];
-const discountTypeOptions = ['All', 'Percentage', 'Fixed Amount', 'Buy X Get Y'];
+// Helper function to map API data to display format
+const mapPromotionToDisplay = (promotion: Promotion): PromotionDisplayItem => {
+  const status = getPromotionStatus(promotion.ngay_bat_dau, promotion.ngay_ket_thuc);
+  
+  return {
+    ...promotion,
+    status,
+    discountType: 'percentage', // Default since API doesn't provide this
+    discountValue: 0, // Default since API doesn't provide this
+    usedCount: 0, // Default since API doesn't provide this
+    createdAt: promotion.ngay_bat_dau,
+    updatedAt: promotion.ngay_ket_thuc
+  };
+};
+
 
 const PromotionManage: React.FC<PromotionManageProps> = ({ className = '' }) => {
   const navigate = useNavigate();
+  const { storeId } = useParams<{ storeId?: string }>();
   
-  // Filter states
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('All');
-  const [discountTypeFilter, setDiscountTypeFilter] = useState('All');
+  // API data states
+  const [promotions, setPromotions] = useState<PromotionDisplayItem[]>([]);
+  const [currentStoreId, setCurrentStoreId] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Sort state
   const [sortBy, setSortBy] = useState('createdAt-desc');
   
-  // Filter and sort promotions
-  const filteredAndSortedPromotions = useMemo(() => {
-    let filtered = promotionItems.filter(item => {
-      const matchesSearch = item.promotionName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           item.description.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus = statusFilter === 'All' || 
-                           (statusFilter === 'Active' && item.status === 'active') ||
-                           (statusFilter === 'Inactive' && item.status === 'inactive') ||
-                           (statusFilter === 'Draft' && item.status === 'draft') ||
-                           (statusFilter === 'Expired' && item.status === 'expired');
-      const matchesDiscountType = discountTypeFilter === 'All' || 
-                                 (discountTypeFilter === 'Percentage' && item.discountType === 'percentage') ||
-                                 (discountTypeFilter === 'Fixed Amount' && item.discountType === 'fixed') ||
-                                 (discountTypeFilter === 'Buy X Get Y' && item.discountType === 'buy_x_get_y');
+  // Get current store ID
+  const getCurrentStoreId = useCallback(async (): Promise<number> => {
+    // If storeId is provided in URL params, use it
+    if (storeId) {
+      return parseInt(storeId);
+    }
+    
+    // Otherwise, get the first store from the user's stores (similar to ShopProfile)
+    try {
+      const response = await cafesService.list(1, 1);
+      if (response.data.items.length > 0) {
+        return response.data.items[0].id_cua_hang;
+      }
+      throw new Error('No store found');
+    } catch (error) {
+      console.error('Error fetching current store:', error);
+      throw new Error('Failed to get current store');
+    }
+  }, [storeId]);
+
+  // Fetch promotions from API for current store
+  const fetchPromotions = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
       
-      return matchesSearch && matchesStatus && matchesDiscountType;
-    });
+      // Get current store ID
+      const storeId = await getCurrentStoreId();
+      setCurrentStoreId(storeId);
+      
+      // Fetch promotions for the current store
+      const response = await promotionsService.listByStore(storeId);
+      const mappedPromotions = response.data.map(mapPromotionToDisplay);
+      setPromotions(mappedPromotions);
+    } catch (error) {
+      console.error('Error fetching promotions:', error);
+      setError('Failed to load promotions');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [getCurrentStoreId]);
+
+  // Fetch promotions on component mount
+  useEffect(() => {
+    fetchPromotions();
+  }, [fetchPromotions]);
+
+  // Fetch data when component comes into focus
+  useEffect(() => {
+    const handleFocus = () => {
+      fetchPromotions();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    fetchPromotions();
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [fetchPromotions]);
+
+  // Sort promotions
+  const sortedPromotions = useMemo(() => {
+    const sorted = [...promotions];
 
     // Sort promotions
-    filtered.sort((a, b) => {
+    sorted.sort((a, b) => {
       const [sortKey, direction] = sortBy.split('-');
       const isAsc = direction === 'asc';
       
-      let aValue: any = a[sortKey as keyof PromotionItem];
-      let bValue: any = b[sortKey as keyof PromotionItem];
+      let aValue: any;
+      let bValue: any;
       
-      if (sortKey === 'createdAt' || sortKey === 'updatedAt' || sortKey === 'startDate' || sortKey === 'endDate') {
-        aValue = new Date(aValue).getTime();
-        bValue = new Date(bValue).getTime();
-      }
-      
-      if (typeof aValue === 'string') {
-        aValue = aValue.toLowerCase();
-        bValue = bValue.toLowerCase();
+      switch (sortKey) {
+        case 'createdAt':
+          aValue = new Date(a.createdAt).getTime();
+          bValue = new Date(b.createdAt).getTime();
+          break;
+        case 'updatedAt':
+          aValue = new Date(a.updatedAt).getTime();
+          bValue = new Date(b.updatedAt).getTime();
+          break;
+        case 'ngay_bat_dau':
+          aValue = new Date(a.ngay_bat_dau).getTime();
+          bValue = new Date(b.ngay_bat_dau).getTime();
+          break;
+        case 'ten_chuong_trinh':
+          aValue = a.ten_chuong_trinh.toLowerCase();
+          bValue = b.ten_chuong_trinh.toLowerCase();
+          break;
+        case 'usedCount':
+          aValue = a.usedCount;
+          bValue = b.usedCount;
+          break;
+        default:
+          aValue = a[sortKey as keyof PromotionDisplayItem];
+          bValue = b[sortKey as keyof PromotionDisplayItem];
       }
       
       if (isAsc) {
@@ -179,48 +169,48 @@ const PromotionManage: React.FC<PromotionManageProps> = ({ className = '' }) => 
       }
     });
 
-    return filtered;
-  }, [searchTerm, statusFilter, discountTypeFilter, sortBy]);
+    return sorted;
+  }, [promotions, sortBy]);
 
   // Statistics
   const statsData = [
     {
       title: 'Total Promotions',
-      value: promotionItems.length.toString(),
+      value: promotions.length.toString(),
       icon: '🎯',
       trend: { value: 2, isPositive: true }
     },
     {
       title: 'Active',
-      value: promotionItems.filter(item => item.status === 'active').length.toString(),
+      value: promotions.filter(item => item.status === 'active').length.toString(),
       icon: '✅',
       trend: { value: 1, isPositive: true }
     },
     {
       title: 'Total Usage',
-      value: promotionItems.reduce((sum, item) => sum + item.usedCount, 0).toString(),
+      value: promotions.reduce((sum, item) => sum + item.usedCount, 0).toString(),
       icon: '📈',
       trend: { value: 15, isPositive: true }
     },
     {
       title: 'Draft',
-      value: promotionItems.filter(item => item.status === 'draft').length.toString(),
+      value: promotions.filter(item => item.status === 'draft').length.toString(),
       icon: '📝',
       trend: { value: 0, isPositive: false }
     }
   ];
 
-  const handleViewPromotion = (promotion: PromotionItem) => {
-    navigate(`/admin/store/promotion/${promotion.id}`);
+  const handleViewPromotion = (promotion: PromotionDisplayItem) => {
+    navigate(`/admin/store/promotion/${promotion.id_khuyen_mai}`);
   };
 
-  const handleEditPromotion = (promotion: PromotionItem) => {
-    navigate(`/admin/store/promotion/${promotion.id}/edit`);
+  const handleEditPromotion = (promotion: PromotionDisplayItem) => {
+    navigate(`/admin/store/promotion/${promotion.id_khuyen_mai}/edit`);
   };
 
-  const handleDeletePromotion = (promotion: PromotionItem) => {
-    if (window.confirm(`Are you sure you want to delete the promotion "${promotion.promotionName}"?`)) {
-      console.log('Delete promotion:', promotion.id);
+  const handleDeletePromotion = (promotion: PromotionDisplayItem) => {
+    if (window.confirm(`Are you sure you want to delete the promotion "${promotion.ten_chuong_trinh}"?`)) {
+      console.log('Delete promotion:', promotion.id_khuyen_mai);
       // In a real app, this would make an API call
     }
   };
@@ -256,7 +246,7 @@ const PromotionManage: React.FC<PromotionManageProps> = ({ className = '' }) => 
     return `${start} - ${end}`;
   };
 
-  const getDiscountDisplay = (promotion: PromotionItem) => {
+  const getDiscountDisplay = (promotion: PromotionDisplayItem) => {
     switch (promotion.discountType) {
       case 'percentage':
         return `${promotion.discountValue}% off`;
@@ -271,11 +261,11 @@ const PromotionManage: React.FC<PromotionManageProps> = ({ className = '' }) => 
 
   const tableColumns = [
     {
-      key: 'promotionName',
+      key: 'ten_chuong_trinh',
       label: 'Promotion Name',
       sortable: true,
       width: '200px',
-      render: (value: string, item: PromotionItem) => (
+      render: (value: string, item: PromotionDisplayItem) => (
         <div className="promotion-manage__promotion-info">
           <Text variant="p" size="sm" color="primary" className="promotion-manage__promotion-name">
             {value}
@@ -287,27 +277,27 @@ const PromotionManage: React.FC<PromotionManageProps> = ({ className = '' }) => 
       )
     },
     {
-      key: 'description',
+      key: 'mo_ta',
       label: 'Description',
       width: '250px',
       render: (value: string) => (
         <Text variant="p" size="sm" color="secondary" className="promotion-manage__description">
-          {value.length > 80 ? `${value.substring(0, 80)}...` : value}
+          {(value || 'No description').length > 80 ? `${(value || 'No description').substring(0, 80)}...` : (value || 'No description')}
         </Text>
       )
     },
     {
-      key: 'startDate',
+      key: 'ngay_bat_dau',
       label: 'Time Period',
       sortable: true,
       width: '180px',
-      render: (value: string, item: PromotionItem) => (
+      render: (value: string, item: PromotionDisplayItem) => (
         <div className="promotion-manage__time-info">
           <Text variant="p" size="sm" color="primary" className="promotion-manage__time-range">
-            {formatDateRange(item.startDate, item.endDate)}
+            {formatDateRange(item.ngay_bat_dau, item.ngay_ket_thuc)}
           </Text>
           <Text variant="p" size="xs" color="muted" className="promotion-manage__time-days">
-            {Math.ceil((new Date(item.endDate).getTime() - new Date(item.startDate).getTime()) / (1000 * 60 * 60 * 24))} days
+            {Math.ceil((new Date(item.ngay_ket_thuc).getTime() - new Date(item.ngay_bat_dau).getTime()) / (1000 * 60 * 60 * 24))} days
           </Text>
         </div>
       )
@@ -323,7 +313,7 @@ const PromotionManage: React.FC<PromotionManageProps> = ({ className = '' }) => 
       label: 'Usage',
       sortable: true,
       width: '100px',
-      render: (value: number, item: PromotionItem) => (
+      render: (value: number, item: PromotionDisplayItem) => (
         <div className="promotion-manage__usage-info">
           <Text variant="span" size="sm" color="primary" className="promotion-manage__usage-count">
             {value}
@@ -349,6 +339,34 @@ const PromotionManage: React.FC<PromotionManageProps> = ({ className = '' }) => 
     }
   ];
 
+  if (isLoading) {
+    return (
+      <div className={`promotion-manage ${className}`}>
+        <div className="promotion-manage__loading">
+          <Text variant="p" size="lg" color="primary">Loading promotions...</Text>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={`promotion-manage ${className}`}>
+        <div className="promotion-manage__error">
+          <Text variant="p" size="lg" color="primary">{error}</Text>
+          <Button
+            variant="primary"
+            size="md"
+            onClick={fetchPromotions}
+            className="promotion-manage__retry-btn"
+          >
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`promotion-manage ${className}`}>
       <div className="promotion-manage__header">
@@ -357,7 +375,7 @@ const PromotionManage: React.FC<PromotionManageProps> = ({ className = '' }) => 
             Promotion Management
           </Title>
           <Text variant="p" size="md" color="secondary" className="promotion-manage__subtitle">
-            Manage promotional campaigns and discounts
+            Manage promotional campaigns and discounts{currentStoreId && ` for Store #${currentStoreId}`}
           </Text>
         </div>
         <div className="promotion-manage__header-right">
@@ -385,44 +403,6 @@ const PromotionManage: React.FC<PromotionManageProps> = ({ className = '' }) => 
 
       <div className="promotion-manage__filters">
         <div className="promotion-manage__filter-group">
-          <Input
-            type="text"
-            placeholder="Search promotions..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="promotion-manage__search-input"
-          />
-        </div>
-        
-        <div className="promotion-manage__filter-group">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="promotion-manage__filter-select"
-          >
-            {statusOptions.map(status => (
-              <option key={status} value={status}>
-                {status}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="promotion-manage__filter-group">
-          <select
-            value={discountTypeFilter}
-            onChange={(e) => setDiscountTypeFilter(e.target.value)}
-            className="promotion-manage__filter-select"
-          >
-            {discountTypeOptions.map(type => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="promotion-manage__filter-group">
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
@@ -430,10 +410,10 @@ const PromotionManage: React.FC<PromotionManageProps> = ({ className = '' }) => 
           >
             <option value="createdAt-desc">Newest First</option>
             <option value="createdAt-asc">Oldest First</option>
-            <option value="promotionName-asc">Name A-Z</option>
-            <option value="promotionName-desc">Name Z-A</option>
-            <option value="startDate-asc">Start Date (Earliest)</option>
-            <option value="startDate-desc">Start Date (Latest)</option>
+            <option value="ten_chuong_trinh-asc">Name A-Z</option>
+            <option value="ten_chuong_trinh-desc">Name Z-A</option>
+            <option value="ngay_bat_dau-asc">Start Date (Earliest)</option>
+            <option value="ngay_bat_dau-desc">Start Date (Latest)</option>
             <option value="usedCount-desc">Most Used</option>
             <option value="usedCount-asc">Least Used</option>
           </select>
@@ -442,12 +422,12 @@ const PromotionManage: React.FC<PromotionManageProps> = ({ className = '' }) => 
 
       <div className="promotion-manage__table-section">
         <AdminTable
-          data={filteredAndSortedPromotions}
+          data={sortedPromotions}
           columns={tableColumns}
           onView={handleViewPromotion}
           onEdit={handleEditPromotion}
           onDelete={handleDeletePromotion}
-          emptyMessage="No promotions found matching your criteria"
+          emptyMessage={currentStoreId ? `No promotions found for Store #${currentStoreId}` : "No promotions found"}
         />
       </div>
     </div>

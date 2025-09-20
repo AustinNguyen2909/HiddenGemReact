@@ -49,6 +49,12 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ className = '' }) => {
       label: 'Banner',
       path: '/admin/banners',
       icon: '🖼️'
+    },
+    {
+      id: 'content',
+      label: 'Content',
+      path: '/admin/content',
+      icon: '📝'
     }
   ];
 

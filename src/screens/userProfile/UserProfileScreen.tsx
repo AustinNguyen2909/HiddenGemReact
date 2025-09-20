@@ -180,25 +180,10 @@ const UserProfileScreen: React.FC<UserProfileScreenProps> = ({ className = '' })
           </div>
 
           {/* Favorite Coffee Shops Section */}
-          <div className="photos-section">
-            <div className="photos-header">
-              <div className="photos-title-group">
-                <h3 className="photos-title">Favorite coffee shop</h3>
-                <span className="photos-count">6</span>
-              </div>
-              <button className="view-detail-btn">View Detail</button>
-            </div>
-            <div className="photos-grid">
-              {profileData.favoriteCoffeeShops.map((shop) => (
-                <div key={shop.id} className="photo-item">
-                  <img src={shop.image} alt={shop.name} />
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* <div z> */}
 
           {/* Review Coffee Shops Section */}
-          <div className="photos-section">
+          {/* <div className="photos-section">
             <div className="photos-header">
               <div className="photos-title-group">
                 <h3 className="photos-title">Review coffee shop</h3>
@@ -216,7 +201,7 @@ const UserProfileScreen: React.FC<UserProfileScreenProps> = ({ className = '' })
                 </div>
               ))}
             </div>
-          </div>
+          </div> */}
         </div>
       </main>
 

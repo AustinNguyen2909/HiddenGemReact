@@ -76,19 +76,6 @@ const NavBar: React.FC<NavBarProps> = ({ className = "" }) => {
             Promotion
           </Link>
         </nav>
-
-        {/* Vendor Button */}
-        <div className="nav-bar__vendor">
-          <Button 
-            variant="primary" 
-            size="sm"
-            className="nav-bar__vendor-button"
-            icon={<span>→</span>}
-            iconPosition="right"
-          >
-            Become a Vendor
-          </Button>
-        </div>
       </div>
     </div>
   );

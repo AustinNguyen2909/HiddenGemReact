@@ -58,6 +58,7 @@ const PromotionScreen: React.FC<PromotionScreenProps> = ({ className = '' }) => 
 
   // Get featured promotions (first 3)
   const featuredPromotions = promotions.slice(0, 3);
+  console.log('featuredPromotions', featuredPromotions)
 
   const formatDate = (dateString: string) => {
     if (dateString === 'Ongoing') return 'Ongoing';

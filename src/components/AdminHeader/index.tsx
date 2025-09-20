@@ -66,7 +66,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ className = '' }) => {
   return (
     <header className={`admin-header ${className}`}>
       <div className="admin-header__left">
-        <div className="admin-header__breadcrumbs">
+        {/* <div className="admin-header__breadcrumbs">
           {breadcrumbs.map((item, index) => (
             <div key={index} className="admin-header__breadcrumb">
               {item.path && index < breadcrumbs.length - 1 ? (
@@ -90,7 +90,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({ className = '' }) => {
               )}
             </div>
           ))}
-        </div>
+        </div> */}
       </div>
 
       <div className="admin-header__right">

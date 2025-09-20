@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Title, Text, Button, Input, AdminStatsCard, AdminTable } from '../../components';
+import { cafesService } from '../../services/cafes';
 import './ReviewManage.css';
 
 interface ReviewManageProps {
@@ -19,96 +20,52 @@ interface ReviewItem {
   orderId?: string;
 }
 
-const reviewItems: ReviewItem[] = [
-  {
-    id: 1,
-    userReviewed: 'John Smith',
-    content: 'Great coffee and excellent service! The barista was very friendly and the latte was perfectly made. Will definitely come back again.',
-    rating: 5,
-    status: 'published',
-    createdAt: '2024-01-15T10:00:00Z',
-    updatedAt: '2024-01-15T10:00:00Z',
-    menuItem: 'Latte',
-    orderId: '#12345'
-  },
-  {
-    id: 2,
-    userReviewed: 'Sarah Johnson',
-    content: 'The croissant was fresh and delicious. However, the service was a bit slow during peak hours.',
-    rating: 4,
-    status: 'published',
-    createdAt: '2024-01-14T15:30:00Z',
-    updatedAt: '2024-01-14T15:30:00Z',
-    menuItem: 'Croissant',
-    orderId: '#12346'
-  },
-  {
-    id: 3,
-    userReviewed: 'Mike Wilson',
-    content: 'Disappointed with the quality. The coffee was cold and the pastry was stale. Not worth the price.',
-    rating: 2,
-    status: 'pending',
-    createdAt: '2024-01-13T09:15:00Z',
-    updatedAt: '2024-01-13T09:15:00Z',
-    menuItem: 'Americano',
-    orderId: '#12347'
-  },
-  {
-    id: 4,
-    userReviewed: 'Emily Davis',
-    content: 'Amazing atmosphere and the staff is very welcoming. The cappuccino was perfect!',
-    rating: 5,
-    status: 'published',
-    createdAt: '2024-01-12T14:20:00Z',
-    updatedAt: '2024-01-12T14:20:00Z',
-    menuItem: 'Cappuccino',
-    orderId: '#12348'
-  },
-  {
-    id: 5,
-    userReviewed: 'David Brown',
-    content: 'Good coffee but the place was too crowded and noisy. Hard to have a conversation.',
-    rating: 3,
-    status: 'published',
-    createdAt: '2024-01-11T11:45:00Z',
-    updatedAt: '2024-01-11T11:45:00Z',
-    menuItem: 'Espresso',
-    orderId: '#12349'
-  },
-  {
-    id: 6,
-    userReviewed: 'Lisa Anderson',
-    content: 'Terrible experience. Rude staff and overpriced food. Would not recommend.',
-    rating: 1,
-    status: 'rejected',
-    createdAt: '2024-01-10T16:30:00Z',
-    updatedAt: '2024-01-10T16:30:00Z',
-    menuItem: 'Sandwich',
-    orderId: '#12350'
-  },
-  {
-    id: 7,
-    userReviewed: 'Tom Garcia',
-    content: 'Decent coffee but nothing special. The place is clean and staff is okay.',
-    rating: 3,
-    status: 'hidden',
-    createdAt: '2024-01-09T13:10:00Z',
-    updatedAt: '2024-01-09T13:10:00Z',
-    menuItem: 'Cold Brew',
-    orderId: '#12351'
-  },
-  {
-    id: 8,
-    userReviewed: 'Anna Martinez',
-    content: 'Love the new seasonal drinks! The pumpkin spice latte was amazing. Great customer service too.',
-    rating: 5,
-    status: 'published',
-    createdAt: '2024-01-08T10:25:00Z',
-    updatedAt: '2024-01-08T10:25:00Z',
-    menuItem: 'Pumpkin Spice Latte',
-    orderId: '#12352'
-  }
-];
+interface ApiReviewItem {
+  id_danh_gia: number;
+  id_user: number;
+  id_cua_hang: number;
+  diem_danh_gia: number;
+  binh_luan: string;
+  trang_thai: string;
+  thoi_gian_tao: string;
+  user_name: string;
+}
+
+interface StoreInfo {
+  id_cua_hang: number;
+  ten_cua_hang: string;
+}
+
+// Helper function to map API review data to ReviewItem with store info
+const mapApiReviewToReviewItem = (apiReview: ApiReviewItem, storeInfo: StoreInfo): ReviewItem => {
+  // Map status from API to our display status
+  const getStatus = (trang_thai: string): 'published' | 'pending' | 'rejected' | 'hidden' => {
+    switch (trang_thai) {
+      case 'da_duyet':
+        return 'published';
+      case 'cho_duyet':
+        return 'pending';
+      case 'tu_choi':
+        return 'rejected';
+      case 'an':
+        return 'hidden';
+      default:
+        return 'pending';
+    }
+  };
+
+  return {
+    id: apiReview.id_danh_gia,
+    userReviewed: apiReview.user_name || `User #${apiReview.id_user}`,
+    content: apiReview.binh_luan,
+    rating: apiReview.diem_danh_gia,
+    status: getStatus(apiReview.trang_thai),
+    createdAt: apiReview.thoi_gian_tao,
+    updatedAt: apiReview.thoi_gian_tao,
+    menuItem: storeInfo.ten_cua_hang, // Use store name as menu item for context
+    orderId: `Store #${storeInfo.id_cua_hang}` // Use store ID as order ID for context
+  };
+};
 
 const statusOptions = ['All', 'Published', 'Pending', 'Rejected', 'Hidden'];
 const ratingOptions = ['All', '5 Stars', '4 Stars', '3 Stars', '2 Stars', '1 Star'];
@@ -116,15 +73,97 @@ const ratingOptions = ['All', '5 Stars', '4 Stars', '3 Stars', '2 Stars', '1 Sta
 const ReviewManage: React.FC<ReviewManageProps> = ({ className = '' }) => {
   const navigate = useNavigate();
   
+  // API data states
+  const [reviews, setReviews] = useState<ReviewItem[]>([]);
+  const [userStores, setUserStores] = useState<StoreInfo[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [ratingFilter, setRatingFilter] = useState('All');
+  const [storeFilter, setStoreFilter] = useState('All');
   const [sortBy, setSortBy] = useState('createdAt-desc');
+  
+  // Get all user stores
+  const getAllUserStores = useCallback(async (): Promise<StoreInfo[]> => {
+    try {
+      // Get all stores for the user (assuming they own all stores they can see)
+      const response = await cafesService.list(1, 100); // Get up to 100 stores
+      const stores = response.data.items.map(store => ({
+        id_cua_hang: store.id_cua_hang,
+        ten_cua_hang: store.ten_cua_hang
+      }));
+      
+      if (stores.length === 0) {
+        throw new Error('No stores found');
+      }
+      
+      return stores;
+    } catch (error) {
+      console.error('Error fetching user stores:', error);
+      throw new Error('Failed to get user stores');
+    }
+  }, []);
+
+  // Fetch reviews from API for all user stores
+  const fetchReviews = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Get all user stores
+      const stores = await getAllUserStores();
+      setUserStores(stores);
+      
+      // Fetch reviews from all stores
+      const allReviews: ReviewItem[] = [];
+      
+      for (const store of stores) {
+        try {
+          const response = await cafesService.getReviews(store.id_cua_hang);
+          const storeReviews = response.data.items.map(apiReview => 
+            mapApiReviewToReviewItem(apiReview, store)
+          );
+          allReviews.push(...storeReviews);
+        } catch (storeError) {
+          console.warn(`Failed to fetch reviews for store ${store.ten_cua_hang}:`, storeError);
+          // Continue with other stores even if one fails
+        }
+      }
+      
+      setReviews(allReviews);
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+      setError('Failed to load reviews');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [getAllUserStores]);
+
+  // Fetch reviews on component mount
+  useEffect(() => {
+    fetchReviews();
+  }, [fetchReviews]);
+
+  // Fetch data when component comes into focus
+  useEffect(() => {
+    const handleFocus = () => {
+      fetchReviews();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    fetchReviews();
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [fetchReviews]);
   
   // Filter and sort reviews
   const filteredAndSortedReviews = useMemo(() => {
-    let filtered = reviewItems.filter(item => {
+    let filtered = reviews.filter(item => {
       const matchesSearch = item.userReviewed.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            item.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            (item.menuItem && item.menuItem.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -139,8 +178,10 @@ const ReviewManage: React.FC<ReviewManageProps> = ({ className = '' }) => {
                            (ratingFilter === '3 Stars' && item.rating === 3) ||
                            (ratingFilter === '2 Stars' && item.rating === 2) ||
                            (ratingFilter === '1 Star' && item.rating === 1);
+      const matchesStore = storeFilter === 'All' || 
+                          (item.menuItem && item.menuItem === storeFilter);
       
-      return matchesSearch && matchesStatus && matchesRating;
+      return matchesSearch && matchesStatus && matchesRating && matchesStore;
     });
 
     // Sort reviews
@@ -169,31 +210,31 @@ const ReviewManage: React.FC<ReviewManageProps> = ({ className = '' }) => {
     });
 
     return filtered;
-  }, [searchTerm, statusFilter, ratingFilter, sortBy]);
+  }, [reviews, searchTerm, statusFilter, ratingFilter, storeFilter, sortBy]);
 
   // Statistics
   const statsData = [
     {
       title: 'Total Reviews',
-      value: reviewItems.length.toString(),
+      value: reviews.length.toString(),
       icon: '⭐',
       trend: { value: 3, isPositive: true }
     },
     {
       title: 'Published',
-      value: reviewItems.filter(item => item.status === 'published').length.toString(),
+      value: reviews.filter(item => item.status === 'published').length.toString(),
       icon: '✅',
       trend: { value: 2, isPositive: true }
     },
     {
       title: 'Pending',
-      value: reviewItems.filter(item => item.status === 'pending').length.toString(),
+      value: reviews.filter(item => item.status === 'pending').length.toString(),
       icon: '⏳',
       trend: { value: 1, isPositive: true }
     },
     {
       title: 'Avg Rating',
-      value: (reviewItems.reduce((sum, item) => sum + item.rating, 0) / reviewItems.length).toFixed(1),
+      value: reviews.length > 0 ? (reviews.reduce((sum, item) => sum + item.rating, 0) / reviews.length).toFixed(1) : '0.0',
       icon: '📊',
       trend: { value: 0.2, isPositive: true }
     }
@@ -260,17 +301,22 @@ const ReviewManage: React.FC<ReviewManageProps> = ({ className = '' }) => {
   const tableColumns = [
     {
       key: 'userReviewed',
-      label: 'User Reviewed',
+      label: 'User & Store',
       sortable: true,
-      width: '150px',
+      width: '200px',
       render: (value: string, item: ReviewItem) => (
         <div className="review-manage__user-info">
           <Text variant="p" size="sm" color="primary" className="review-manage__user-name">
             {value}
           </Text>
           {item.menuItem && (
-            <Text variant="p" size="xs" color="muted" className="review-manage__menu-item">
-              {item.menuItem}
+            <Text variant="p" size="xs" color="muted" className="review-manage__store-name">
+              📍 {item.menuItem}
+            </Text>
+          )}
+          {item.orderId && (
+            <Text variant="p" size="xs" color="secondary" className="review-manage__store-id">
+              {item.orderId}
             </Text>
           )}
         </div>
@@ -282,7 +328,7 @@ const ReviewManage: React.FC<ReviewManageProps> = ({ className = '' }) => {
       width: '300px',
       render: (value: string) => (
         <Text variant="p" size="sm" color="secondary" className="review-manage__content">
-          {value.length > 100 ? `${value.substring(0, 100)}...` : value}
+          {(value?.length || 0) > 100 ? `${value.substring(0, 100)}...` : value}
         </Text>
       )
     },
@@ -312,6 +358,31 @@ const ReviewManage: React.FC<ReviewManageProps> = ({ className = '' }) => {
     }
   ];
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className={`review-manage ${className}`}>
+        <div className="review-manage__loading">
+          <Text variant="p" size="md" color="muted">Loading reviews...</Text>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className={`review-manage ${className}`}>
+        <div className="review-manage__error">
+          <Text variant="p" size="md" color="primary">{error}</Text>
+          <Button variant="primary" size="md" onClick={fetchReviews} className="review-manage__retry-btn">
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`review-manage ${className}`}>
       <div className="review-manage__header">
@@ -320,7 +391,7 @@ const ReviewManage: React.FC<ReviewManageProps> = ({ className = '' }) => {
             Review Management
           </Title>
           <Text variant="p" size="md" color="secondary" className="review-manage__subtitle">
-            Manage customer reviews and feedback
+            Manage customer reviews and feedback{userStores.length > 0 && ` from ${userStores.length} store${userStores.length > 1 ? 's' : ''}`}
           </Text>
         </div>
         <div className="review-manage__header-right">
@@ -384,6 +455,21 @@ const ReviewManage: React.FC<ReviewManageProps> = ({ className = '' }) => {
 
         <div className="review-manage__filter-group">
           <select
+            value={storeFilter}
+            onChange={(e) => setStoreFilter(e.target.value)}
+            className="review-manage__filter-select"
+          >
+            <option value="All">All Stores</option>
+            {userStores.map(store => (
+              <option key={store.id_cua_hang} value={store.ten_cua_hang}>
+                {store.ten_cua_hang}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="review-manage__filter-group">
+          <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
             className="review-manage__filter-select"
@@ -405,7 +491,7 @@ const ReviewManage: React.FC<ReviewManageProps> = ({ className = '' }) => {
           onView={handleViewReview}
           onEdit={handleEditReview}
           onDelete={handleDeleteReview}
-          emptyMessage="No reviews found matching your criteria"
+          emptyMessage={userStores.length > 0 ? `No reviews found${storeFilter !== 'All' ? ` for ${storeFilter}` : ' from your stores'}` : "No reviews found"}
         />
       </div>
     </div>

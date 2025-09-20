@@ -109,10 +109,25 @@ const UserManage: React.FC<UserManageProps> = ({ className = '' }) => {
     navigate(`/admin/users/${user.id_user}/edit`);
   };
 
-  const handleDeleteUser = (user: User) => {
+  const handleDeleteUser = async (user: User) => {
     if (window.confirm(`Are you sure you want to delete user "${user.full_name}"?`)) {
-      // In a real app, this would make an API call
-      console.log('Delete user:', user.id_user);
+      try {
+        setLoading(true);
+        setError(null);
+        
+        await adminService.deleteUser(user.id_user);
+        
+        // Refetch users after successful deletion
+        const response = await adminService.getUsers();
+        setUsers(response.data);
+        
+        console.log('User deleted successfully:', user.id_user);
+      } catch (err) {
+        setError('Failed to delete user');
+        console.error('Error deleting user:', err);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 

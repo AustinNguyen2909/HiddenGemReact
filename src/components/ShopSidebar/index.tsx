@@ -22,25 +22,25 @@ const menuItems: MenuItem[] = [
     icon: '📊',
     path: '/admin/dashboard'
   },
-  {
-    id: 'introductions',
-    label: 'Introductions',
-    icon: '📝',
-    children: [
-      { id: 'introductions-service', label: 'Service', path: '/admin/introductions/service/manage' },
-      { id: 'introductions-client', label: 'Client', path: '/admin/introductions/client/manage' },
-      { id: 'introductions-pay', label: 'Pay', path: '/admin/introductions/pay/manage' },
-      { id: 'introductions-parking', label: 'Parking', path: '/admin/introductions/parking/manage' },
-      { id: 'introductions-amenities', label: 'Amenities', path: '/admin/introductions/amenities/manage' }
-    ]
-  },
+  // {
+  //   id: 'introductions',
+  //   label: 'Introductions',
+  //   icon: '📝',
+  //   children: [
+  //     { id: 'introductions-service', label: 'Service', path: '/admin/introductions/service/manage' },
+  //     { id: 'introductions-client', label: 'Client', path: '/admin/introductions/client/manage' },
+  //     { id: 'introductions-pay', label: 'Pay', path: '/admin/introductions/pay/manage' },
+  //     { id: 'introductions-parking', label: 'Parking', path: '/admin/introductions/parking/manage' },
+  //     { id: 'introductions-amenities', label: 'Amenities', path: '/admin/introductions/amenities/manage' }
+  //   ]
+  // },
   {
     id: 'store',
     label: 'Store',
     icon: '🏪',
     children: [
-      { id: 'store-menu', label: 'Menu', path: '/admin/store/menu/manage' },
-      { id: 'store-category', label: 'Category', path: '/admin/store/category/manage' },
+      // { id: 'store-menu', label: 'Menu', path: '/admin/store/menu/manage' },
+      // { id: 'store-category', label: 'Category', path: '/admin/store/category/manage' },
       { id: 'store-review', label: 'Review', path: '/admin/store/review/manage' },
       { id: 'store-promotion', label: 'Promotion Program', path: '/admin/store/promotion/manage' }
     ]

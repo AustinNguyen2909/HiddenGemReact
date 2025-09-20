@@ -2,6 +2,20 @@
   padding: 24px;
 }
 
+.promotion-manage__loading,
+.promotion-manage__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: var(--spacing-md);
+}
+
+.promotion-manage__retry-btn {
+  margin-top: var(--spacing-sm);
+}
+
 .promotion-manage__header {
   display: flex;
   align-items: center;
@@ -40,13 +54,11 @@
 
 .promotion-manage__filters {
   display: flex;
-  gap: 16px;
+  justify-content: flex-end;
   margin-bottom: 24px;
-  flex-wrap: wrap;
 }
 
 .promotion-manage__filter-group {
-  flex: 1;
   min-width: 200px;
 }
 

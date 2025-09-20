@@ -2,6 +2,7 @@ import apiClient from './api';
 import { UpdateProfileRequest, ConsentRequest, BaseData } from './types';
 
 export interface UserProfile {
+  id_user: number;
   id: number;
   email: string;
   username: string;

@@ -5,7 +5,16 @@ export interface CafeDetail extends BaseData<Cafe> {}
 
 export interface ReviewsListResponse {
   data: {
-    items: Array<{ id: number; rating: number; content: string; user_id: number; created_at: string }>;
+    items: Array<{ 
+      id_danh_gia: number;
+      id_user: number;
+      id_cua_hang: number;
+      diem_danh_gia: number;
+      binh_luan: string;
+      trang_thai: string;
+      thoi_gian_tao: string;
+      user_name: string;
+    }>;
     total?: number;
   };
 }

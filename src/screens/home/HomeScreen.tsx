@@ -9,6 +9,7 @@ import HomeStory from "../../assets/images/home-story.png";
 import HomeReview from "../../assets/images/home-review.png";
 import HomeNewsletter from "../../assets/images/home-newsletter.png";
 import { useNavigate } from 'react-router-dom';
+import { contentService } from '../../services';
 
 
 const TestimonialCard: React.FC<{ testimonial: any }> = ({ testimonial }) => {
@@ -68,6 +69,8 @@ const HomeScreen: React.FC = () => {
   const [isLoadingCafes, setIsLoadingCafes] = useState(true);
   const [cafeError, setCafeError] = useState<string | null>(null);
 
+  const [content, setContent] = useState<string>('');
+
   // Fetch banners on component mount
   useEffect(() => {
     const fetchBanners = async () => {
@@ -110,10 +113,33 @@ const HomeScreen: React.FC = () => {
     fetchCafes();
   }, []);
 
+    // Fetch cafes on component mount
+    useEffect(() => {
+      const fetchContent = async () => {
+        try {
+          setIsLoadingCafes(true);
+          setContent('');
+          const response = await contentService.getContent('about'); // First page, 12 items
+          console.log('fetchContent', response.data);
+          // setContent(response.data);
+        } catch (error) {
+          console.error('Error fetching content:', error);
+          setContent('');
+        } finally {
+          setIsLoadingCafes(false);
+        }
+      };
+  
+      fetchContent();
+    }, []);
+
   // Get hero images from banners, sorted by thu_tu (order)
   const heroImages = banners
     .sort((a, b) => a.thu_tu - b.thu_tu)
     .map(banner => banner.url_anh);
+
+    const heroImageTitle = banners?.[currentSlide]?.tieu_de || '';
+    const heroImageSubtitle = banners?.[currentSlide]?.mo_ta || '';
 
   const hiddenGemsStory = {
     id: 1,
@@ -197,10 +223,10 @@ const HomeScreen: React.FC = () => {
           <div className="hero-search">
             <div className="search-slogan">
               <Text variant="p" size="md" color="white" className="highlight-text">
-                Hightlight news, ads, discount, HOT HOT
+                {heroImageSubtitle}
               </Text>
               <Title level="h1" size="xl" color="white">
-                Find the café, feel the vibe
+                {heroImageTitle}
               </Title>
             </div>
             <div className="search-form">

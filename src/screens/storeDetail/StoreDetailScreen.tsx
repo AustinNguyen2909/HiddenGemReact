@@ -1,10 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Footer, Title, Text, Button, Input, StoreCard } from '../../components';
+import { Footer, Title, Text, Button, Input, StoreCard, useAuth } from '../../components';
 import { cafesService } from '../../services/cafes';
-import { Cafe } from '../../services/types';
+import { Cafe, CreateReviewRequest } from '../../services/types';
 import './StoreDetailScreen.css';
 import StoreDetail from "../../assets/images/store-detail.png";
+
+interface ReviewItem {
+  id_danh_gia: number;
+  id_user: number;
+  id_cua_hang: number;
+  diem_danh_gia: number;
+  binh_luan: string;
+  trang_thai: string;
+  thoi_gian_tao: string;
+  user_name: string;
+}
 
 
 interface StoreDetailScreenProps {
@@ -23,11 +34,36 @@ const getRating = (rating: string | number): number => {
 const StoreDetailScreen: React.FC<StoreDetailScreenProps> = ({ className = '' }) => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const [activeTab, setActiveTab] = useState<'details' | 'menu' | 'reviews' | 'photos'>('details');
+  const { isAuthenticated } = useAuth();
   const [store, setStore] = useState<Cafe | null>(null);
   const [relatedStores, setRelatedStores] = useState<Cafe[]>([]);
+  const [reviews, setReviews] = useState<ReviewItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [reviewsError, setReviewsError] = useState<string | null>(null);
+  
+  // Review creation states
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewContent, setReviewContent] = useState('');
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [reviewSubmitError, setReviewSubmitError] = useState<string | null>(null);
+
+  // Fetch reviews for the store
+  const fetchReviews = async (storeId: number) => {
+    try {
+      setReviewsLoading(true);
+      setReviewsError(null);
+      const response = await cafesService.getReviews(storeId);
+      setReviews(response.data.items);
+    } catch (err) {
+      setReviewsError('Failed to load reviews');
+      console.error('Error fetching reviews:', err);
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
 
   // Fetch store details on component mount
   useEffect(() => {
@@ -58,8 +94,109 @@ const StoreDetailScreen: React.FC<StoreDetailScreenProps> = ({ className = '' })
     fetchStoreDetails();
   }, [id]);
 
+  // Fetch reviews when store is loaded
+  useEffect(() => {
+    if (store && reviews.length === 0) {
+      fetchReviews(store.id_cua_hang);
+    }
+  }, [store, reviews.length]);
+
   const handleViewDetails = (storeId: number) => {
     navigate(`/store/${storeId}`);
+  };
+
+  // Helper functions for reviews
+  const renderStars = (rating: number) => {
+    return (
+      <div className="review-stars">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <span
+            key={star}
+            className={`review-star ${star <= rating ? 'review-star--filled' : ''}`}
+          >
+            ★
+          </span>
+        ))}
+      </div>
+    );
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  const getStatusText = (trang_thai: string) => {
+    switch (trang_thai) {
+      case 'da_duyet':
+        return 'Published';
+      case 'cho_duyet':
+        return 'Pending';
+      case 'tu_choi':
+        return 'Rejected';
+      case 'an':
+        return 'Hidden';
+      default:
+        return 'Pending';
+    }
+  };
+
+  // Review submission functions
+  const handleCreateReview = () => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    setShowReviewModal(true);
+    setReviewRating(0);
+    setReviewContent('');
+    setReviewSubmitError(null);
+  };
+
+  const handleSubmitReview = async () => {
+    if (!store || reviewRating === 0 || !reviewContent.trim()) {
+      setReviewSubmitError('Please provide both rating and review content');
+      return;
+    }
+
+    try {
+      setIsSubmittingReview(true);
+      setReviewSubmitError(null);
+
+      const reviewData: CreateReviewRequest = {
+        rating: reviewRating,
+        content: reviewContent.trim()
+      };
+
+      await cafesService.createReview(store.id_cua_hang, reviewData);
+      
+      // Close modal and refresh reviews
+      setShowReviewModal(false);
+      setReviewRating(0);
+      setReviewContent('');
+      
+      // Refresh reviews to show the new one
+      await fetchReviews(store.id_cua_hang);
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      setReviewSubmitError('Failed to submit review. Please try again.');
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
+
+  const handleCloseReviewModal = () => {
+    setShowReviewModal(false);
+    setReviewRating(0);
+    setReviewContent('');
+    setReviewSubmitError(null);
+  };
+
+  const handleStarClick = (rating: number) => {
+    setReviewRating(rating);
   };
 
   // Loading state
@@ -166,76 +303,81 @@ const StoreDetailScreen: React.FC<StoreDetailScreenProps> = ({ className = '' })
               </Text>
             </div>
           </div>
-
-          {/* Store Image Gallery */}
-          <div className="store-gallery">
-            <div className="main-image">
-              <img src="/api/placeholder/630/516" alt="Store interior" />
-              <button className="wishlist-btn">
-                <span className="wishlist-icon">♡</span>
-              </button>
-            </div>
-            <div className="thumbnail-gallery">
-              <div className="thumbnail active">
-                <img src="/api/placeholder/88/100" alt="Thumbnail 1" />
-              </div>
-              <div className="thumbnail">
-                <img src="/api/placeholder/88/100" alt="Thumbnail 2" />
-              </div>
-              <div className="thumbnail">
-                <img src="/api/placeholder/88/100" alt="Thumbnail 3" />
-              </div>
-              <div className="thumbnail">
-                <img src="/api/placeholder/88/100" alt="Thumbnail 4" />
-              </div>
-              <div className="gallery-controls">
-                <button className="gallery-prev">‹</button>
-                <button className="gallery-next">›</button>
-              </div>
-            </div>
-          </div>
         </div>
 
-        {/* Tab Navigation */}
-        <section className="store-tabs">
-          <div className="tab-container">
-            <div className="tab-navigation">
-              <button
-                className={`tab-button ${activeTab === 'details' ? 'active' : ''}`}
-                onClick={() => setActiveTab('details')}
-              >
-                Shop Details
-              </button>
-              <button
-                className={`tab-button ${activeTab === 'menu' ? 'active' : ''}`}
-                onClick={() => setActiveTab('menu')}
-              >
-                Show Menu
-              </button>
-              <button
-                className={`tab-button ${activeTab === 'reviews' ? 'active' : ''}`}
-                onClick={() => setActiveTab('reviews')}
-              >
-                Customer Reviews
-              </button>
-              <button
-                className={`tab-button ${activeTab === 'photos' ? 'active' : ''}`}
-                onClick={() => setActiveTab('photos')}
-              >
-                Customer Photos
-              </button>
+
+        {/* Reviews Section */}
+        <div className="reviews-section">
+          <div className="reviews-header">
+            <div className="reviews-title-section">
+              <Title level="h3" size="lg" color="primary">Customer Reviews</Title>
+              <Text variant="p" size="md" color="secondary">
+                {reviews.length} review{reviews.length !== 1 ? 's' : ''}
+              </Text>
             </div>
-            <div className="tab-indicator"></div>
+            <Button 
+              variant="primary" 
+              size="md" 
+              onClick={handleCreateReview}
+              className="create-review-btn"
+            >
+              {isAuthenticated ? 'Write a Review' : 'Login to Review'}
+            </Button>
           </div>
-        </section>
 
-        {/* Tab Content */}
-        <div className="tab-content">
-          {activeTab === 'details' && (
-            <div className="details-content">
-              <div className="content-card">
+          {reviewsLoading && (
+            <div className="reviews-loading">
+              <Text variant="p" size="md" color="muted">Loading reviews...</Text>
+            </div>
+          )}
 
-              </div>
+          {reviewsError && (
+            <div className="reviews-error">
+              <Text variant="p" size="md" color="primary">{reviewsError}</Text>
+              <Button variant="primary" size="sm" onClick={() => store && fetchReviews(store.id_cua_hang)}>
+                Retry
+              </Button>
+            </div>
+          )}
+
+          {!reviewsLoading && !reviewsError && reviews.length === 0 && (
+            <div className="reviews-empty">
+              <Text variant="p" size="md" color="muted">No reviews yet. Be the first to review this store!</Text>
+            </div>
+          )}
+
+          {!reviewsLoading && !reviewsError && reviews.length > 0 && (
+            <div className="reviews-list">
+              {reviews.map((review) => (
+                <div key={review.id_danh_gia} className="review-item">
+                  <div className="review-header">
+                    <div className="review-user">
+                      <Text variant="p" size="md" color="primary" className="review-user-name">
+                        {review.user_name || `User #${review.id_user}`}
+                      </Text>
+                      <div className="review-rating">
+                        {renderStars(review.diem_danh_gia)}
+                        <Text variant="span" size="sm" color="muted" className="review-rating-text">
+                          ({review.diem_danh_gia}/5)
+                        </Text>
+                      </div>
+                    </div>
+                    <div className="review-meta">
+                      <Text variant="span" size="sm" color="muted">
+                        {formatDate(review.thoi_gian_tao)}
+                      </Text>
+                      <span className={`review-status review-status--${review.trang_thai}`}>
+                        {getStatusText(review.trang_thai)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="review-content">
+                    <Text variant="p" size="md" color="secondary">
+                      {review.binh_luan}
+                    </Text>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
@@ -262,6 +404,85 @@ const StoreDetailScreen: React.FC<StoreDetailScreenProps> = ({ className = '' })
           </div>
         </section>
       </main>
+
+      {/* Review Modal */}
+      {showReviewModal && (
+        <div className="review-modal-overlay" onClick={handleCloseReviewModal}>
+          <div className="review-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="review-modal-header">
+              <Title level="h3" size="lg" color="primary">Write a Review</Title>
+              <button className="review-modal-close" onClick={handleCloseReviewModal}>
+                ×
+              </button>
+            </div>
+            
+            <div className="review-modal-content">
+              <div className="review-rating-section">
+                <Text variant="p" size="md" color="secondary" className="review-rating-label">
+                  Rating *
+                </Text>
+                <div className="review-star-selector">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      className={`review-star-btn ${star <= reviewRating ? 'review-star-btn--selected' : ''}`}
+                      onClick={() => handleStarClick(star)}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
+                {reviewRating > 0 && (
+                  <Text variant="p" size="sm" color="muted" className="review-rating-text">
+                    {reviewRating} star{reviewRating !== 1 ? 's' : ''}
+                  </Text>
+                )}
+              </div>
+
+              <div className="review-content-section">
+                <Text variant="p" size="md" color="secondary" className="review-content-label">
+                  Review *
+                </Text>
+                <textarea
+                  className="review-content-textarea"
+                  placeholder="Share your experience with this store..."
+                  value={reviewContent}
+                  onChange={(e) => setReviewContent(e.target.value)}
+                  rows={4}
+                />
+                <Text variant="p" size="sm" color="muted" className="review-content-hint">
+                  {reviewContent.length}/500 characters
+                </Text>
+              </div>
+
+              {reviewSubmitError && (
+                <div className="review-error">
+                  <Text variant="p" size="sm" color="primary">{reviewSubmitError}</Text>
+                </div>
+              )}
+
+              <div className="review-modal-actions">
+                <Button 
+                  variant="secondary" 
+                  size="md" 
+                  onClick={handleCloseReviewModal}
+                  disabled={isSubmittingReview}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  variant="primary" 
+                  size="md" 
+                  onClick={handleSubmitReview}
+                  disabled={isSubmittingReview || reviewRating === 0 || !reviewContent.trim()}
+                >
+                  {isSubmittingReview ? 'Submitting...' : 'Submit Review'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>
