@@ -19,7 +19,6 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
   
   return (
     <header className={`header ${className}`}>
-      <TopSettings />
       <MainMenu />
       <NavBar />
     </header>

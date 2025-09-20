@@ -40,7 +40,7 @@ const BannerAdd: React.FC<BannerAddProps> = ({ className = '' }) => {
 
   // Position options
   const positionOptions = [
-    { value: 'Home', label: 'Home' },
+    { value: 'home_top', label: 'Home' },
     { value: 'Promotion-1', label: 'Promotion-1' },
     { value: 'Promotion-2', label: 'Promotion-2' }
   ];

@@ -265,6 +265,18 @@
   line-height: 1.21;
 }
 
+.top-settings__account,
+.top-settings__logout {
+  cursor: pointer;
+  transition: color var(--transition-colors);
+  margin-left: 20px;
+}
+
+.top-settings__account:hover,
+.top-settings__logout:hover {
+  color: var(--color-primary);
+}
+
 /* Responsive adjustments */
 @media (max-width: 1024px) {
   .main-menu__search {

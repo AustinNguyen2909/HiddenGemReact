@@ -11,14 +11,19 @@ interface MainMenuProps {
 
 const MainMenu: React.FC<MainMenuProps> = ({ className = "" }) => {
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
 
-  const handleUserIconClick = () => {
+  const handleAccountClick = () => {
     if (isAuthenticated) {
       navigate('/profile');
     } else {
       navigate('/login');
     }
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
   };
 
   return (
@@ -85,6 +90,20 @@ const MainMenu: React.FC<MainMenuProps> = ({ className = "" }) => {
           </div> */}
 
           <div className="main-menu__action-item">
+            <span
+              className="top-settings__help-text top-settings__account"
+              onClick={handleAccountClick}
+            >
+              {isAuthenticated ? (user?.username || 'Account') : 'Account'}
+            </span>
+            {isAuthenticated && (
+              <span
+                className="top-settings__help-text top-settings__logout"
+                onClick={handleLogout}
+              >
+                Logout
+              </span>
+            )}
             {/* <div 
               className="main-menu__action-icon main-menu__action-icon--user"
               onClick={handleUserIconClick}
