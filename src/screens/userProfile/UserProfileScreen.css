@@ -466,3 +466,182 @@
     padding: 1rem;
   }
 }
+
+/* Change Password Modal Styles */
+.change-password-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.change-password-modal {
+  background: white;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.change-password-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.change-password-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 1;
+  transition: color 0.2s ease;
+}
+
+.change-password-modal-close:hover {
+  color: var(--color-text-primary);
+}
+
+.change-password-modal-content {
+  padding: 1.5rem;
+}
+
+.change-password-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.change-password-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.change-password-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.change-password-label {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.change-password-input {
+  width: 100%;
+  padding: var(--spacing-4) 50px var(--spacing-4) var(--spacing-4);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: 4px;
+  font-size: 16px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.change-password-input:focus {
+  border-color: var(--color-interactive-auth-primary);
+}
+
+.change-password-input:disabled {
+  background: var(--color-background-secondary);
+  color: var(--color-text-secondary);
+  cursor: not-allowed;
+}
+
+.change-password-toggle {
+  position: absolute;
+  right: var(--spacing-4);
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-tertiary);
+  padding: 0;
+  font-size: 16px;
+  z-index: 1;
+}
+
+.change-password-toggle:hover:not(:disabled) {
+  color: var(--color-text-primary);
+}
+
+.change-password-toggle:disabled {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.change-password-error {
+  background: rgba(var(--color-primary-rgb), 0.1);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--border-radius-md);
+  padding: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.change-password-modal-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+/* Dark theme support */
+[data-theme="dark"] .change-password-modal {
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+}
+
+[data-theme="dark"] .change-password-input {
+  background: var(--color-background-secondary);
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+[data-theme="dark"] .change-password-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .change-password-modal {
+    margin: 1rem;
+    max-width: calc(100vw - 2rem);
+  }
+  
+  .change-password-modal-header {
+    padding: 1rem 1rem 0.75rem;
+  }
+  
+  .change-password-modal-content {
+    padding: 1rem;
+  }
+  
+  .change-password-modal-actions {
+    flex-direction: column;
+  }
+  
+  .change-password-modal-actions .button {
+    width: 100%;
+  }
+}

@@ -68,9 +68,8 @@ const MainMenu: React.FC<MainMenuProps> = ({ className = "" }) => {
 
         {/* User Actions */}
         <div className="main-menu__actions">
-          <div className="main-menu__action-item">
+          {/* <div className="main-menu__action-item">
             <div className="main-menu__action-icon">
-              {/* TODO: Replace with location icon */}
               <div className="main-menu__icon-placeholder main-menu__icon-placeholder--location">
                 <span>📍</span>
               </div>
@@ -79,19 +78,17 @@ const MainMenu: React.FC<MainMenuProps> = ({ className = "" }) => {
 
           <div className="main-menu__action-item">
             <div className="main-menu__action-icon">
-              {/* TODO: Replace with notification icon */}
               <div className="main-menu__icon-placeholder main-menu__icon-placeholder--notification">
                 <span>🔔</span>
               </div>
             </div>
-          </div>
+          </div> */}
 
           <div className="main-menu__action-item">
-            <div 
+            {/* <div 
               className="main-menu__action-icon main-menu__action-icon--user"
               onClick={handleUserIconClick}
             >
-              {/* TODO: Replace with user icon */}
               <div className="main-menu__icon-placeholder main-menu__icon-placeholder--user">
                 <span>👤</span>
               </div>
@@ -100,7 +97,7 @@ const MainMenu: React.FC<MainMenuProps> = ({ className = "" }) => {
                   {user.username}
                 </div>
               )}
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
