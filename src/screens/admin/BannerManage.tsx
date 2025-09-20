@@ -54,23 +54,42 @@ const BannerManage: React.FC<BannerManageProps> = ({ className = '' }) => {
   const [positionFilter, setPositionFilter] = useState<BannerPosition | 'all'>('all');
   const [sortBy, setSortBy] = useState('thu_tu-asc');
   
-  // Fetch banners on component mount
+  // Fetch banners function
+  const fetchBanners = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await bannersService.list();
+      setBanners(response.data);
+    } catch (error) {
+      console.error('Error fetching banners:', error);
+      setError('Failed to load banners');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch banners on component mount and when screen comes into focus
   useEffect(() => {
-    const fetchBanners = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const response = await bannersService.list();
-        setBanners(response.data);
-      } catch (error) {
-        console.error('Error fetching banners:', error);
-        setError('Failed to load banners');
-      } finally {
-        setIsLoading(false);
-      }
+    fetchBanners();
+  }, []);
+
+  // Fetch data when component comes into focus
+  useEffect(() => {
+    const handleFocus = () => {
+      fetchBanners();
     };
 
+    // Add focus event listener
+    window.addEventListener('focus', handleFocus);
+    
+    // Also fetch when component mounts (in case it's already focused)
     fetchBanners();
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
   
   // Filter and sort banners

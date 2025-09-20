@@ -74,7 +74,7 @@ const HomeScreen: React.FC = () => {
       try {
         setIsLoadingBanners(true);
         setBannerError(null);
-        const response = await bannersService.list({ vi_tri: 'Home', active: 1 });
+        const response = await bannersService.list({ vi_tri: 'home_top', active: 1 });
         console.log('bannersService', response.data);
         setBanners(response.data);
       } catch (error) {
